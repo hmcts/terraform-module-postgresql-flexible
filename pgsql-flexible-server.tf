@@ -15,3 +15,9 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 
   sku_name = var.pgsql_sku
 }
+
+resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
+  name      = var.pgsql_configuration_name
+  server_id = azurerm_postgresql_flexible_server.pgsql_server.id
+  value     = var.pgsql_configuration_value
+}
