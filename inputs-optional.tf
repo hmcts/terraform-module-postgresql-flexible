@@ -36,7 +36,7 @@ variable "pgsql_storage_mb" {
 
 variable "pgsql_server_zone" {
   description = "Specifies the Availability Zone in which the PGSql Flexible Server should be located."
-  type        = number
+  type        = string
   default     = "1"
 }
 
