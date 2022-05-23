@@ -14,6 +14,8 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   storage_mb = var.pgsql_storage_mb
 
   sku_name = var.pgsql_sku
+
+  common_tags = var.common_tags
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
