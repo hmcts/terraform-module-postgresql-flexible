@@ -40,20 +40,17 @@ variable "pgsql_server_zone" {
   default     = "1"
 }
 
-variable "pgsql_configuration_name" {
-  description = "The PGSql configuration name."
-  type        = string
-  default     = "backslash_quote"
-}
-
-variable "pgsql_configuration_value" {
-  description = "Controls how PGSql handles backslash quotes Default in PGSql (since 9.1) is `on`."
-  type        = string
-  default     = "on"
+variable "pgsql_server_configuration" {
+  description = "The PGSql configuration."
+  type        = map(string)
+  default = {
+    name  = "backslash_quote"
+    value = "on"
+  }
 }
 
 variable "pgsql_firewall_rules" {
-  description = "Common tag to be applied to resources."
+  description = "PGSql firewall rules."
   type        = map(string)
   default     = {}
 }

@@ -19,7 +19,9 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
-  name      = var.pgsql_configuration_name
+  for_each = var.pgsql_server_configuration
+
+  name      = each.value.name
   server_id = azurerm_postgresql_flexible_server.pgsql_server.id
-  value     = var.pgsql_configuration_value
+  value     = each.value.value
 }
