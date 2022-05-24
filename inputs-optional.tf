@@ -19,7 +19,7 @@ variable "pgsql_admin_username" {
 variable "pgsql_version" {
   description = "The PGSql flexible server instance version."
   type        = string
-  default     = "12"
+  default     = "13"
 }
 
 variable "pgsql_sku" {
