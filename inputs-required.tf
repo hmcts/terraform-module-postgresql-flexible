@@ -4,6 +4,10 @@ variable "resource_group_name" {
   default     = null
 }
 
+variable "env" {
+  description = "Environment value."
+}
+
 variable "pgsql_server_name" {
   description = "The pgsql flexible server instance name."
   type        = string
