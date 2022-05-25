@@ -1,0 +1,4 @@
+# https://terraform-docs.io/user-guide/configuration/
+
+settings:
+  hide-empty: true

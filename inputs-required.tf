@@ -1,39 +1,34 @@
-variable "resource_group_name" {
-  description = "Enter Resource Group name."
-  type        = string
-  default     = null
-}
-
 variable "env" {
   description = "Environment value."
+  type        = string
 }
 
-variable "pgsql_server_name" {
-  description = "The pgsql flexible server instance name."
-  type        = string
-  default     = null
+variable "common_tags" {
+  description = "Common tag to be applied to resources."
+  type        = map(string)
 }
 
 variable "pgsql_databases" {
   description = "Databases for the pgsql instance."
-  type        = map(string)
-  default     = null
-}
-
-variable "pgsql_admin_password" {
-  description = "PGSql flexible server admin password."
-  type        = string
-  default     = null
+  type        = list(object({ name : string, collation : optional(string), charset : optional(string) }))
 }
 
 variable "pgsql_delegated_subnet_id" {
   description = "PGSql delegated subnet id."
   type        = string
-  default     = null
 }
 
-variable "pgsql_private_dns_zone_id" {
-  description = "PGSql private dns zone id."
+variable "pgsql_version" {
+  description = "The PGSql flexible server instance version."
   type        = string
-  default     = null
+}
+
+variable "product" {
+  description = "https://hmcts.github.io/glossary/#product"
+  type        = string
+}
+
+variable "component" {
+  description = "https://hmcts.github.io/glossary/#component"
+  type        = string
 }
