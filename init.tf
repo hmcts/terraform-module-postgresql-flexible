@@ -1,20 +1,13 @@
 terraform {
   required_providers {
     azurerm = {
-      source                = "hashicorp/azurerm"
-      version               = ">= 2.41.0"
-      configuration_aliases = [azurerm.data]
+      source  = "hashicorp/azurerm"
+      version = ">= 3.7.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.2.0"
     }
   }
-}
-
-provider "azurerm" {
-  features {}
-  skip_provider_registration = true
-}
-
-provider "azurerm" {
-  alias = "data"
-  features {}
-  subscription_id = var.data_subscription
+  experiments = [module_variable_optional_attrs]
 }
