@@ -1,3 +1,9 @@
+data "azurerm_subnet" "pg_subnet" {
+  name                 = "postgresql"
+  resource_group_name  = "ss-${var.env}-network-rg"
+  virtual_network_name = "ss-${var.env}-vnet"
+}
+
 locals {
   default_name = var.component != "" ? "${var.product}-${var.component}" : var.product
   name         = var.name != "" ? var.name : local.default_name
