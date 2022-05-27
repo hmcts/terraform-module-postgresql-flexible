@@ -21,19 +21,13 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Setup providers configuration
-        shell: bash
-        run: |
-          cat << EOF > provider.tf
-          provider "azurerm" {
-            features {}
-          }
-          EOF
       - name: Terraform Init
         run: terraform init
-
-      - name: Terraform format
-        run: terraform fmt -check
+        working-directory: example
 
       - name: Terraform validate
         run: terraform validate
+        working-directory: example
+
+      - name: Terraform format
+        run: terraform fmt -check
