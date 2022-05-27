@@ -1,3 +1,9 @@
+data "azurerm_subnet" "this" {
+  name                 = "postgresql"
+  resource_group_name  = "ss-${var.env}-network-rg"
+  virtual_network_name = "ss-${var.env}-vnet"
+}
+
 module "postgresql" {
   source = "../"
   env    = var.env
