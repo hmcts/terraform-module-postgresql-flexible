@@ -5,21 +5,27 @@ on:
     branches:
       - master
 
-env:
-  TF_VERSION: 0.14.3
-
 jobs:
   terraform:
     name: 'terraform'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: hmcts/cnp-azuredevops-libraries
+          path: cnp-azuredevops-libraries
+
+      - name: Setup Script
+        run: chmod +x cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
+        run: ./cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
+        working-directory: ./
+        shell: bash
 
       - name: Terraform Init
         run: terraform init
