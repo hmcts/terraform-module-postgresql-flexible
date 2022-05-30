@@ -29,7 +29,7 @@ variable "product" {
 }
 
 variable "project" {
-  description = "Project name (required for Premium SKU) - sds or cft. "
+  description = "Project name - sds or cft."
 }
 
 variable "component" {
