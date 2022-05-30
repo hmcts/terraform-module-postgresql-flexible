@@ -2,13 +2,15 @@ locals {
   default_name = var.component != "" ? "${var.product}-${var.component}" : var.product
   name         = var.name != "" ? var.name : local.default_name
   server_name  = "${local.name}-${var.env}"
-  vnet_rg_name = var.project == "sds" ? "ss-${var.env}-network-rg" : "${var.project}-${var.env}-network-rg"
-  vnet_name    = var.project == "sds" ? "ss-${var.env}-vnet" : "${var.project}-${var.env}-vnet"
+  vnet_rg_name = var.project == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
+  vnet_name    = var.project == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 }
 
 data "azurerm_subnet" "pg_subnet" {
+  provider = azurerm.postgresql
+
   name                 = "postgresql"
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
