@@ -7,7 +7,7 @@ data "azurerm_subnet" "this" {
 module "postgresql" {
   source = "../"
   providers = {
-    postgresql = azurerm.postgresql
+    azurerm.postgresql = azurerm.postgresql
   }
   env = var.env
 
