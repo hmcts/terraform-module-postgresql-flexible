@@ -6,7 +6,10 @@ data "azurerm_subnet" "this" {
 
 module "postgresql" {
   source = "../"
-  env    = var.env
+  providers = {
+    postgresql = azurerm.postgresql
+  }
+  env = var.env
 
   product   = "platops"
   component = "example"
