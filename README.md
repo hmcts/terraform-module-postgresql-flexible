@@ -79,6 +79,7 @@ module "postgresql" {
 | <a name="input_pgsql_version"></a> [pgsql\_version](#input\_pgsql\_version) | The PGSql flexible server instance version. | `string` | n/a | yes |
 | <a name="input_product"></a> [product](#input\_product) | https://hmcts.github.io/glossary/#product | `string` | n/a | yes |
 | <a name="input_project"></a> [project](#input\_project) | Project name - sds or cft. | `any` | n/a | yes |
+| <a name="input_super_new_var"></a> [super\_new\_var](#input\_super\_new\_var) | Super new var | `string` | `"snv"` | no |
 
 ## Outputs
 

@@ -41,3 +41,9 @@ variable "name" {
   default     = ""
   description = "The default name will be product+component+env, you can override the product+component part by setting this"
 }
+
+variable "super_new_var" {
+  description = "Super new var"
+  type        = string
+  default     = "snv"
+}
