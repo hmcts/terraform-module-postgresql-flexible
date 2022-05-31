@@ -3,7 +3,10 @@
 settings:
   hide-empty: true
 
+formatter: "md"
+
 output:
+  file: README.md
   template: |-
     <!-- BEGIN_TF_DOCS -->
     {{ .Content }}
