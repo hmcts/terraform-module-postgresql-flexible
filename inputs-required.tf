@@ -36,8 +36,3 @@ variable "component" {
   description = "https://hmcts.github.io/glossary/#component"
   type        = string
 }
-
-variable "aaaaa" {
-  description = "hello"
-}
-
