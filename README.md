@@ -64,6 +64,7 @@ module "postgresql" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_aaaaa"></a> [aaaaa](#input\_aaaaa) | hello | `any` | n/a | yes |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Common tag to be applied to resources. | `map(string)` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
