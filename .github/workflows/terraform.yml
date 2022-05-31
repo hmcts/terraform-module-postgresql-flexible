@@ -22,7 +22,7 @@ jobs:
       - name: Setup Script
         run: |
           chmod +x cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
-          ssh-keyscan -t rsa github.com
+          ssh-keyscan -t rsa github.com >> /home/runner/.ssh/known_hosts
 
       - name: Setup Terraform
         run: ./cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
