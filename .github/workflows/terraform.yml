@@ -20,7 +20,9 @@ jobs:
           path: cnp-azuredevops-libraries
 
       - name: Setup Script
-        run: chmod +x cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
+        run: |
+          chmod +x cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
+          ssh-keyscan github.com
 
       - name: Setup Terraform
         run: ./cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
