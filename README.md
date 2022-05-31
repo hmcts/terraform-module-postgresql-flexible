@@ -44,7 +44,6 @@ module "postgresql" {
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
-| <a name="provider_azurerm.postgresql"></a> [azurerm.postgresql](#provider\_azurerm.postgresql) | >= 3.7.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.2.0 |
 
 ## Resources
