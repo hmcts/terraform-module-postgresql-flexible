@@ -24,7 +24,7 @@ jobs:
           chmod +x cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
           mkdir -p /home/runner/.ssh
           ssh-keyscan github.com >> /home/runner/.ssh/known_hosts
-          eval "$(ssh-agent -s)"
+          ssh -vT git@github.com
 
       - name: Setup Terraform
         run: ./cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
