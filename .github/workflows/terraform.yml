@@ -1,4 +1,4 @@
-name: 'Terraform'
+name: "Terraform"
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   terraform:
-    name: 'terraform'
+    name: "terraform"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,8 +22,6 @@ jobs:
       - name: Setup Script
         run: |
           chmod +x cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
-          mkdir -p /home/runner/.ssh
-          ssh-keyscan github.com >> /home/runner/.ssh/known_hosts
 
       - name: Setup Terraform
         run: ./cnp-azuredevops-libraries/scripts/tfenv-install-terraform.sh
