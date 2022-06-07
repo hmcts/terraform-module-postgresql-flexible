@@ -59,7 +59,7 @@ variable "geo_redundant_backups" {
 }
 
 variable "create_mode" {
-  default     = "default"
+  default     = "Default"
   description = "The creation mode which can be used to restore or replicate existing servers"
 }
 
