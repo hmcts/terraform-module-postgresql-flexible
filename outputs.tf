@@ -1,9 +1,9 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.rg.name
+  value = local.postgresql_rg_name
 }
 
 output "resource_group_location" {
-  value = azurerm_resource_group.rg.name
+  value = local.postgresql_rg_location
 }
 
 output "password" {
