@@ -57,3 +57,13 @@ variable "geo_redundant_backups" {
   default     = false
   description = "Enable geo-redundant backups for the PGSql instance."
 }
+
+variable "create_mode" {
+  default     = "default"
+  description = "The creation mode which can be used to restore or replicate existing servers"
+}
+
+variable "restore_time" {
+  default     = null
+  description = "The point in time to restore from. Only used when create mode is set to PointInTimeRestore"
+}
