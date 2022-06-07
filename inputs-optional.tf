@@ -47,3 +47,13 @@ variable "name" {
   default     = ""
   description = "The default name will be product+component+env, you can override the product+component part by setting this"
 }
+
+variable "backup_retention_days" {
+  default     = 7
+  description = "Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days"
+}
+
+variable "geo_redundant_backups" {
+  default     = false
+  description = "Enable geo-redundant backups for the PGSql instance."
+}

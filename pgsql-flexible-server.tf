@@ -50,6 +50,10 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
       high_availability.0.standby_availability_zone,
     ]
   }
+
+  backup_retention_days        = var.backup_retention_days
+  geo_redundant_backup_enabled = var.geo_redundant_backups
+
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
