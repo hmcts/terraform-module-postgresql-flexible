@@ -1,9 +1,11 @@
 locals {
-  default_name = var.component != "" ? "${var.product}-${var.component}" : var.product
-  name         = var.name != "" ? var.name : local.default_name
-  server_name  = "${local.name}-${var.env}"
-  vnet_rg_name = var.project == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
-  vnet_name    = var.project == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
+  default_name           = var.component != "" ? "${var.product}-${var.component}" : var.product
+  name                   = var.name != "" ? var.name : local.default_name
+  server_name            = "${local.name}-${var.env}"
+  postgresql_rg_name     = var.existing_resource_group_name == null ? azurerm_resource_group.rg.name : data.azurerm_resource_group.rg.name
+  postgresql_rg_location = var.existing_resource_group_name == null ? azurerm_resource_group.rg.location : data.azurerm_resource_group.rg.location
+  vnet_rg_name           = var.project == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
+  vnet_name              = var.project == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 }
@@ -22,7 +24,7 @@ resource "random_password" "password" {
 
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   name                = local.server_name
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.postgresql_rg_name
   location            = var.location
   version             = var.pgsql_version
 
