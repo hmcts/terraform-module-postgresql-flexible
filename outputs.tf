@@ -9,3 +9,7 @@ output "resource_group_location" {
 output "password" {
   value = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
 }
+
+output "instance_id" {
+  value = azurerm_postgresql_flexible_server.pgsql_server.id
+}
