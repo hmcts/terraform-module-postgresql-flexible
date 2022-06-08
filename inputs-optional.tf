@@ -65,5 +65,10 @@ variable "create_mode" {
 
 variable "restore_time" {
   default     = null
-  description = "The point in time to restore from. Only used when create mode is set to PointInTimeRestore"
+  description = "The point in time to restore. Only used when create mode is set to PointInTimeRestore"
+}
+
+variable "source_server_id" {
+  default     = null
+  description = "Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore"
 }
