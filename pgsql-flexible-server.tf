@@ -28,6 +28,10 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   location            = local.postgresql_rg_location
   version             = var.pgsql_version
 
+  create_mode                       = var.create_mode
+  point_in_time_restore_time_in_utc = var.restore_time
+  source_server_id                  = var.source_server_id
+
   delegated_subnet_id = var.pgsql_delegated_subnet_id
   private_dns_zone_id = local.private_dns_zone_id
 
@@ -50,6 +54,10 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
       high_availability.0.standby_availability_zone,
     ]
   }
+
+  backup_retention_days        = var.backup_retention_days
+  geo_redundant_backup_enabled = var.geo_redundant_backups
+
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
