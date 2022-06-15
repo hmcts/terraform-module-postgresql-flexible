@@ -2,8 +2,8 @@ locals {
   default_name           = var.component != "" ? "${var.product}-${var.component}" : var.product
   name                   = var.name != "" ? var.name : local.default_name
   server_name            = "${local.name}-${var.env}"
-  postgresql_rg_name     = var.existing_resource_group_name == null ? azurerm_resource_group.rg[0].name : var.existing_resource_group_name
-  postgresql_rg_location = var.existing_resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
+  postgresql_rg_name     = var.resource_group_name == null ? azurerm_resource_group.rg[0].name : var.resource_group_name
+  postgresql_rg_location = var.resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
   vnet_rg_name           = var.project == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
   vnet_name              = var.project == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
 
