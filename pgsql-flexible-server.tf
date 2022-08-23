@@ -14,6 +14,8 @@ data "azurerm_subnet" "pg_subnet" {
   name                 = "postgresql"
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
+
+  count = var.pgsql_delegated_subnet_id == "" ? 1 : 0
 }
 
 resource "random_password" "password" {
@@ -32,7 +34,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   point_in_time_restore_time_in_utc = var.restore_time
   source_server_id                  = var.source_server_id
 
-  delegated_subnet_id = var.pgsql_delegated_subnet_id
+  delegated_subnet_id = var.pgsql_delegated_subnet_id == "" ? data.azurerm_subnet.pg_subnet[0].id : var.pgsql_delegated_subnet_id
   private_dns_zone_id = local.private_dns_zone_id
 
   administrator_login    = var.pgsql_admin_username
