@@ -1,9 +1,3 @@
-data "azurerm_subnet" "this" {
-  name                 = "postgresql"
-  resource_group_name  = "ss-${var.env}-network-rg"
-  virtual_network_name = "ss-${var.env}-vnet"
-}
-
 module "postgresql" {
   source = "../"
   env    = var.env
@@ -18,8 +12,7 @@ module "postgresql" {
       name : "application"
     }
   ]
-  pgsql_delegated_subnet_id = data.azurerm_subnet.this.id
-  pgsql_version             = "12"
+  pgsql_version = "12"
 }
 
 # only for use when building from ADO and as a quick example to get valid tags

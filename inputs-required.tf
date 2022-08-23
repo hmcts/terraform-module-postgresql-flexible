@@ -16,6 +16,7 @@ variable "pgsql_databases" {
 variable "pgsql_delegated_subnet_id" {
   description = "PGSql delegated subnet id."
   type        = string
+  default     = ""
 }
 
 variable "pgsql_version" {
