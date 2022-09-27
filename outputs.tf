@@ -10,6 +10,10 @@ output "password" {
   value = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
 }
 
+output "fqdn" {
+  value = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+}
+
 output "instance_id" {
   value = azurerm_postgresql_flexible_server.pgsql_server.id
 }
