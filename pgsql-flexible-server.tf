@@ -18,6 +18,8 @@ data "azurerm_subnet" "pg_subnet" {
   count = var.pgsql_delegated_subnet_id == "" ? 1 : 0
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "random_password" "password" {
   length = 20
   # safer set of special characters for pasting in the shell
@@ -43,6 +45,16 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   storage_mb = var.pgsql_storage_mb
 
   sku_name = var.pgsql_sku
+
+  dynamic "authentication" {
+
+    # Include this block only if var.set_ad_admin is set to a non-null value.
+    for_each = var.set_ad_admin[*]
+    content {
+      active_directory_auth_enabled = true
+      tenant_id                     = data.azurerm_client_config.current.tenant_id
+    }
+  }
 
   tags = var.common_tags
 
@@ -71,4 +83,15 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
   name      = each.value.name
   server_id = azurerm_postgresql_flexible_server.pgsql_server.id
   value     = each.value.value
+}
+
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
+  count               = var.set_ad_admin != null ? 1 : 0
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azurerm_client_config.current.object_id
+  principal_name      = var.ad_pricipal_name
+  principal_type      = var.ad_principal_type
 }

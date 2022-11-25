@@ -72,3 +72,27 @@ variable "source_server_id" {
   default     = null
   description = "Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore"
 }
+
+##### Azure AD Admin variables
+variable "set_ad_admin" {
+  type        = string
+  default     = null
+  description = "Set value on for this variable if you like to set AD admin"
+}
+variable "ad_pricipal_name" {
+  type        = string
+  default     = null
+  description = "Azure AD principal name."
+}
+variable "ad_principal_type" {
+  type        = string
+  default     = null
+  description = "Azure AD principal type, it can only be either Group, ServicePrincipal or User"
+  validation {
+    condition = contains(
+      [null, "Group", "ServicePrincipal", "User"],
+      var.ad_principal_type
+    )
+    error_message = "Validation Error: ad_principal_type is NOT valid, it can only be either Group, ServicePrincipal or User"
+  }
+}
