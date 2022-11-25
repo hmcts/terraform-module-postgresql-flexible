@@ -21,8 +21,7 @@ data "azurerm_subnet" "pg_subnet" {
 locals {
   is_prod     = length(regexall(".*(prod).*", var.env)) > 0
   admin_group = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
-  # psql needs spaces escaped in user names
-  escaped_admin_group = replace(local.admin_group, " ", "\\ ")
+
 }
 
 data "azurerm_client_config" "current" {}
@@ -101,4 +100,21 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   object_id           = data.azuread_group.db_admin.object_id
   principal_name      = local.admin_group
   principal_type      = "Group"
+}
+
+
+resource "postgresql_role" "aad_role" {
+  name = local.admin_group
+}
+
+resource "postgresql_grant" "add_role_grant" {
+  for_each = {
+    for index, db in var.pgsql_databases :
+    db.name => db
+  }
+  database    = each.value.name
+  role        = local.admin_group
+  schema      = "public"
+  object_type = "table"
+  privileges  = ["SELECT"]
 }
