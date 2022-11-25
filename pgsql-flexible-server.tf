@@ -8,6 +8,11 @@ locals {
   vnet_name              = var.project == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
+
+  is_prod     = length(regexall(".*(prod).*", var.env)) > 0
+  admin_group = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${var.business_area} DB Access Reader"
+
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -16,12 +21,6 @@ data "azurerm_subnet" "pg_subnet" {
   virtual_network_name = local.vnet_name
 
   count = var.pgsql_delegated_subnet_id == "" ? 1 : 0
-}
-
-locals {
-  is_prod     = length(regexall(".*(prod).*", var.env)) > 0
-  admin_group = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
-
 }
 
 data "azurerm_client_config" "current" {}
@@ -104,7 +103,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 
 
 resource "postgresql_role" "aad_role" {
-  name = local.admin_group
+  name = local.db_reader_user
 }
 
 resource "postgresql_grant" "add_role_grant" {
@@ -113,7 +112,7 @@ resource "postgresql_grant" "add_role_grant" {
     db.name => db
   }
   database    = each.value.name
-  role        = local.admin_group
+  role        = local.db_reader_user
   schema      = "public"
   object_type = "table"
   privileges  = ["SELECT"]

@@ -72,3 +72,7 @@ variable "source_server_id" {
   default     = null
   description = "Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore"
 }
+variable "business_area" {
+  description = "Business Area."
+  default     = "CFT"
+}
