@@ -59,14 +59,9 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 
   sku_name = var.pgsql_sku
 
-  dynamic "authentication" {
-
-    # Include this block only if var.set_ad_admin is set to a non-null value.
-    for_each = var.set_ad_admin[*]
-    content {
-      active_directory_auth_enabled = true
-      tenant_id                     = data.azurerm_client_config.current.tenant_id
-    }
+  authentication {
+    active_directory_auth_enabled = true
+    tenant_id                     = data.azurerm_client_config.current.tenant_id
   }
 
   tags = var.common_tags
@@ -100,11 +95,10 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
 
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
-  count               = var.set_ad_admin != null ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   object_id           = data.azuread_group.db_admin.object_id
-  principal_name      = var.ad_pricipal_name
-  principal_type      = var.ad_principal_type
+  principal_name      = local.admin_group
+  principal_type      = "Group"
 }
