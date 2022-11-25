@@ -61,8 +61,6 @@ module "postgresql" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_ad_pricipal_name"></a> [ad\_pricipal\_name](#input\_ad\_pricipal\_name) | Azure AD principal name. | `string` | `null` | no |
-| <a name="input_ad_principal_type"></a> [ad\_principal\_type](#input\_ad\_principal\_type) | Azure AD principal type, it can only be either Group, ServicePrincipal or User | `string` | `null` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `7` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Common tag to be applied to resources. | `map(string)` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
@@ -83,7 +81,6 @@ module "postgresql" {
 | <a name="input_project"></a> [project](#input\_project) | Project name - sds or cft. | `any` | n/a | yes |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of existing resource group to deploy resources into | `string` | `null` | no |
 | <a name="input_restore_time"></a> [restore\_time](#input\_restore\_time) | The point in time to restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
-| <a name="input_set_ad_admin"></a> [set\_ad\_admin](#input\_set\_ad\_admin) | Set value on for this variable if you like to set AD admin | `string` | `null` | no |
 | <a name="input_source_server_id"></a> [source\_server\_id](#input\_source\_server\_id) | Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 
 ## Outputs
