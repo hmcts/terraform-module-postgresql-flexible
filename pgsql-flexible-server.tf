@@ -18,7 +18,20 @@ data "azurerm_subnet" "pg_subnet" {
   count = var.pgsql_delegated_subnet_id == "" ? 1 : 0
 }
 
+locals {
+  is_prod     = length(regexall(".*(prod).*", var.env)) > 0
+  admin_group = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  # psql needs spaces escaped in user names
+  escaped_admin_group = replace(local.admin_group, " ", "\\ ")
+}
+
 data "azurerm_client_config" "current" {}
+
+data "azuread_group" "db_admin" {
+  display_name     = local.admin_group
+  security_enabled = true
+}
+
 
 resource "random_password" "password" {
   length = 20
@@ -91,7 +104,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azurerm_client_config.current.object_id
+  object_id           = data.azuread_group.db_admin.object_id
   principal_name      = var.ad_pricipal_name
   principal_type      = var.ad_principal_type
 }
