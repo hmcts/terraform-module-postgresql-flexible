@@ -40,8 +40,13 @@ module "postgresql" {
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | n/a |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
-| <a name="provider_postgresql"></a> [postgresql](#provider\_postgresql) | 1.17.1 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.2.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_aad_role"></a> [aad\_role](#module\_aad\_role) | git@github.com:hmcts/terraform-postgresql-aad-role.git | master |
 
 ## Resources
 
@@ -53,8 +58,6 @@ module "postgresql" {
 | [azurerm_postgresql_flexible_server_database.pg_databases](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
 | [azurerm_postgresql_flexible_server_firewall_rule.pg_firewall_rules](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_firewall_rule) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
-| [postgresql_grant.add_role_grant](https://registry.terraform.io/providers/cyrilgdn/postgresql/1.17.1/docs/resources/grant) | resource |
-| [postgresql_role.aad_role](https://registry.terraform.io/providers/cyrilgdn/postgresql/1.17.1/docs/resources/role) | resource |
 | [random_password.password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
