@@ -102,13 +102,43 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_type      = "Group"
 }
 
-module "aad_role" {
+# module "aad_role" {
 
-  source               = "git@github.com:hmcts/terraform-postgresql-aad-role.git?ref=master"
-  name                 = local.db_reader_user
-  password             = random_password.password.result
-  db_name              = azurerm_postgresql_flexible_server_database.pg_databases[0].name
-  server_name          = local.server_name
-  pgsql_admin_username = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-  pgsql_admin_password = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+#   source               = "git@github.com:hmcts/terraform-postgresql-aad-role.git?ref=master"
+#   name                 = local.db_reader_user
+#   password             = random_password.password.result
+#   db_name              = azurerm_postgresql_flexible_server_database.pg_databases[0].name
+#   server_name          = local.server_name
+#   pgsql_admin_username = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+#   pgsql_admin_password = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+# }
+
+resource "null_resource" "set-user-permissions-additionaldbs" {
+  for_each = {
+    for index, db in var.pgsql_databases :
+    db.name => db
+  }
+  triggers = {
+    script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
+    name           = local.name
+    db_reader_user = local.db_reader_user
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/set-postgres-permissions.bash"
+
+    environment = {
+      DB_NAME                       = each.value.name
+      DB_HOST_NAME                  = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER                       = "${azurerm_postgresql_flexible_server.pgsql_server.administrator_login}@${azurerm_postgresql_flexible_server.pgsql_server.name}"
+      DB_READER_USER                = local.db_reader_user
+      AZURE_SUBSCRIPTION_SHORT_NAME = var.env
+      DB_MANAGER_USER_NAME          = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+      DB_MANAGER_PASSWORD           = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+      TENANT_ID                     = data.azurerm_client_config.current.tenant_id
+    }
+  }
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
+  ]
 }
