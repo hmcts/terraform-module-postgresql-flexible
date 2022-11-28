@@ -60,6 +60,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   authentication {
     active_directory_auth_enabled = true
     tenant_id                     = data.azurerm_client_config.current.tenant_id
+    password_auth_enabled         = true
   }
 
   tags = var.common_tags
