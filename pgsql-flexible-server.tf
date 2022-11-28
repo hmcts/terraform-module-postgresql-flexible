@@ -104,7 +104,9 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 
 
 resource "postgresql_role" "aad_role" {
-  name = local.db_reader_user
+  name  = local.db_reader_user
+  login = true
+
 }
 
 resource "postgresql_grant" "add_role_grant" {
@@ -117,4 +119,5 @@ resource "postgresql_grant" "add_role_grant" {
   schema      = "public"
   object_type = "table"
   privileges  = ["SELECT"]
+  depends_on  = ["postgresql_role.aad_role"]
 }

@@ -4,8 +4,9 @@ resource "azurerm_postgresql_flexible_server_database" "pg_databases" {
     db.name => db
   }
 
-  name      = each.value.name
-  server_id = azurerm_postgresql_flexible_server.pgsql_server.id
-  collation = try(each.value.collation, null)
-  charset   = try(each.value.charset, null)
+  name       = each.value.name
+  server_id  = azurerm_postgresql_flexible_server.pgsql_server.id
+  collation  = try(each.value.collation, null)
+  charset    = try(each.value.charset, null)
+  depends_on = ["postgresql_role.aad_role"]
 }
