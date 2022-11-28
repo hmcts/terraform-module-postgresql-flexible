@@ -104,9 +104,9 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 
 
 resource "postgresql_role" "aad_role" {
-  name  = local.db_reader_user
-  login = true
-
+  name     = local.db_reader_user
+  login    = true
+  password = random_password.password.result
 }
 
 resource "postgresql_grant" "add_role_grant" {
