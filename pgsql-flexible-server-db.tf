@@ -8,5 +8,5 @@ resource "azurerm_postgresql_flexible_server_database" "pg_databases" {
   server_id  = azurerm_postgresql_flexible_server.pgsql_server.id
   collation  = try(each.value.collation, null)
   charset    = try(each.value.charset, null)
-  depends_on = ["postgresql_role.aad_role"]
+  depends_on = [postgresql_role.aad_role]
 }

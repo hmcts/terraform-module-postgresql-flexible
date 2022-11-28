@@ -119,5 +119,5 @@ resource "postgresql_grant" "add_role_grant" {
   schema      = "public"
   object_type = "table"
   privileges  = ["SELECT"]
-  depends_on  = ["postgresql_role.aad_role"]
+  depends_on  = [postgresql_role.aad_role]
 }
