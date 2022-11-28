@@ -14,6 +14,9 @@ terraform {
     }
   }
 }
+provider "azurerm" {
+  features {}
+}
 provider "postgresql" {
   host            = "${local.server_name}.postgres.database.azure.com"
   port            = "5432"
