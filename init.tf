@@ -14,3 +14,13 @@ terraform {
     }
   }
 }
+provider "postgresql" {
+  host            = "${local.server_name}.postgres.database.azure.com"
+  port            = "5432"
+  database        = azurerm_postgresql_flexible_server_database.pg_databases[0].name
+  username        = local.db_reader_user
+  password        = random_password.password.result
+  superuser       = false
+  sslmode         = "require"
+  connect_timeout = 15
+}
