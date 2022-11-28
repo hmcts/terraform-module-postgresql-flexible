@@ -102,22 +102,13 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_type      = "Group"
 }
 
+module "aad_role" {
 
-resource "postgresql_role" "aad_role" {
-  name     = local.db_reader_user
-  login    = true
-  password = random_password.password.result
-}
-
-resource "postgresql_grant" "add_role_grant" {
-  for_each = {
-    for index, db in var.pgsql_databases :
-    db.name => db
-  }
-  database    = each.value.name
-  role        = local.db_reader_user
-  schema      = "public"
-  object_type = "table"
-  privileges  = ["SELECT"]
-  depends_on  = [postgresql_role.aad_role]
+  source               = "git@github.com:hmcts/terraform-postgresql-aad-role.git?ref=master"
+  name                 = local.db_reader_user
+  password             = random_password.password.result
+  db_name              = azurerm_postgresql_flexible_server_database.pg_databases[0].name
+  server_name          = local.server_name
+  pgsql_admin_username = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+  pgsql_admin_password = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
 }
