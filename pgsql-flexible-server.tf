@@ -12,7 +12,8 @@ locals {
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.project)} DB Access Reader"
-
+  # psql needs spaces escaped in user names
+  escaped_admin_group = replace(local.admin_group, " ", "\\ ")
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -130,7 +131,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     environment = {
       DB_NAME                       = each.value.name
       DB_HOST_NAME                  = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER                       = "${azurerm_postgresql_flexible_server.pgsql_server.administrator_login}@${azurerm_postgresql_flexible_server.pgsql_server.name}"
+      DB_USER                       = "${local.escaped_admin_group}"
       DB_READER_USER                = local.db_reader_user
       AZURE_SUBSCRIPTION_SHORT_NAME = var.env
       DB_MANAGER_USER_NAME          = azurerm_postgresql_flexible_server.pgsql_server.administrator_login

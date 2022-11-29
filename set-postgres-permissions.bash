@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export AZURE_CONFIG_DIR=~/.azure-db-manager
-az login -u "${DB_MANAGER_USER_NAME}" -p "${DB_MANAGER_PASSWORD}" -t "${TENANT_ID}" >/dev/null
+az login --identity
 
 # shellcheck disable=SC2155
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
@@ -39,4 +39,4 @@ while true; do
    sleep 5
 done
 
-psql "sslmode=require host=${DB_HOST_NAME} dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
