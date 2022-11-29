@@ -126,7 +126,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/set-postgres-permissions.bash"
+    command = "chmod +x ${path.module}/set-postgres-permissions.bash; ${path.module}/set-postgres-permissions.bash"
 
     environment = {
       DB_NAME                       = each.value.name
