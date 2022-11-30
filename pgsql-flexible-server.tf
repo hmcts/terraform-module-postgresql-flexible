@@ -31,9 +31,7 @@ data "azuread_group" "db_admin" {
   display_name     = local.admin_group
   security_enabled = true
 }
-data "azuread_application" "mi_db_admin" {
-  display_name = local.mi_name
-}
+
 
 
 
@@ -111,7 +109,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_application.mi_db_admin.object_id
+  object_id           = "7ef3b6ce-3974-41ab-8512-c3ef4bb8ae01"
   principal_name      = local.mi_name
   principal_type      = "ServicePrincipal"
 }
