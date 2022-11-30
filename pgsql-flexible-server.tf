@@ -12,6 +12,7 @@ locals {
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.project)} DB Access Reader"
+  mi_name        = "jenkins-ptl-mi"
   # psql needs spaces escaped in user names
   escaped_admin_group = replace(local.admin_group, " ", "\\ ")
 }
@@ -30,6 +31,10 @@ data "azuread_group" "db_admin" {
   display_name     = local.admin_group
   security_enabled = true
 }
+data "azuread_application" "mi_db_admin" {
+  display_name = local.mi_name
+}
+
 
 
 resource "random_password" "password" {
@@ -102,14 +107,14 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_name      = local.admin_group
   principal_type      = "Group"
 }
-# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
-#   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
-#   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
-#   tenant_id           = data.azurerm_client_config.current.tenant_id
-#   object_id           = data.azuread_group.db_admin.object_id
-#   principal_name      = "Jenkins"
-#   principal_type      = "ServicePrincipal"
-# }
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azuread_group.mi_db_admin.object_id
+  principal_name      = local.mi_name
+  principal_type      = "ServicePrincipal"
+}
 # module "aad_role" {
 
 #   source               = "git@github.com:hmcts/terraform-postgresql-aad-role.git?ref=master"
@@ -136,17 +141,13 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     command = "chmod +x ${path.module}/set-postgres-permissions.bash; ${path.module}/set-postgres-permissions.bash"
 
     environment = {
-      DB_NAME                       = each.value.name
-      DB_HOST_NAME                  = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER                       = "${local.escaped_admin_group}"
-      DB_READER_USER                = local.db_reader_user
-      AZURE_SUBSCRIPTION_SHORT_NAME = var.env
-      DB_MANAGER_USER_NAME          = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-      DB_MANAGER_PASSWORD           = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
-      TENANT_ID                     = data.azurerm_client_config.current.tenant_id
+      DB_NAME        = each.value.name
+      DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER        = "${local.escaped_admin_group}"
+      DB_READER_USER = local.db_reader_user
     }
   }
   depends_on = [
-    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_jenkins_admin
   ]
 }
