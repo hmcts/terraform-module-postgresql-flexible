@@ -15,7 +15,8 @@ BEGIN
       SELECT FROM pg_catalog.pg_roles  -- SELECT list can be empty for this
       WHERE rolname = '${DB_READER_USER}') THEN
 
-      CREATE ROLE \"${DB_READER_USER}\" WITH LOGIN IN ROLE azure_ad_user;
+      select * from pgaadauth_create_principal(\"${DB_READER_USER}\", false, false)
+      
    END IF;
 END
 \$do\$;
