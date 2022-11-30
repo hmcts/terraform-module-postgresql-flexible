@@ -111,7 +111,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_group.mi_db_admin.object_id
+  object_id           = data.azuread_application.mi_db_admin.object_id
   principal_name      = local.mi_name
   principal_type      = "ServicePrincipal"
 }
