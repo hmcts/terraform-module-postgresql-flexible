@@ -72,3 +72,8 @@ variable "source_server_id" {
   default     = null
   description = "Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore"
 }
+
+variable "jenkins_AAD_objectId" {
+  default     = null
+  description = "The object ID of the user to be granted access to the key vault"
+}

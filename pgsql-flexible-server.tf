@@ -12,7 +12,7 @@ locals {
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.project)} DB Access Reader"
-  mi_name        = "jenkins-ptl-mi"
+  #mi_name        = "jenkins-ptl-mi"
   # psql needs spaces escaped in user names
   escaped_admin_group = replace(local.admin_group, " ", "\\ ")
 }
@@ -31,10 +31,9 @@ data "azuread_group" "db_admin" {
   display_name     = local.admin_group
   security_enabled = true
 }
-
-
-
-
+data "azuread_service_principal" "mi_name" {
+  object_id = var.jenkins_AAD_objectId
+}
 resource "random_password" "password" {
   length = 20
   # safer set of special characters for pasting in the shell
@@ -109,8 +108,8 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = "7ef3b6ce-3974-41ab-8512-c3ef4bb8ae01"
-  principal_name      = local.mi_name
+  object_id           = var.jenkins_AAD_objectId
+  principal_name      = data.azuread_service_principal.mi_name.display_name
   principal_type      = "ServicePrincipal"
 }
 # module "aad_role" {
@@ -141,7 +140,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     environment = {
       DB_NAME        = each.value.name
       DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = "${local.mi_name}"
+      DB_USER        = "${data.azuread_service_principal.mi_name.display_name}"
       DB_READER_USER = local.db_reader_user
     }
   }
