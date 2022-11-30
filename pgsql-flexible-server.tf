@@ -141,7 +141,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     environment = {
       DB_NAME        = each.value.name
       DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = "${local.escaped_admin_group}"
+      DB_USER        = "${local.mi_name}"
       DB_READER_USER = local.db_reader_user
     }
   }
