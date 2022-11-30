@@ -3,7 +3,7 @@
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
 
-az account show
+az ad signed-in-user show
 # shellcheck disable=SC2155
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
