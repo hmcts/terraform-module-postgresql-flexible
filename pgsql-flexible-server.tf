@@ -102,7 +102,14 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_name      = local.admin_group
   principal_type      = "Group"
 }
-
+# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
+#   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+#   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+#   object_id           = data.azuread_group.db_admin.object_id
+#   principal_name      = "Jenkins"
+#   principal_type      = "ServicePrincipal"
+# }
 # module "aad_role" {
 
 #   source               = "git@github.com:hmcts/terraform-postgresql-aad-role.git?ref=master"
