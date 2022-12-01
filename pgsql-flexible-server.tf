@@ -110,16 +110,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_name      = data.azuread_service_principal.mi_name.display_name
   principal_type      = "ServicePrincipal"
 }
-# module "aad_role" {
 
-#   source               = "git@github.com:hmcts/terraform-postgresql-aad-role.git?ref=master"
-#   name                 = local.db_reader_user
-#   password             = random_password.password.result
-#   db_name              = azurerm_postgresql_flexible_server_database.pg_databases[0].name
-#   server_name          = local.server_name
-#   pgsql_admin_username = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-#   pgsql_admin_password = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
-# }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
   for_each = {
