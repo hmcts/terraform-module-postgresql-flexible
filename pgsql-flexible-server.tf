@@ -102,6 +102,9 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   object_id           = data.azuread_group.db_admin.object_id
   principal_name      = local.admin_group
   principal_type      = "Group"
+  depends_on = [
+    azurerm_postgresql_flexible_server.pgsql_server
+  ]
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
@@ -112,6 +115,9 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   object_id           = var.admin_user_object_id
   principal_name      = data.azuread_service_principal.mi_name[0].display_name
   principal_type      = "ServicePrincipal"
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
+  ]
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
