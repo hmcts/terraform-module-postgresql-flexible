@@ -31,7 +31,6 @@ module "postgresql" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0 |
-| <a name="requirement_postgresql"></a> [postgresql](#requirement\_postgresql) | 1.17.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.2.0 |
 
 ## Providers
