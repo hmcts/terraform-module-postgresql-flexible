@@ -4,14 +4,14 @@ locals {
   server_name            = "${local.name}-${var.env}"
   postgresql_rg_name     = var.resource_group_name == null ? azurerm_resource_group.rg[0].name : var.resource_group_name
   postgresql_rg_location = var.resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
-  vnet_rg_name           = var.project == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
-  vnet_name              = var.project == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
+  vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
+  vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
-  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.project)} DB Access Reader"
+  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 }
 

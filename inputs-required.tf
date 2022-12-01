@@ -29,8 +29,8 @@ variable "product" {
   type        = string
 }
 
-variable "project" {
-  description = "Project name - sds or cft."
+variable "business_area" {
+  description = "business_area name - sds or cft."
 }
 
 variable "component" {

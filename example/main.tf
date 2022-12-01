@@ -4,7 +4,7 @@ module "postgresql" {
 
   product   = "platops"
   component = "example"
-  project   = "sds"
+  business_area   = "sds"
 
   common_tags = module.common_tags.common_tags
   pgsql_databases = [
