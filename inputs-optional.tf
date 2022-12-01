@@ -72,3 +72,14 @@ variable "source_server_id" {
   default     = null
   description = "Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore"
 }
+
+variable "admin_user_object_id" {
+  default     = null
+  description = "The ID of the principal to be granted admin access to the database server, should be the principal running this normally"
+}
+
+variable "enable_read_only_group_access" {
+  type        = bool
+  default     = true
+  description = "Enables read only group support for accessing the database"
+}
