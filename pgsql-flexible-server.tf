@@ -29,11 +29,9 @@ data "azuread_group" "db_admin" {
   security_enabled = true
 }
 
-
 data "azuread_service_principal" "mi_name" {
   object_id = var.admin_user_object_id
 }
-
 
 resource "random_password" "password" {
   length = 20
