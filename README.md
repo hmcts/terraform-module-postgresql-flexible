@@ -8,8 +8,8 @@ module "postgresql" {
   source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
   env    = var.env
 
-  product   = var.product
-  component = var.component
+  product         = var.product
+  component       = var.component
   business_area   = "sds" # sds or cft
 
   pgsql_databases = [
