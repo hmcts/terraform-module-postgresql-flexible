@@ -2,9 +2,9 @@ module "postgresql" {
   source = "../"
   env    = var.env
 
-  product         = "platops"
-  component       = "example"
-  business_area   = "sds"
+  product       = "platops"
+  component     = "example"
+  business_area = "sds"
 
   common_tags = module.common_tags.common_tags
   pgsql_databases = [
