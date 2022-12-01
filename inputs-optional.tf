@@ -77,3 +77,9 @@ variable "jenkins_AAD_objectId" {
   default     = null
   description = "The object ID of the user to be granted access to the key vault"
 }
+
+variable "create_readonly_group" {
+  type        = bool
+  default     = true
+  description = "Flag to add readonly Azure AD role as readonly users"
+}

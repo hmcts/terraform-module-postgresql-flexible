@@ -29,9 +29,11 @@ data "azuread_group" "db_admin" {
   security_enabled = true
 }
 
+
 data "azuread_service_principal" "mi_name" {
   object_id = var.jenkins_AAD_objectId
 }
+
 
 resource "random_password" "password" {
   length = 20
@@ -94,6 +96,7 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
   value     = each.value.value
 }
 
+
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
@@ -102,6 +105,8 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_name      = local.admin_group
   principal_type      = "Group"
 }
+
+
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
@@ -112,11 +117,10 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_type      = "ServicePrincipal"
 }
 
+
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  for_each = {
-    for index, db in var.pgsql_databases :
-    db.name => db
-  }
+  count = var.create_readonly_group ? 1 : 0
+
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
     name           = local.name
@@ -127,7 +131,6 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     command = "${path.module}/set-postgres-permissions.bash"
 
     environment = {
-      DB_NAME        = each.value.name
       DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
       DB_USER        = "${data.azuread_service_principal.mi_name.display_name}"
       DB_READER_USER = local.db_reader_user
