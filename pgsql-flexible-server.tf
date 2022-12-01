@@ -12,9 +12,7 @@ locals {
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.project)} DB Access Reader"
-  #mi_name        = "jenkins-ptl-mi"
-  # psql needs spaces escaped in user names
-  escaped_admin_group = replace(local.admin_group, " ", "\\ ")
+
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -135,7 +133,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
   }
 
   provisioner "local-exec" {
-    command = "chmod +x ${path.module}/set-postgres-permissions.bash; ${path.module}/set-postgres-permissions.bash"
+    command = "${path.module}/set-postgres-permissions.bash"
 
     environment = {
       DB_NAME        = each.value.name
