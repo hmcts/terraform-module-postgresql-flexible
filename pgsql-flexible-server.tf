@@ -29,11 +29,9 @@ data "azuread_group" "db_admin" {
   security_enabled = true
 }
 
-
 data "azuread_service_principal" "mi_name" {
   object_id = var.jenkins_AAD_objectId
 }
-
 
 resource "random_password" "password" {
   length = 20
@@ -96,7 +94,6 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
   value     = each.value.value
 }
 
-
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
@@ -106,8 +103,6 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_type      = "Group"
 }
 
-
-
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
@@ -116,7 +111,6 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_name      = data.azuread_service_principal.mi_name.display_name
   principal_type      = "ServicePrincipal"
 }
-
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
   for_each = {
