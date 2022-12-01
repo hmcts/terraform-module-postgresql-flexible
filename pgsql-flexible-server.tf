@@ -28,9 +28,11 @@ data "azuread_group" "db_admin" {
   display_name     = local.admin_group
   security_enabled = true
 }
+
 data "azuread_service_principal" "mi_name" {
   object_id = var.jenkins_AAD_objectId
 }
+
 resource "random_password" "password" {
   length = 20
   # safer set of special characters for pasting in the shell
