@@ -31,7 +31,7 @@ data "azuread_group" "db_admin" {
 
 
 data "azuread_service_principal" "mi_name" {
-  object_id = var.jenkins_AAD_objectId
+  object_id = var.admin_user_object_id
 }
 
 
@@ -108,18 +108,18 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 
 
 
-resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = var.jenkins_AAD_objectId
+  object_id           = var.admin_user_object_id
   principal_name      = data.azuread_service_principal.mi_name.display_name
   principal_type      = "ServicePrincipal"
 }
 
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  count = var.create_readonly_group ? 1 : 0
+  count = var.enable_read_only_group_access ? 1 : 0
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
@@ -137,6 +137,6 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     }
   }
   depends_on = [
-    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_jenkins_admin
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
   ]
 }

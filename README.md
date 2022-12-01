@@ -48,7 +48,7 @@ module "postgresql" {
 |------|------|
 | [azurerm_postgresql_flexible_server.pgsql_server](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
-| [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_jenkins_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
+| [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_configuration.pgsql_server_config](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_configuration) | resource |
 | [azurerm_postgresql_flexible_server_database.pg_databases](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
 | [azurerm_postgresql_flexible_server_firewall_rule.pg_firewall_rules](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_firewall_rule) | resource |
@@ -70,10 +70,10 @@ module "postgresql" {
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Common tag to be applied to resources. | `map(string)` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
 | <a name="input_create_mode"></a> [create\_mode](#input\_create\_mode) | The creation mode which can be used to restore or replicate existing servers | `string` | `"Default"` | no |
-| <a name="input_create_readonly_group"></a> [create\_readonly\_group](#input\_create\_readonly\_group) | Flag to add readonly Azure AD role as readonly users | `bool` | `true` | no |
+| <a name="input_create_readonly_group"></a> [create\_readonly\_group](#input\_create\_readonly\_group) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_geo_redundant_backups"></a> [geo\_redundant\_backups](#input\_geo\_redundant\_backups) | Enable geo-redundant backups for the PGSql instance. | `bool` | `false` | no |
-| <a name="input_jenkins_AAD_objectId"></a> [jenkins\_AAD\_objectId](#input\_jenkins\_AAD\_objectId) | The object ID of the user to be granted access to the key vault | `any` | `null` | no |
+| <a name="input_admin_user_object_id"></a> [jenkins\_AAD\_objectId](#input\_jenkins\_AAD\_objectId) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally | `any` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |
