@@ -114,6 +114,11 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_type      = "ServicePrincipal"
 }
 
+moved {
+  from = azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_jenkins_admin
+  to   = azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
+}
+
 resource "null_resource" "set-user-permissions-additionaldbs" {
   count = var.enable_read_only_group_access ? 1 : 0
 
