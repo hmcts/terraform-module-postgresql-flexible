@@ -105,6 +105,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
+  count               = var.enable_read_only_group_access ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
