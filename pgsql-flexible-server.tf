@@ -12,7 +12,6 @@ locals {
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
-
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -102,6 +101,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   principal_name      = local.admin_group
   principal_type      = "Group"
 }
+
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_jenkins_admin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
