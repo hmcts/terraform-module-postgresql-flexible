@@ -49,7 +49,7 @@ variable "name" {
 }
 
 variable "backup_retention_days" {
-  default     = 7
+  default     = 35
   description = "Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days"
 }
 
