@@ -18,8 +18,7 @@ module "postgresql" {
     }
   ]
 
-  # Set your PostgreSQL version, note AzureAD auth requires version 12 (and not 11 or 13 currently)
-  pgsql_version = "12"
+  pgsql_version = "14"
   
   # The ID of the principal to be granted admin access to the database server, should be the principal running this normally
   admin_user_object_id = var.admin_user_object_id
