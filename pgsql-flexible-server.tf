@@ -72,7 +72,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
     mode = "ZoneRedundant"
   }
 
-maintenance_window {
+  maintenance_window {
     day_of_week  = "0"
     start_hour   = "03"
     start_minute = "00"
