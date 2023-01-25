@@ -10,7 +10,7 @@ locals {
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
-  admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", concat("DTS Platform Operations SC,", var.additional_admin_groups)) : "DTS Platform Operations SC") : (var.add_multiple_admin_groups ? split(",", concat("DTS Platform Operations,", var.additional_admin_groups)) : "DTS Platform Operations")
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 }
 
@@ -25,7 +25,8 @@ data "azurerm_subnet" "pg_subnet" {
 data "azurerm_client_config" "current" {}
 
 data "azuread_group" "db_admin" {
-  display_name     = local.admin_group
+  count            = length(tolist(local.admin_group))
+  display_name     = local.admin_group[count.index]
   security_enabled = true
 }
 
@@ -102,11 +103,12 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
+  count               = length(tolist(local.admin_group))
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_group.db_admin.object_id
-  principal_name      = local.admin_group
+  object_id           = data.azuread_group.db_admin[count.index].object_id
+  principal_name      = local.admin_group[count.index]
   principal_type      = "Group"
   depends_on = [
     azurerm_postgresql_flexible_server.pgsql_server
