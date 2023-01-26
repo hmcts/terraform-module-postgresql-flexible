@@ -11,7 +11,7 @@ locals {
 
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations SC", var.additional_admin_groups])) : tolist("DTS Platform Operations SC")) : (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations", var.additional_admin_groups])) : tolist("DTS Platform Operations"))
-  db_reader_user = local.is_prod ? (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS JIT Access ${var.product} DB Reader SC", var.additional_readonly_groups])) : tolist("DTS JIT Access ${var.product} DB Reader SC")) : (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS ${upper(var.business_area)} DB Access Reader", var.additional_readonly_groups])) : tolist("DTS ${upper(var.business_area)} DB Access Reader"))
+  db_reader_user = local.is_prod ? (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS JIT Access ${var.product} DB Reader SC", var.additional_readonly_groups])) : split(",","DTS JIT Access ${var.product} DB Reader SC")) : (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS ${upper(var.business_area)} DB Access Reader", var.additional_readonly_groups])) : split(",","DTS ${upper(var.business_area)} DB Access Reader"))
 
 }
 
