@@ -95,3 +95,15 @@ variable "additional_admin_groups" {
   default     = null
   description = "Comma seperated additional admin groups"
 }
+
+variable "add_multiple_readonly_groups" {
+  type        = bool
+  default     = false
+  description = "Allows to add multipe AAD read only group for the postgres DB"
+}
+
+variable "additional_readonly_groups" {
+  type        = string
+  default     = null
+  description = "Comma seperated additional read only groups"
+}

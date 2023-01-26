@@ -11,7 +11,8 @@ locals {
 
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
   admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations SC", var.additional_admin_groups])) : tolist("DTS Platform Operations SC")) : (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations", var.additional_admin_groups])) : tolist("DTS Platform Operations"))
-  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
+  db_reader_user = local.is_prod ? (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS JIT Access ${var.product} DB Reader SC", var.additional_readonly_groups])) : tolist("DTS JIT Access ${var.product} DB Reader SC")) : (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS ${upper(var.business_area)} DB Access Reader", var.additional_readonly_groups])) : tolist("DTS ${upper(var.business_area)} DB Access Reader"))
+
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -129,12 +130,12 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  count = var.enable_read_only_group_access ? 1 : 0
+  count = var.enable_read_only_group_access ? length(db_reader_user) : 0
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
     name           = local.name
-    db_reader_user = local.db_reader_user
+    db_reader_user = local.db_reader_user[count.index]
   }
 
   provisioner "local-exec" {
@@ -143,7 +144,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     environment = {
       DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
       DB_USER        = "${data.azuread_service_principal.mi_name[0].display_name}"
-      DB_READER_USER = local.db_reader_user
+      DB_READER_USER = local.db_reader_user[count.index]
     }
   }
   depends_on = [
