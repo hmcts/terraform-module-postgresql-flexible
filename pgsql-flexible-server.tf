@@ -130,7 +130,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  count = var.enable_read_only_group_access ? length(db_reader_user) : 0
+  count = var.enable_read_only_group_access ? length(local.db_reader_user) : 0
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
