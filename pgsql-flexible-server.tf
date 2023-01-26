@@ -10,7 +10,7 @@ locals {
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 
   is_prod        = length(regexall(".*(prod).*", var.env)) > 0
-  admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", concat("DTS Platform Operations SC,", var.additional_admin_groups)) : "DTS Platform Operations SC") : (var.add_multiple_admin_groups ? split(",", concat("DTS Platform Operations,", var.additional_admin_groups)) : "DTS Platform Operations")
+  admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations SC", var.additional_admin_groups])) : "DTS Platform Operations SC") : (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations", var.additional_admin_groups])) : "DTS Platform Operations")
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 }
 
