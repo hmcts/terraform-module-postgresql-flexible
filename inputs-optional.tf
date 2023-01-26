@@ -83,3 +83,27 @@ variable "enable_read_only_group_access" {
   default     = true
   description = "Enables read only group support for accessing the database"
 }
+
+variable "add_multiple_admin_groups" {
+  type        = bool
+  default     = false
+  description = "Allows to add multipe AAD admin group for the postgres DB"
+}
+
+variable "additional_admin_groups" {
+  type        = string
+  default     = null
+  description = "Comma seperated additional admin groups"
+}
+
+variable "add_multiple_readonly_groups" {
+  type        = bool
+  default     = false
+  description = "Allows to add multipe AAD read only group for the postgres DB"
+}
+
+variable "additional_readonly_groups" {
+  type        = string
+  default     = null
+  description = "Comma seperated additional read only groups"
+}
