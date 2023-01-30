@@ -107,3 +107,21 @@ variable "additional_readonly_groups" {
   default     = null
   description = "Comma seperated additional read only groups"
 }
+
+variable "collation" {
+  type        = string
+  default     = "en_GB.utf8"
+  description = "Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation."
+}
+
+variable "charset" {
+  type        = string
+  default     = "utf8"
+  description = "Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset."
+}
+
+variable "high_availability" {
+  type        = bool
+  default     = false
+  description = "Enable high availability mode for the PostgreSQL Flexible Server."
+}
