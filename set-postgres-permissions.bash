@@ -42,4 +42,4 @@ while true; do
 done
 
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAMES} user=${DB_USER}" -c "${SQL_COMMAND}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND}"
