@@ -71,7 +71,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   tags = var.common_tags
 
   high_availability {
-    mode = var.high_availability == false ? null : "ZoneRedundant"
+    mode = var.high_availability == false ? "" : "ZoneRedundant"
   }
 
   maintenance_window {
