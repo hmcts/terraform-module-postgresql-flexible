@@ -13,6 +13,8 @@ locals {
   admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations SC", var.additional_admin_groups])) : split(",", "DTS Platform Operations SC")) : (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations", var.additional_admin_groups])) : split(",", "DTS Platform Operations"))
   db_reader_user = local.is_prod ? (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS JIT Access ${var.product} DB Reader SC", var.additional_readonly_groups])) : split(",", "DTS JIT Access ${var.product} DB Reader SC")) : (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS ${upper(var.business_area)} DB Access Reader", var.additional_readonly_groups])) : split(",", "DTS ${upper(var.business_area)} DB Access Reader"))
 
+  high_availability = var.env == "prod" || var.env == "stg" || var.env == "aat" ? true : false
+
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -71,7 +73,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   tags = var.common_tags
 
   dynamic "high_availability" {
-    for_each = var.high_availability != false ? [1] : []
+    for_each = local.high_availability != false ? [1] : []
     content {
       mode = "ZoneRedundant"
     }

@@ -120,8 +120,3 @@ variable "charset" {
   description = "Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset."
 }
 
-variable "high_availability" {
-  type        = bool
-  default     = false
-  description = "Enable high availability mode for the PostgreSQL Flexible Server."
-}
