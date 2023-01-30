@@ -41,4 +41,5 @@ while true; do
    sleep 5
 done
 
+
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND}"

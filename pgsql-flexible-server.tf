@@ -15,6 +15,7 @@ locals {
 
   high_availability = var.high_availability == true || var.env == "prod" || var.env == "perftest" || var.env == "stg" || var.env == "aat" ? true : false
 
+
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -28,8 +29,8 @@ data "azurerm_subnet" "pg_subnet" {
 data "azurerm_client_config" "current" {}
 
 data "azuread_group" "db_admin" {
-  count            = length(local.admin_group)
-  display_name     = local.admin_group[count.index]
+  for_each         = toset(local.admin_group)
+  display_name     = each.key
   security_enabled = true
 }
 
@@ -109,12 +110,12 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
-  count               = length(local.admin_group)
+  for_each            = toset(local.admin_group)
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_group.db_admin[count.index].object_id
-  principal_name      = local.admin_group[count.index]
+  object_id           = data.azuread_group.db_admin[each.key].object_id
+  principal_name      = each.key
   principal_type      = "Group"
   depends_on = [
     azurerm_postgresql_flexible_server.pgsql_server
