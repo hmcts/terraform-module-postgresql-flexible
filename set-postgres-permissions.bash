@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+#### TESTing List on the bash
+
+for i in "${DB_S[@]}"
+do
+   echo "$i"
+   # or do whatever with individual element of the array
+done
+#####
+
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
 
