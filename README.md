@@ -67,10 +67,6 @@ module "postgresql" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_add_multiple_admin_groups"></a> [add\_multiple\_admin\_groups](#input\_add\_multiple\_admin\_groups) | Allows to add multipe AAD admin group for the postgres DB | `bool` | `false` | no |
-| <a name="input_add_multiple_readonly_groups"></a> [add\_multiple\_readonly\_groups](#input\_add\_multiple\_readonly\_groups) | Allows to add multipe AAD read only group for the postgres DB | `bool` | `false` | no |
-| <a name="input_additional_admin_groups"></a> [additional\_admin\_groups](#input\_additional\_admin\_groups) | Comma seperated additional admin groups | `string` | `null` | no |
-| <a name="input_additional_readonly_groups"></a> [additional\_readonly\_groups](#input\_additional\_readonly\_groups) | Comma seperated additional read only groups | `string` | `null` | no |
 | <a name="input_admin_user_object_id"></a> [admin\_user\_object\_id](#input\_admin\_user\_object\_id) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally | `any` | `null` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `35` | no |
 | <a name="input_business_area"></a> [business\_area](#input\_business\_area) | business\_area name - sds or cft. | `any` | n/a | yes |
