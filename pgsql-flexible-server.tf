@@ -151,7 +151,31 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
       DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
       DB_USER        = "${data.azuread_service_principal.mi_name[0].display_name}"
       DB_READER_USER = local.db_reader_user[count.index]
-      DB_S           = jsonencode(var.pgsql_databases)
+      DB_S           = jsonencode(var.pgsql_databases) # This will only work correctly if the databases are created using terraform
+    }
+  }
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
+  ]
+}
+
+resource "null_resource" "remove-create-rights" {
+  count = var.remove_all_admin_create_rights ? 1 : 0
+
+  triggers = {
+    script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
+    name           = local.name
+    db_reader_user = local.db_reader_user[count.index]
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/set-postgres-permissions.bash"
+
+    environment = {
+      DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER        = "${data.azuread_service_principal.mi_name[0].display_name}"
+      DB_READER_USER = local.db_reader_user[count.index] 
+      DB_S           = jsonencode(var.pgsql_databases)   
     }
   }
   depends_on = [

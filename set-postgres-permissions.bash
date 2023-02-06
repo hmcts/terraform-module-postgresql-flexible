@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 
-#### TESTing List on the bash
 
-for i in "${DB_S[@]}"
-do
-   echo "$i"
-   # or do whatever with individual element of the array
-done
-#####
 
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
@@ -52,3 +45,9 @@ done
 
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND}"
+
+	for row in $(echo "${DB_S}" | jq '.[].name | tostring'); do
+                    DBNAME=`echo ${row} | sed 's/"//g'`
+                    echo "this is DB ${DBNAME}" 
+        psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DBNAME} user=${DB_USER}" -c "${SQL_COMMAND}" 				
+	done

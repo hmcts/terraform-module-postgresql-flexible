@@ -125,3 +125,9 @@ variable "high_availability" {
   default     = false
   description = "Enable high availability mode for the PostgreSQL Flexible Server."
 }
+
+variable "remove_all_admin_create_rights" {
+  type        = bool
+  default     = false
+  description = "If set to true, it will remove CREATE database rights from all admin users except the Service Pricipal"
+}
