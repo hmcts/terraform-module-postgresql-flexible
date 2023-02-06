@@ -6,7 +6,7 @@ az login --identity
 # shellcheck disable=SC2155
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
-SQL_COMMAND="
+SQL_COMMAND_POSTGRES="
 DO
 \$do\$
 BEGIN
@@ -20,9 +20,16 @@ BEGIN
 END
 \$do\$;
 
+"
+
+SQL_COMMAND="
+DO
+\$do\$
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO PUBLIC;
 REVOKE CREATE ON SCHEMA public FROM public;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
+
 "
 
 ## Delay until DB DNS and propagated 
@@ -41,6 +48,7 @@ while true; do
    sleep 5
 done
 
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
 

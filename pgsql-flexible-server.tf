@@ -9,9 +9,10 @@ locals {
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 
-  is_prod        = length(regexall(".*(prod).*", var.env)) > 0
-  admin_group    = local.is_prod ? (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations SC", var.additional_admin_groups])) : split(",", "DTS Platform Operations SC")) : (var.add_multiple_admin_groups ? split(",", join(",", ["DTS Platform Operations", var.additional_admin_groups])) : split(",", "DTS Platform Operations"))
-  db_reader_user = local.is_prod ? (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS JIT Access ${var.product} DB Reader SC", var.additional_readonly_groups])) : split(",", "DTS JIT Access ${var.product} DB Reader SC")) : (var.add_multiple_readonly_groups ? split(",", join(",", ["DTS ${upper(var.business_area)} DB Access Reader", var.additional_readonly_groups])) : split(",", "DTS ${upper(var.business_area)} DB Access Reader"))
+  is_prod = length(regexall(".*(prod).*", var.env)) > 0
+
+  admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 
   high_availability = var.high_availability == true || var.env == "prod" || var.env == "ptl" || var.env == "perftest" || var.env == "stg" || var.env == "aat" ? true : false
@@ -31,8 +32,7 @@ data "azurerm_subnet" "pg_subnet" {
 data "azurerm_client_config" "current" {}
 
 data "azuread_group" "db_admin" {
-  for_each         = toset(local.admin_group)
-  display_name     = each.key
+  display_name     = local.admin_group
   security_enabled = true
 }
 
@@ -112,12 +112,11 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
-  for_each            = toset(local.admin_group)
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_group.db_admin[each.key].object_id
-  principal_name      = each.key
+  object_id           = data.azuread_group.db_admin.object_id
+  principal_name      = local.admin_group
   principal_type      = "Group"
   depends_on = [
     azurerm_postgresql_flexible_server.pgsql_server
@@ -138,12 +137,12 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  count = var.enable_read_only_group_access ? length(local.db_reader_user) : 0
+  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : []
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
     name           = local.name
-    db_reader_user = local.db_reader_user[count.index]
+    db_reader_user = local.db_reader_user
   }
 
   provisioner "local-exec" {
@@ -152,8 +151,8 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     environment = {
       DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
       DB_USER        = "${data.azuread_service_principal.mi_name[0].display_name}"
-      DB_READER_USER = local.db_reader_user[count.index]
-      DB_NAME        = azurerm_postgresql_flexible_server.pgsql_server.name
+      DB_READER_USER = local.db_reader_user
+      DB_NAME        = each.value.name
     }
   }
   depends_on = [
