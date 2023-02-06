@@ -15,7 +15,8 @@ locals {
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 
-  high_availability = var.high_availability == true || var.env == "prod" || var.env == "ptl" || var.env == "perftest" || var.env == "stg" || var.env == "aat" ? true : false
+  high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
+  high_availability = var.high_availability == true || contains(local.high_availability_environments, var.env)
 
 
 
