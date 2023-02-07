@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
 
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
