@@ -157,6 +157,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     }
   }
   depends_on = [
-    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
+    azurerm_postgresql_flexible_server_database.pg_databases
   ]
 }
