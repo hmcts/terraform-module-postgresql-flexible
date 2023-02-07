@@ -16,7 +16,7 @@ locals {
 
 
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
-  high_availability = var.high_availability == true || contains(local.high_availability_environments, var.env)
+  high_availability              = var.high_availability == true || contains(local.high_availability_environments, var.env)
 
 
 
