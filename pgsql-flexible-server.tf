@@ -113,6 +113,7 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
+  count               = 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
