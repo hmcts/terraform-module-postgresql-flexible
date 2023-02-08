@@ -1,4 +1,4 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
@@ -22,14 +22,6 @@ END
 
 "
 
-SQL_COMMAND="
-
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO PUBLIC;
-REVOKE CREATE ON SCHEMA public FROM public;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
-
-"
-
 ## Delay until DB DNS and propagated 
 COUNT=0;
 MAX=10;
@@ -47,6 +39,14 @@ while true; do
 done
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
+
+SQL_COMMAND="
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO PUBLIC;
+REVOKE CREATE ON SCHEMA public FROM public;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
+
+"
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
 
