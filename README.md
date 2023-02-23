@@ -67,19 +67,18 @@ module "postgresql" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_add_multiple_admin_groups"></a> [add\_multiple\_admin\_groups](#input\_add\_multiple\_admin\_groups) | Allows to add multipe AAD admin group for the postgres DB | `bool` | `false` | no |
-| <a name="input_add_multiple_readonly_groups"></a> [add\_multiple\_readonly\_groups](#input\_add\_multiple\_readonly\_groups) | Allows to add multipe AAD read only group for the postgres DB | `bool` | `false` | no |
-| <a name="input_additional_admin_groups"></a> [additional\_admin\_groups](#input\_additional\_admin\_groups) | Comma seperated additional admin groups | `string` | `null` | no |
-| <a name="input_additional_readonly_groups"></a> [additional\_readonly\_groups](#input\_additional\_readonly\_groups) | Comma seperated additional read only groups | `string` | `null` | no |
 | <a name="input_admin_user_object_id"></a> [admin\_user\_object\_id](#input\_admin\_user\_object\_id) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally | `any` | `null` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `35` | no |
 | <a name="input_business_area"></a> [business\_area](#input\_business\_area) | business\_area name - sds or cft. | `any` | n/a | yes |
+| <a name="input_charset"></a> [charset](#input\_charset) | Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset. | `string` | `"utf8"` | no |
+| <a name="input_collation"></a> [collation](#input\_collation) | Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation. | `string` | `"en_GB.utf8"` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Common tag to be applied to resources. | `map(string)` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
 | <a name="input_create_mode"></a> [create\_mode](#input\_create\_mode) | The creation mode which can be used to restore or replicate existing servers | `string` | `"Default"` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_geo_redundant_backups"></a> [geo\_redundant\_backups](#input\_geo\_redundant\_backups) | Enable geo-redundant backups for the PGSql instance. | `bool` | `false` | no |
+| <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `false` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |

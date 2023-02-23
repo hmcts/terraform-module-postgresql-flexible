@@ -84,26 +84,20 @@ variable "enable_read_only_group_access" {
   description = "Enables read only group support for accessing the database"
 }
 
-variable "add_multiple_admin_groups" {
+variable "collation" {
+  type        = string
+  default     = "en_GB.utf8"
+  description = "Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation."
+}
+
+variable "charset" {
+  type        = string
+  default     = "utf8"
+  description = "Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset."
+}
+
+variable "high_availability" {
   type        = bool
   default     = false
-  description = "Allows to add multipe AAD admin group for the postgres DB"
-}
-
-variable "additional_admin_groups" {
-  type        = string
-  default     = null
-  description = "Comma seperated additional admin groups"
-}
-
-variable "add_multiple_readonly_groups" {
-  type        = bool
-  default     = false
-  description = "Allows to add multipe AAD read only group for the postgres DB"
-}
-
-variable "additional_readonly_groups" {
-  type        = string
-  default     = null
-  description = "Comma seperated additional read only groups"
+  description = "Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself."
 }

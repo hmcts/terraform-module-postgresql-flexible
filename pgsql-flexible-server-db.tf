@@ -6,6 +6,6 @@ resource "azurerm_postgresql_flexible_server_database" "pg_databases" {
 
   name      = each.value.name
   server_id = azurerm_postgresql_flexible_server.pgsql_server.id
-  collation = try(each.value.collation, null)
-  charset   = try(each.value.charset, null)
+  collation = var.collation
+  charset   = var.charset
 }
