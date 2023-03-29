@@ -3,7 +3,7 @@ terraform {
     azurerm = {
       source                = "hashicorp/azurerm"
       version               = ">= 3.7.0"
-      configuration_aliases = [azurerm.aks_subscription]
+      configuration_aliases = [azurerm.postgres_network]
     }
     random = {
       source  = "hashicorp/random"

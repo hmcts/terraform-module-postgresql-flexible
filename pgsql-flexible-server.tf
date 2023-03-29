@@ -21,7 +21,7 @@ locals {
 }
 
 data "azurerm_subnet" "pg_subnet" {
-  provider             = azurerm.aks_subscription
+  provider             = azurerm.postgres_network
   name                 = "postgresql"
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
