@@ -10,3 +10,10 @@ terraform {
     }
   }
 }
+
+provider "azurerm" {
+  alias                      = "subscription"
+  skip_provider_registration = "true"
+  features {}
+  subscription_id = var.business_area == "sds" ? local.subscription[var.env].subscription : local.subscription[var.env].subscription
+}
