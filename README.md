@@ -41,7 +41,7 @@ module "postgresql" {
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | n/a |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
-| <a name="provider_azurerm.aks_subscription"></a> [azurerm.aks\_subscription](#provider\_azurerm.aks\_subscription) | >= 3.7.0 |
+| <a name="provider_azurerm.postgres_network"></a> [azurerm.postgres\_network](#provider\_azurerm.postgres\_network) | >= 3.7.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.2.0 |
 
