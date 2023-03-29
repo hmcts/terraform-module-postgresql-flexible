@@ -18,7 +18,7 @@ locals {
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
   high_availability              = var.high_availability == true || contains(local.high_availability_environments, var.env)
 
-  cft = {
+  cft_subscriptions = {
     sbox = {
       subscription = "b72ab7b7-723f-4b18-b6f6-03b0f2c6a1bb"
     }
@@ -42,7 +42,7 @@ locals {
     }
   }
 
-  sds = {
+  sds_subscriptions = {
     sbox = {
       subscription = "a8140a9e-f1b0-481f-a4de-09e2ee23f7ab"
     }
