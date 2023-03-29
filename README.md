@@ -3,14 +3,22 @@ Terraform module for [Azure Database for PostgreSQL - Flexible Server](https://d
 
 ## Example
 
+provider.tf
 ```hcl
+provider "azurerm" {
+  features {}
+}
+
 provider "azurerm" {
   features {}
   skip_provider_registration = true
   alias                      = "postgres_network"
   subscription_id            = var.aks_subscription_id
 }
+```
 
+main.tf
+```hcl
 module "postgresql" {
 
   providers = {
