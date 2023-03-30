@@ -47,6 +47,12 @@ module "postgresql" {
 }
 ```
 
+variables.tf
+```hcl
+variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
+```
+
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
