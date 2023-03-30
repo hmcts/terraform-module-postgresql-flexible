@@ -1,9 +1,5 @@
 module "postgresql" {
 
-  providers = {
-    azurerm.postgres_network = azurerm.postgres_network
-  }
-  
   source = "../"
   env    = var.env
 
