@@ -17,7 +17,7 @@ provider "azurerm" {
 }
 ```
 
-main.tf
+postgres.tf
 ```hcl
 module "postgresql" {
 
