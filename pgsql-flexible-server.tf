@@ -4,8 +4,9 @@ locals {
   server_name            = "${local.name}-${var.env}"
   postgresql_rg_name     = var.resource_group_name == null ? azurerm_resource_group.rg[0].name : var.resource_group_name
   postgresql_rg_location = var.resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
-  vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
-  vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
+  env                    = var.env == "sandbox" ? "sbox" : var.env
+  vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "cft-${local.env}-network-rg"
+  vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "cft-${local.env}-vnet"
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 
@@ -18,11 +19,10 @@ locals {
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
   high_availability              = var.high_availability == true || contains(local.high_availability_environments, var.env)
 
-
-
 }
 
 data "azurerm_subnet" "pg_subnet" {
+  provider             = azurerm.postgres_network
   name                 = "postgresql"
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
