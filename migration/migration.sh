@@ -13,6 +13,11 @@ jq ".properties |
   .SecretParameters.AdminCredentials.SourceServerPassword = \"${single_server_admin_password}\" |
   .SecretParameters.AdminCredentials.TargetServerPassword = \"${flexible_server_admin_password}\" " ${template_properties_file} > ${properties_file}
 
+echo "###################################"
+cat ${properties_file}
+echo "###################################"
+
+
 az postgres flexible-server migration create \
     --subscription "${subscription}" \
     --resource-group "${resource_group}"\
