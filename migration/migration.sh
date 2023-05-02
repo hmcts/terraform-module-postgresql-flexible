@@ -13,10 +13,6 @@ jq ". |
   .properties.SecretParameters.AdminCredentials.SourceServerPassword = \"${single_server_admin_password}\" |
   .properties.SecretParameters.AdminCredentials.TargetServerPassword = \"${flexible_server_admin_password}\" " ${template_properties_file} > ${properties_file}
 
-echo "###################################"
-cat ${properties_file}
-echo "###################################"
-
 
 az postgres flexible-server migration create \
     --subscription "${subscription}" \
@@ -30,12 +26,3 @@ az postgres flexible-server migration show \
     --resource-group "${resource_group}"\
     --name "${flexible_server_name}" \
     --migration-name "${migration_name}"
-
-
-
-az postgres flexible-server migration create \
-    --subscription "DCD-CFTAPPS-SBOX" \
-    --resource-group "fliexible-migration-test"\
-    --name "ccd-data-store-api-flexible-migration-test" \
-    --migration-name "migration1" \
-    --properties config.json
