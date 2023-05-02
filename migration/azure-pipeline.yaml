@@ -31,6 +31,7 @@ steps:
       dbs_to_migrate: ${{ convertToJson(parameters.migrationConfig.dbs_to_migrate) }}
       single_server_resource_id: ${{ parameters.migrationConfig.single_server_resource_id }}
       overwrite_target_dbs: ${{ parameters.migrationConfig.overwrite_target_dbs }}
+      kv_subscription: ${{ parameters.migrationConfig.kv_subscription }}
       flexible_server_kv_name: ${{ parameters.migrationConfig.flexible_server_kv_name }}
       flexible_server_secret_name: ${{ parameters.migrationConfig.flexible_server_secret_name }}
       single_server_kv_name: ${{ parameters.migrationConfig.single_server_kv_name }}
