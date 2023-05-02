@@ -6,7 +6,7 @@ flexible_server_admin_password=$(az keyvault secret show --vault-name "${flexibl
 
 # Command to update json file
 jq ".properties |
-  .OverwriteDBsInTarget = ${overwrite_target_dbs} |
+  .OverwriteDBsInTarget = \"${overwrite_target_dbs}\" |
   .SourceDBServerResourceId = \"${single_server_resource_id}\" |
   .DBsToMigrate = ${dbs_to_migrate} |
   .SecretParameters.AdminCredentials.SourceServerPassword = \"${single_server_admin_password}\" |
