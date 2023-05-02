@@ -18,7 +18,7 @@ steps:
   - task: AzureCLI@2
     displayName: "Create migration"
     inputs:
-      azureSubscription: ${{ parameters.migrationConfig.subscription }}
+      azureSubscription: ${{ env.service_connection }}
       scriptType: bash
       scriptPath: migration/migration.sh
     env:
