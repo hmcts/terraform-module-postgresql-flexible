@@ -27,8 +27,8 @@ steps:
     displayName: Retrieve admin password for single server
     inputs:
       ConnectedServiceName: ${{ variables.service_connection }}
-      keyVaultName: ${{ migrationConfig.single_server_kv_name }}
-      secretsFilter: ${{ migrationConfig.single_server_secret_name }}
+      keyVaultName: ${{ parameters.migrationConfig.single_server_kv_name }}
+      secretsFilter: ${{ parameters.migrationConfig.single_server_secret_name }}
       runAsPreJob: false
 
 
@@ -36,8 +36,8 @@ steps:
     displayName: Retrieve admin password for flexible server
     inputs:
       ConnectedServiceName: ${{ variables.service_connection }}
-      keyVaultName: ${{ migrationConfig.flexible_server_kv_name }}
-      secretsFilter: ${{ migrationConfig.flexible_server_secret_name }}
+      keyVaultName: ${{ parameters.migrationConfig.flexible_server_kv_name }}
+      secretsFilter: ${{ parameters.migrationConfig.flexible_server_secret_name }}
       runAsPreJob: false
 
 #######
