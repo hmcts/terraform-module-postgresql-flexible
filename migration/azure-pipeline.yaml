@@ -10,6 +10,9 @@ parameters:
     displayName: Migration Config
     type: object
 
+variables:
+  - name: service_connection
+    value: GA
 
 steps:
   - task: Bash@3
@@ -19,6 +22,23 @@ steps:
       script: |
         echo ${{ parameters.migrationConfig.project }}
         echo "${{ convertToJson(parameters.migrationConfig.dbs_to_migrate) }}"
+
+  - task: AzureKeyVault@1
+    displayName: Retrieve admin password for single server
+    inputs:
+      ConnectedServiceName: ${{ variables.service_connection }}
+      keyVaultName: ${{ migrationConfig.single_server_kv_name }}
+      secretsFilter: ${{ migrationConfig.single_server_secret_name }}
+      runAsPreJob: false
+
+
+  - task: AzureKeyVault@1
+    displayName: Retrieve admin password for flexible server
+    inputs:
+      ConnectedServiceName: ${{ variables.service_connection }}
+      keyVaultName: ${{ migrationConfig.flexible_server_kv_name }}
+      secretsFilter: ${{ migrationConfig.flexible_server_secret_name }}
+      runAsPreJob: false
 
 #######
 ## Pipeline tasks
