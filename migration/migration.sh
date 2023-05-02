@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-template_properties_file="migration-config-template.json"
-properties_file="migration-config.json"
+template_properties_file="migration/migration-config-template.json"
+properties_file="migration/migration-config.json"
 single_server_admin_password=$(az keyvault secret show --vault-name "${single_server_kv_name}" --name "${single_server_secret_name}" --query value -o tsv)
 flexible_server_admin_password=$(az keyvault secret show --vault-name "${flexible_server_kv_name}" --name "${flexible_server_secret_name}" --query value -o tsv)
 
