@@ -1,4 +1,4 @@
-name: "${{ parameters.action }} - ${{ parameters.env }}.${{ parameters.cluster }}.${{ parameters.location }}"
+#name: "${{ parameters.env }}.${{ parameters.cluster }}.${{ parameters.location }}"
 
 trigger: none
 
@@ -36,6 +36,3 @@ steps:
 
 # Things to think about
 # Timeout of the pipeline, increase it to as much as possible 24 hours maybe
-
-
-# Best practices for the
