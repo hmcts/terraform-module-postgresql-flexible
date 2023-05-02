@@ -16,42 +16,33 @@ variables:
 
 steps:
   - task: Bash@3
-    displayName: "Print Migration config"
+    displayName: "Create migration"
     inputs:
-      targetType: 'inline'
-      script: |
-        echo ${{ parameters.migrationConfig.project }}
-        echo "${{ convertToJson(parameters.migrationConfig.dbs_to_migrate) }}"
-
-  - task: AzureKeyVault@1
-    displayName: Retrieve admin password for single server
-    inputs:
-      ConnectedServiceName: ${{ variables.service_connection }}
-      keyVaultName: ${{ parameters.migrationConfig.single_server_kv_name }}
-      secretsFilter: ${{ parameters.migrationConfig.single_server_secret_name }}
-      runAsPreJob: false
-
-
-  - task: AzureKeyVault@1
-    displayName: Retrieve admin password for flexible server
-    inputs:
-      ConnectedServiceName: ${{ variables.service_connection }}
-      keyVaultName: ${{ parameters.migrationConfig.flexible_server_kv_name }}
-      secretsFilter: ${{ parameters.migrationConfig.flexible_server_secret_name }}
-      runAsPreJob: false
+      targetType: 'filePath'
+      filePath: migration/migration.sh
+    env:
+      project: ${{ parameters.migrationConfig.project }}
+      environment: ${{ parameters.migrationConfig.environment }}
+      migration_name: ${{ parameters.migrationConfig.migration_name }}
+      subscription: ${{ parameters.migrationConfig.subscription }}
+      resource_group: ${{ parameters.migrationConfig.overwrite_target_dbs }}
+      flexible_server_name: ${{ parameters.migrationConfig.resource_group }}
+      dbs_to_migrate: ${{ parameters.migrationConfig.dbs_to_migrate }}
+      single_server_resource_id: ${{ parameters.migrationConfig.single_server_resource_id }}
+      overwrite_target_dbs: ${{ parameters.migrationConfig.overwrite_target_dbs }}
+      flexible_server_kv_name: ${{ parameters.migrationConfig.flexible_server_kv_name }}
+      flexible_server_secret_name: ${{ parameters.migrationConfig.flexible_server_secret_name }}
+      single_server_kv_name: ${{ parameters.migrationConfig.single_server_kv_name }}
+      single_server_secret_name: ${{ parameters.migrationConfig.single_server_secret_name }}
 
 #######
 ## Pipeline tasks
 
-# 1. Take params
-# 2. Validation (may not need to do any of this)
-#    - check that the source and target db's exist and that they are the right type.
-#    - check that the migration name doesn't exist (may just be able to leave this out)
-#    - check that the flex dbs have the same server settings (cli will also do this)
+## Prerequisites
+# - flexible server deployed
+# - "Get" permissions to kv secrets for dad693c4-36ad-468f-94e9-76faa4bc844b
 
-# 3. Get Admin creds for both dbs and store as vars
-# 4. Create json file for the migration
-# 5. Run the migration
+# Tasks
 # 6. Monitor the migration until it finishes
 # 7. make sure pipeline fails if the migration fails
 

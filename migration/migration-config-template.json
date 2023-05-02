@@ -1,0 +1,22 @@
+{
+  "properties": {
+    "SourceDBServerResourceId":"/subscriptions/<subscriptionid>/resourceGroups/<src_ rg_name>/providers/Microsoft.DBforPostgreSQL/servers/<source server name>",
+
+    "SecretParameters": {
+      "AdminCredentials":
+      {
+        "SourceServerPassword": "<password>",
+        "TargetServerPassword": "<password>"
+      }
+    },
+
+    "DBsToMigrate":
+    [
+      "<db1>","<db2>"
+    ],
+
+    "OverwriteDBsInTarget":"true"
+
+  }
+
+}
