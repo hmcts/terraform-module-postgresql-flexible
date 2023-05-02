@@ -26,7 +26,7 @@ steps:
       environment: ${{ parameters.migrationConfig.environment }}
       migration_name: ${{ parameters.migrationConfig.migration_name }}
       subscription: ${{ parameters.migrationConfig.subscription }}
-      resource_group: ${{ parameters.migrationConfig.overwrite_target_dbs }}
+      resource_group: ${{ parameters.migrationConfig.resource_group }}
       flexible_server_name: ${{ parameters.migrationConfig.resource_group }}
       dbs_to_migrate: ${{ convertToJson(parameters.migrationConfig.dbs_to_migrate) }}
       single_server_resource_id: ${{ parameters.migrationConfig.single_server_resource_id }}
