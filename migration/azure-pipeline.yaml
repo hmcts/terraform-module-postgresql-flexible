@@ -17,7 +17,8 @@ variables:
 steps:
   - task: AzureCLI@2
     displayName: "Azure Authenticate"
-    azureSubscription: ${{ parameters.migrationConfig.subscription }}
+    inputs:
+      azureSubscription: ${{ parameters.migrationConfig.subscription }}
 
   - task: Bash@3
     displayName: "Create migration"
