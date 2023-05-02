@@ -17,7 +17,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        echo ${{ parameters.migrationConfig }} 
+        echo ${{ parameters.migrationConfig.project }} 
 
 #######
 ## Pipeline tasks
