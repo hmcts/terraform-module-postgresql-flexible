@@ -16,15 +16,11 @@ variables:
 
 steps:
   - task: AzureCLI@2
-    displayName: "Azure Authenticate"
-    inputs:
-      azureSubscription: ${{ parameters.migrationConfig.subscription }}
-
-  - task: Bash@3
     displayName: "Create migration"
     inputs:
-      targetType: 'filePath'
-      filePath: migration/migration.sh
+      azureSubscription: ${{ parameters.migrationConfig.subscription }}
+      scriptType: bash
+      scriptPath: migration/migration.sh
     env:
       project: ${{ parameters.migrationConfig.project }}
       environment: ${{ parameters.migrationConfig.environment }}
