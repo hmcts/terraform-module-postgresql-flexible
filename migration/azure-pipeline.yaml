@@ -1,0 +1,41 @@
+name: "${{ parameters.action }} - ${{ parameters.env }}.${{ parameters.cluster }}.${{ parameters.location }}"
+
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+  - name: migrationConfig
+    displayName: Migration Config
+    type: object
+
+
+steps:
+  - task: Bash@3
+    displayName: "Print Migration config"
+    inputs:
+      targetType: 'inline'
+      script: |
+        echo ${{ parameters.migrationConfig }} 
+
+#######
+## Pipeline tasks
+
+# 1. Take params
+# 2. Validation (may not need to do any of this)
+#    - check that the source and target db's exist and that they are the right type.
+#    - check that the migration name doesn't exist (may just be able to leave this out)
+#    - check that the flex dbs have the same server settings (cli will also do this)
+
+# 3. Get Admin creds for both dbs and store as vars
+# 4. Create json file for the migration
+# 5. Run the migration
+# 6. Monitor the migration until it finishes
+# 7. make sure pipeline fails if the migration fails
+
+# Things to think about
+# Timeout of the pipeline, increase it to as much as possible 24 hours maybe
+
+
+# Best practices for the
