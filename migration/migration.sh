@@ -8,6 +8,18 @@ flexible_server_admin_password=$(az keyvault secret show --vault-name "${flexibl
 
 
 # TODO check migration name doesn't exist
+migration_name_available=$(az postgres flexible-server migration check-name-availability \
+     --subscription "${subscription}" \
+     --resource-group "${resource_group}"\
+     --name "${flexible_server_name}" \
+     --migration-name "${migration_name}"
+     --query nameAvailable)
+
+if [[ "${migration_name_available}" == "false" ]]; then
+  echo "Migration name not available, please choose another one."
+  jq .properties.currentStatus.error <<< "${migration}"
+  exit 1
+fi
 
 # Command to update json file
 jq ". |
@@ -26,18 +38,26 @@ az postgres flexible-server migration create \
     --properties ${properties_file}
 
 
-migration=$(az postgres flexible-server migration show \
-    --subscription "${subscription}" \
-    --resource-group "${resource_group}"\
-    --name "${flexible_server_name}" \
-    --migration-name "${migration_name}" )
+state="InProgress"
 
-state=$(jq .properties.currentStatus.state <<< "${migration}")
+while [[ ${state} == "InProgress" ]]; do
+  state=$(az postgres flexible-server migration show \
+      --subscription "${subscription}" \
+      --resource-group "${resource_group}"\
+      --name "${flexible_server_name}" \
+      --migration-name "${migration_name}"
+      --query ".properties.currentStatus.state" )
+
+  echo "Migration still in progress"
+  sleep 30
+done
 
 if [[ "${state}" == "failed" ]]; then
   echo "Migration failed"
   jq .properties.currentStatus.error <<< "${migration}"
   exit 1
+else
+  echo "Migration no longer in progress. State: ${state}"
 fi
 
 
