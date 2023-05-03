@@ -12,7 +12,7 @@ migration_name_available=$(az postgres flexible-server migration check-name-avai
      --subscription "${subscription}" \
      --resource-group "${resource_group}"\
      --name "${flexible_server_name}" \
-     --migration-name "${migration_name}"
+     --migration-name "${migration_name}" \
      --query nameAvailable)
 
 if [[ "${migration_name_available}" == "false" ]]; then
