@@ -102,7 +102,7 @@ variable "high_availability" {
   description = "Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself."
 }
 
-variable  "public_access" {
+variable "public_access" {
   type        = bool
   default     = false
   description = "Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false."
