@@ -45,7 +45,7 @@ while [[ ${state} == "InProgress" ]]; do
       --subscription "${subscription}" \
       --resource-group "${resource_group}"\
       --name "${flexible_server_name}" \
-      --migration-name "${migration_name}"
+      --migration-name "${migration_name}" \
       --query ".properties.currentStatus.state" )
 
   echo "Migration still in progress"
