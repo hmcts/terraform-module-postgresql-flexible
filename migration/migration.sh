@@ -17,7 +17,7 @@ migration_name_available=$(az postgres flexible-server migration check-name-avai
 
 if [[ "${migration_name_available}" == "false" ]]; then
   echo "Migration name not available, please choose another one."
-  jq .properties.currentStatus.error <<< "${migration}"
+  jq .properties.currentStatus.error <<< "${migration_name_available}"
   exit 1
 fi
 
