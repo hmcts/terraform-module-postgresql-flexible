@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 template_properties_file="migration/migration-config-template.json"
 properties_file="migration/migration-config.json"
