@@ -106,6 +106,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_geo_redundant_backups"></a> [geo\_redundant\_backups](#input\_geo\_redundant\_backups) | Enable geo-redundant backups for the PGSql instance. | `bool` | `false` | no |
 | <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `false` | no |
+| <a name="public_access"></a> [high\_availability](#input\_high\_availability) | Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Should not be used unless a specific usecase requires public access. | `bool` | `false` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |
