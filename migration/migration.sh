@@ -16,7 +16,7 @@ migration_name_availability=$(az postgres flexible-server migration check-name-a
 
 if [[ $(jq .nameAvailable <<< "${migration_name_availability}") == "false" ]]; then
   echo "Migration name not available, please choose another one."
-  jq .reason <<< "${migration_name_availability}"
+  echo "Reason: $(jq .reason <<< ${migration_name_availability})"
   exit 1
 fi
 
