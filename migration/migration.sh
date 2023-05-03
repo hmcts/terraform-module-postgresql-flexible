@@ -8,16 +8,15 @@ flexible_server_admin_password=$(az keyvault secret show --vault-name "${flexibl
 
 
 # TODO check migration name doesn't exist
-migration_name_available=$(az postgres flexible-server migration check-name-availability \
+migration_name_availability=$(az postgres flexible-server migration check-name-availability \
      --subscription "${subscription}" \
      --resource-group "${resource_group}"\
      --name "${flexible_server_name}" \
-     --migration-name "${migration_name}" \
-     --query nameAvailable)
+     --migration-name "${migration_name}")
 
-if [[ "${migration_name_available}" == "false" ]]; then
+if [[ $(jq .nameAvailable <<< "${migration_name_availability}") == "false" ]]; then
   echo "Migration name not available, please choose another one."
-  jq .properties.currentStatus.error <<< "${migration_name_available}"
+  jq .reason <<< "${migration_name_availability}"
   exit 1
 fi
 
