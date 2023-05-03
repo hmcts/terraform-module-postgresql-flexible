@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -ex
 
 template_properties_file="migration/migration-config-template.json"
 properties_file="migration/migration-config.json"
@@ -23,6 +24,7 @@ az postgres flexible-server migration create \
     --name "${flexible_server_name}" \
     --migration-name "${migration_name}" \
     --properties ${properties_file}
+
 
 state=$(az postgres flexible-server migration show \
     --subscription "${subscription}" \
