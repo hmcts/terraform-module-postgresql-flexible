@@ -26,12 +26,18 @@ az postgres flexible-server migration create \
     --properties ${properties_file}
 
 
-state=$(az postgres flexible-server migration show \
+migration=$(az postgres flexible-server migration show \
     --subscription "${subscription}" \
     --resource-group "${resource_group}"\
     --name "${flexible_server_name}" \
-    --migration-name "${migration_name}" \
-    --query ".properties.currentStatus.state")
+    --migration-name "${migration_name}" )
 
-echo "${state}"
+state=$(jq .properties.currentStatus.state <<< "${migration}")
+
+if [[ "${state}" == "failed" ]]; then
+  echo "Migration failed"
+  jq .properties.currentStatus.error <<< "${migration}"
+  exit 1
+fi
+
 
