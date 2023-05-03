@@ -45,7 +45,8 @@ while [[ ${state} == "InProgress" ]]; do
       --resource-group "${resource_group}"\
       --name "${flexible_server_name}" \
       --migration-name "${migration_name}" \
-      --query "properties.currentStatus.state" )
+      --query "properties.currentStatus.state" \
+      --output tsv )
 
   echo "Migration still in progress"
   sleep 30

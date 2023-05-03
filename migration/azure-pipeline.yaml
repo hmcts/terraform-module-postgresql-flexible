@@ -43,6 +43,7 @@ steps:
 ## Prerequisites
 # - flexible server deployed
 # - "Get" permissions to kv secrets for dad693c4-36ad-468f-94e9-76faa4bc844b
+# - consumers of db scaled down
 
 # Tasks
 # 6. Monitor the migration until it finishes
