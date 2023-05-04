@@ -1,33 +1,32 @@
 # Name of migration this needs to be unique to the flexible server (target server), the same name can't be used twice.
-migration_name: migration1
+migration_name: migration_1
 
 # Subscription of the flexible server
-subscription: DCD-CFTAPPS-SBOX
+subscription:
 
 # Resource group of the flexible server
-resource_group: fliexible-migration-test
+resource_group:
 
 # Name of the flexible server
-flexible_server_name: ccd-data-store-api-flexible-migration-test
+flexible_server_name:
 
 # Databases to migrate - max 8 at a time
 dbs_to_migrate:
   - postgres
-  - ccd
 
 # Resource ID of the single server (source server)
-single_server_resource_id: /subscriptions/b72ab7b7-723f-4b18-b6f6-03b0f2c6a1bb/resourceGroups/fliexible-migration-test/providers/Microsoft.DBforPostgreSQL/servers/migration-test-matts
+single_server_resource_id: /subscriptions/xxxxxx/resourceGroups/xxxxxx/providers/Microsoft.DBforPostgreSQL/servers/xxxxxx
 
 # Whether to overwrite existing target dbs
 overwrite_target_dbs: true
 
 # Subscription name of the key vault that holds the secret with the postgres admins' password
-kv_subscription: DCD-CNP-DEV
+kv_subscription:
 
 # Key vault name and secret name with flexible servers' admin password
-flexible_server_kv_name: ccd-aat
-flexible_server_secret_name: data-store-api-POSTGRES-PASS-flexible-test
+flexible_server_kv_name:
+flexible_server_secret_name:
 
 # Key vault name and secret name with single servers' admin password
-single_server_kv_name: ccd-aat
-single_server_secret_name: data-store-api-POSTGRES-PASS
+single_server_kv_name:
+single_server_secret_name:

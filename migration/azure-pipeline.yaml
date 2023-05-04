@@ -1,4 +1,4 @@
-name: "Migration ${{ parameters.migrationConfig.flexible_server_name }}"
+name: "Migration - ${{ parameters.migrationConfig.flexible_server_name }}"
 
 trigger: none
 
