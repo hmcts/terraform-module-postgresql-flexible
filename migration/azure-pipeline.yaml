@@ -1,4 +1,4 @@
-#name: "${{ parameters.env }}.${{ parameters.cluster }}.${{ parameters.location }}"
+name: "Migration ${{ parameters.migrationConfig.flexible_server_name }}"
 
 trigger: none
 
@@ -22,8 +22,6 @@ steps:
       scriptType: bash
       scriptPath: migration/migration.sh
     env:
-      project: ${{ parameters.migrationConfig.project }}
-      environment: ${{ parameters.migrationConfig.environment }}
       migration_name: ${{ parameters.migrationConfig.migration_name }}
       subscription: ${{ parameters.migrationConfig.subscription }}
       resource_group: ${{ parameters.migrationConfig.resource_group }}
@@ -36,18 +34,3 @@ steps:
       flexible_server_secret_name: ${{ parameters.migrationConfig.flexible_server_secret_name }}
       single_server_kv_name: ${{ parameters.migrationConfig.single_server_kv_name }}
       single_server_secret_name: ${{ parameters.migrationConfig.single_server_secret_name }}
-
-#######
-## Pipeline tasks
-
-## Prerequisites
-# - flexible server deployed
-# - "Get" permissions to kv secrets for dad693c4-36ad-468f-94e9-76faa4bc844b
-# - consumers of db scaled down
-
-# Tasks
-# 6. Monitor the migration until it finishes
-# 7. make sure pipeline fails if the migration fails
-
-# Things to think about
-# Timeout of the pipeline, increase it to as much as possible 24 hours maybe
