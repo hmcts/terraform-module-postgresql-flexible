@@ -4,7 +4,6 @@ export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
 
 # shellcheck disable=SC2155
-export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
 SQL_COMMAND_POSTGRES="
 DO
@@ -37,6 +36,16 @@ while true; do
    fi
    sleep 5
 done
+
+export PGPASSWORD=$DB_PASSWORD
+
+JENKINS_SQL_COMMAND="
+GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
+"
+
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}"
+
+export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
 
