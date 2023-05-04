@@ -1,6 +1,7 @@
 name: "Migration - ${{ parameters.migrationConfig.flexible_server_name }}"
 
-trigger: none
+trigger:
+  pr: none
 
 pool:
   vmImage: 'ubuntu-latest'
