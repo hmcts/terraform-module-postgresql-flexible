@@ -40,8 +40,9 @@ module "postgresql" {
 
   pgsql_version = "14"
   
-  # The ID of the principal to be granted admin access to the database server, should be the principal running this normally
-  admin_user_object_id = var.admin_user_object_id
+  # The ID of the principal to be granted admin access to the database server, on Jenkins it will be injected for you automatically as jenkins_AAD_objectId
+  # Otherwise change the below:
+  admin_user_object_id = var.jenkins_AAD_objectId
   
   common_tags = var.common_tags
 }
