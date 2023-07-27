@@ -48,6 +48,11 @@ resource "random_password" "password" {
   override_special = "()-_"
 }
 
+data "azurerm_log_analytics_workspace" "log_analytics_workspace" {
+  name                = var.log_analytics_workspace_name
+  resource_group_name = var.log_analytics_workspace_resource_group_name
+}
+
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   name                = local.server_name
   resource_group_name = local.postgresql_rg_name
@@ -162,4 +167,30 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
+}
+
+resource "azurerm_monitor_diagnostic_setting" "pgsql_logs" {
+  name                       = azurerm_postgresql_flexible_server.pgsql_server.name
+  target_resource_id         = azurerm_postgresql_flexible_server.pgsql_logs.id
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+    dynamic "log" {
+    for_each = toset(var.flexible_server_logs)
+    content {
+      category = log.value
+      enabled  = true
+      retention_policy {
+        enabled = true
+        days    = data.azurerm_log_analytics_workspace.log_analytics_workspace.retention_in_days
+      }
+    }
+  }
+   metric {
+    category = "AllMetrics"
+    enabled  = false
+    retention_policy {
+      enabled = false
+      days    = data.azurerm_log_analytics_workspace.log_analytics_workspace.retention_in_days
+    }
+  } 
 }
