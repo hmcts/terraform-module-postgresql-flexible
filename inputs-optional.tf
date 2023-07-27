@@ -107,3 +107,22 @@ variable "public_access" {
   default     = false
   description = "Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false."
 }
+
+variable "log_analytics_workspace_name" {
+  description = "Azure Log Analytics Workspace Name"
+  type        = string
+  default     = ""
+}
+
+variable "log_analytics_workspace_resource_group_name" {
+  description = "Azure Log Analytics Workspace Resource Group Name"
+  type        = string
+  # The default name is the same on Sandbox, Perftest, QA, DEV & PROD
+  default = "oms-automation"
+}
+
+variable "flexible_server_logs" {
+  description = "Logging to Azure Monitor Settings for Flexible Instance"
+  type        = list(string)
+  default     = ["PostgreSQLLogs", "PostgreSQLFlexDatabaseXacts", "PostgreSQLFlexQueryStoreRuntime","PostgreSQLFlexQueryStoreWaitStats","PostgreSQLFlexSessions","PostgreSQLFlexTableStats"]
+}
