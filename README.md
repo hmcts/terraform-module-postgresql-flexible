@@ -73,6 +73,12 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.2.0 |
 
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#module\_log\_analytics\_workspace\_id) | git@github.com:hmcts/terraform-module-log-analytics-workspace-id | master |
+
 ## Resources
 
 | Name | Type |
@@ -90,7 +96,6 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
-| [azurerm_log_analytics_workspace.log_analytics_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/log_analytics_workspace) | data source |
 | [azurerm_subnet.pg_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
 
