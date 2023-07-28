@@ -48,9 +48,10 @@ resource "random_password" "password" {
   override_special = "()-_"
 }
 
-data "azurerm_log_analytics_workspace" "log_analytics_workspace" {
-  name                = var.log_analytics_workspace_name
-  resource_group_name = var.log_analytics_workspace_resource_group_name
+module "log_analytics_workspace_id" {
+  source = "git@github.com:hmcts/terraform-module-log-analytics-workspace-id?ref=master"
+
+  environment = var.env
 }
 
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
