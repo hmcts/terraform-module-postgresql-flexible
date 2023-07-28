@@ -124,5 +124,5 @@ variable "log_analytics_workspace_resource_group_name" {
 variable "flexible_server_logs" {
   description = "Logging to Azure Monitor Settings for Flexible Instance"
   type        = list(string)
-  default     = ["PostgreSQLLogs", "PostgreSQLFlexDatabaseXacts", "PostgreSQLFlexQueryStoreRuntime","PostgreSQLFlexQueryStoreWaitStats","PostgreSQLFlexSessions","PostgreSQLFlexTableStats"]
+  default     = []
 }
