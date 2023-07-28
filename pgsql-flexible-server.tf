@@ -173,7 +173,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
 resource "azurerm_monitor_diagnostic_setting" "pgsql_logs" {
   name                       = azurerm_postgresql_flexible_server.pgsql_server.name
   target_resource_id         = azurerm_postgresql_flexible_server.pgsql_logs.id
-  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
+  log_analytics_workspace_id = module.log_analytics_workspace_id. workspace_id
 
     dynamic "log" {
     for_each = toset(var.flexible_server_logs)
