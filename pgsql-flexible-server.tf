@@ -13,7 +13,7 @@ locals {
   is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
-  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
+  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS JIT Access ${var.product} DB Reader SC"
 
 
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
