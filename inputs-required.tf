@@ -10,7 +10,7 @@ variable "common_tags" {
 
 variable "pgsql_databases" {
   description = "Databases for the pgsql instance."
-  type        = list(object({ name : string, collation : optional(string), charset : optional(string) }))
+  type        = list(object({ name : string, collation : optional(string), charset : optional(string), schema_name : optional(string, "public") }) )
 }
 
 variable "pgsql_delegated_subnet_id" {

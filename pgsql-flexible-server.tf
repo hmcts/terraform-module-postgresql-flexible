@@ -150,12 +150,13 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     command = "${path.module}/set-postgres-permissions.bash"
 
     environment = {
-      DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = data.azuread_service_principal.mi_name[0].display_name
-      DB_READER_USER = local.db_reader_user
-      DB_NAME        = each.value.name
-      DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-      DB_PASSWORD    = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+      DB_HOST_NAME          = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER               = data.azuread_service_principal.mi_name[0].display_name
+      DB_READER_USER        = local.db_reader_user
+      DB_READER_SCHEMA_NAME = each.value.schema_name
+      DB_NAME               = each.value.name
+      DB_ADMIN              =  azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+      DB_PASSWORD           = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
     }
   }
   depends_on = [
