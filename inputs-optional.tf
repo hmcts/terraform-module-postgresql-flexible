@@ -107,3 +107,9 @@ variable "public_access" {
   default     = false
   description = "Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false."
 }
+
+variable "add_sdp_read_user" {
+  type        = bool
+  default     = false
+  description = "Add a read-only user for SDP to use for analytics. Defaults to false."
+}

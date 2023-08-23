@@ -19,6 +19,22 @@ locals {
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
   high_availability              = var.high_availability == true || contains(local.high_availability_environments, var.env)
 
+  sdp_read_user = "SDP_READ_USER"
+
+  sdp_environments_map = {
+    sandbox  = "sbox"
+    aat      = "dev"
+    perftest = "test"
+    ithc     = "ithc"
+    prod     = "prod"
+  }
+
+  sdp_environment = lookup(local.sdp_environments_map, var.env, local.env)
+
+  sdp_vault = {
+    name = "mi-vault-${local.sdp_environment}"
+    rg   = "mi-${local.sdp_environment}-rg"
+  }
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -141,25 +157,49 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
   for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
 
   triggers = {
-    script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
-    name           = local.name
-    db_reader_user = local.db_reader_user
+    script_hash       = filesha256("${path.module}/set-postgres-permissions.bash")
+    name              = local.name
+    db_reader_user    = local.db_reader_user
+    add_sdp_read_user = var.add_sdp_read_user
+    sdp_reader_user   = local.sdp_read_user
   }
 
   provisioner "local-exec" {
     command = "${path.module}/set-postgres-permissions.bash"
 
     environment = {
-      DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = data.azuread_service_principal.mi_name[0].display_name
-      DB_READER_USER = local.db_reader_user
-      DB_NAME        = each.value.name
-      DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-      DB_PASSWORD    = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+      DB_HOST_NAME    = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER         = data.azuread_service_principal.mi_name[0].display_name
+      DB_READER_USER  = local.db_reader_user
+      DB_NAME         = each.value.name
+      DB_ADMIN        = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+      DB_PASSWORD     = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+      DB_ADD_SDP_USER = var.add_sdp_read_user
+      DB_SDP_USER     = local.sdp_read_user
+      DB_SDP_PASS     = random_password.sdp_read_user_password.result
     }
   }
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
+}
+
+data "azurerm_key_vault" "sdp_vault" {
+  name                = local.sdp_vault.name
+  resource_group_name = local.sdp_vault.rg
+}
+
+resource "random_password" "sdp_read_user_password" {
+  length = 20
+  # safer set of special characters for pasting in the shell
+  override_special = "()-_"
+}
+
+resource "azurerm_key_vault_secret" "sdp_vault_sdp_read_user_password" {
+  count = var.add_sdp_read_user == true ? 1 : 0
+
+  name         = "${local.name}-read-user-password"
+  value        = random_password.sdp_read_user_password.result
+  key_vault_id = data.azurerm_key_vault.sdp_vault.id
 }

@@ -43,11 +43,11 @@ JENKINS_SQL_COMMAND="
 GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
 "
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user='${DB_ADMIN}'" -c "${JENKINS_SQL_COMMAND}"
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user='${DB_USER}'" -c "${SQL_COMMAND_POSTGRES}"
 
 SQL_COMMAND="
 
@@ -58,5 +58,27 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
 
 "
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user='${DB_USER}'" -c "${SQL_COMMAND}"
 
+SDP_SQL_COMMAND="
+DO
+\$do\$
+BEGIN
+   IF NOT EXISTS (
+      SELECT FROM pg_catalog.pg_roles WHERE rolname = '${DB_SDP_USER}') THEN
+
+      CREATE USER \"${DB_SDP_USER}\" WITH PASSWORD '${DB_SDP_PASS}';
+
+   END IF;
+
+   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO PUBLIC;
+   REVOKE CREATE ON SCHEMA public FROM public;
+   GRANT USAGE ON SCHEMA public TO \"${DB_SDP_USER}\";
+   GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_SDP_USER}\";
+END
+\$do\$;
+"
+
+if [[ ${DB_ADD_SDP_USER} == "true" ]]; then
+  psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user='${DB_USER}'" -c "${SDP_SQL_COMMAND}"
+fi
