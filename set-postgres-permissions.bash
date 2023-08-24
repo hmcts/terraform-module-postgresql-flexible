@@ -39,6 +39,10 @@ done
 
 export PGPASSWORD=$DB_PASSWORD
 
+echo "Setting user DB User permissions with:"
+echo "${DB_NAME}"
+echo "${DB_READER_SCHEMA_NAME}"
+
 JENKINS_SQL_COMMAND="
 GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
 "
@@ -60,3 +64,4 @@ GRANT SELECT ON ALL TABLES IN SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READ
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
 
+echo "DB script run complete."
