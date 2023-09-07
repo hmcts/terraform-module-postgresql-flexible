@@ -74,6 +74,8 @@ echo $SQL_COMMAND >> permissions.log
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}" >> permissions.log
 
 
+export PGPASSWORD=$DB_PASSWORD
+
 SCHEMA_SQL_COMMAND="
 GRANT USAGE ON SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
 GRANT SELECT ON ALL TABLES IN SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
