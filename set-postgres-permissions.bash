@@ -41,10 +41,6 @@ export PGPASSWORD=$DB_PASSWORD
 
 JENKINS_SQL_COMMAND="
 GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
-CREATE SCHEMA IF NOT EXISTS \"${DB_READER_SCHEMA_NAME}\" AUTHORIZATION \"${DB_ADMIN}\";
-GRANT ALL ON ALL TABLES IN SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_USER}\";
-GRANT USAGE ON SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
-GRANT SELECT ON ALL TABLES IN SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
 "
 
 echo "About to run on host ${DB_HOST_NAME}, db ${DB_NAME} as ${DB_ADMIN}..." >> permissions.log
@@ -59,12 +55,16 @@ echo $SQL_COMMAND_POSTGRES >> permissions.log
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}" >> permissions.log
 
+
+
 SQL_COMMAND="
 
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO PUBLIC;
 REVOKE CREATE ON SCHEMA public FROM public;
 GRANT USAGE ON SCHEMA public TO \"${DB_READER_USER}\";
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
+
+CREATE SCHEMA IF NOT EXISTS \"${DB_READER_SCHEMA_NAME}\" AUTHORIZATION \"${DB_ADMIN}\";
 
 "
 
@@ -73,3 +73,13 @@ echo $SQL_COMMAND >> permissions.log
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}" >> permissions.log
 
+
+SCHEMA_SQL_COMMAND="
+GRANT USAGE ON SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
+GRANT SELECT ON ALL TABLES IN SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
+"
+
+echo "About to run on host ${DB_HOST_NAME}, db ${DB_NAME} as ${DB_ADMIN}..." >> permissions.log
+echo $SCHEMA_SQL_COMMAND >> permissions.log
+
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${SCHEMA_SQL_COMMAND}" >> permissions.log
