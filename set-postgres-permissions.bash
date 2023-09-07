@@ -54,7 +54,7 @@ psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
-echo "About to run on host ${DB_HOST_NAME}, db ${postgres} as ${DB_USER}..." >> permissions.log
+echo "About to run on host ${DB_HOST_NAME}, db postgres as ${DB_USER}..." >> permissions.log
 echo $SQL_COMMAND_POSTGRES >> permissions.log
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}" >> permissions.log
