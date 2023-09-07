@@ -47,9 +47,15 @@ GRANT USAGE ON SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
 GRANT SELECT ON ALL TABLES IN SCHEMA \"${DB_READER_SCHEMA_NAME}\" TO \"${DB_READER_USER}\";
 "
 
+echo "About to run on host ${DB_HOST_NAME}, db ${DB_NAME} as ${DB_ADMIN}..." >> permissions.log
+echo $JENKINS_SQL_COMMAND >> permissions.log
+
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}" >> permissions.log
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
+
+echo "About to run on host ${DB_HOST_NAME}, db ${postgres} as ${DB_USER}..." >> permissions.log
+echo $SQL_COMMAND_POSTGRES >> permissions.log
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}" >> permissions.log
 
@@ -61,6 +67,9 @@ GRANT USAGE ON SCHEMA public TO \"${DB_READER_USER}\";
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
 
 "
+
+echo "About to run on host ${DB_HOST_NAME}, db ${DB_NAME} as ${DB_USER}..." >> permissions.log
+echo $SQL_COMMAND >> permissions.log
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}" >> permissions.log
 
