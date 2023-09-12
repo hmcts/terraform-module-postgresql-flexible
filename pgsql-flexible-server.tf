@@ -4,7 +4,7 @@ locals {
   server_name            = "${local.name}-${var.env}"
   postgresql_rg_name     = var.resource_group_name == null ? azurerm_resource_group.rg[0].name : var.resource_group_name
   postgresql_rg_location = var.resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
-  env_temp               = replace(var.env,"idam-","")
+  env_temp               = replace(var.env, "idam-", "")
   env                    = local.env_temp == "sandbox" ? "sbox" : local.env_temp
   vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "cft-${local.env}-network-rg"
   vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "cft-${local.env}-vnet"
