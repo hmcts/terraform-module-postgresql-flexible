@@ -21,9 +21,9 @@ END
 
 "
 
-## Delay until DB DNS and propagated
-COUNT=0
-MAX=10
+## Delay until DB DNS and propagated 
+COUNT=0;
+MAX=10;
 while true; do
    ping -c 1 $DB_HOST_NAME &>/dev/null
    if [[ $? -eq 0 ]]; then
@@ -32,26 +32,20 @@ while true; do
    if [[ $COUNT -eq $MAX ]]; then
       break
    else
-      COUNT=$(($COUNT + 1))
+      COUNT=$[$COUNT+1]
    fi
    sleep 5
 done
 
 export PGPASSWORD=$DB_PASSWORD
-export DB_ADMIN="${DB_ADMIN}"
-export DB_USER="${DB_USER}"
 
 JENKINS_SQL_COMMAND="
 GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
 "
 
-echo "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}"
-
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}"
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
-
-echo "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}"
 
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
 
