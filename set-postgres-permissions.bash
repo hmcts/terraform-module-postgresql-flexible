@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+export AZURE_CONFIG_DIR=~/.azure-db-manager
+az login --identity
+
 # shellcheck disable=SC2155
 
 SQL_COMMAND_POSTGRES="
@@ -34,8 +38,22 @@ while true; do
 done
 
 export PGPASSWORD=$DB_PASSWORD
+export DB_ADMIN="${DB_ADMIN}"
+export DB_USER="${DB_USER}"
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_ADMIN}" -c "${SQL_COMMAND_POSTGRES}"
+JENKINS_SQL_COMMAND="
+GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
+"
+
+echo "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}"
+
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}"
+
+export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
+
+echo "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}"
+
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
 
 SQL_COMMAND="
 
@@ -46,4 +64,4 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
 
 "
 
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${SQL_COMMAND}"
+psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
