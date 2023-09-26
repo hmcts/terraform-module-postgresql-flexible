@@ -38,7 +38,7 @@ module "postgresql" {
     }
   ]
 
-  pgsql_version = "14"
+  pgsql_version = "15"
   
   # The ID of the principal to be granted admin access to the database server.
   # On Jenkins it will be injected for you automatically as jenkins_AAD_objectId.
