@@ -49,6 +49,12 @@ resource "random_password" "password" {
   override_special = "()-_"
 }
 
+module "log_analytics_workspace_id" {
+  source = "git@github.com:hmcts/terraform-module-log-analytics-workspace-id?ref=master"
+
+  environment = var.env
+}
+
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   name                = local.server_name
   resource_group_name = local.postgresql_rg_name
@@ -163,4 +169,30 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
+}
+
+resource "azurerm_monitor_diagnostic_setting" "pgsql_logs" {
+  name                       = azurerm_postgresql_flexible_server.pgsql_server.name
+  target_resource_id         = azurerm_postgresql_flexible_server.pgsql_logs.id
+  log_analytics_workspace_id = module.log_analytics_workspace_id. workspace_id
+
+    dynamic "log" {
+    for_each = toset(var.flexible_server_logs)
+    content {
+      category = log.value
+      enabled  = true
+      retention_policy {
+        enabled = true
+        days    = data.azurerm_log_analytics_workspace.log_analytics_workspace.retention_in_days
+      }
+    }
+  }
+   metric {
+    category = "AllMetrics"
+    enabled  = false
+    retention_policy {
+      enabled = false
+      days    = data.azurerm_log_analytics_workspace.log_analytics_workspace.retention_in_days
+    }
+  } 
 }

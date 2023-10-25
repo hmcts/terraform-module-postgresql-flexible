@@ -107,3 +107,10 @@ variable "public_access" {
   default     = false
   description = "Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false."
 }
+
+
+variable "flexible_server_logs" {
+  description = "Logging to Azure Monitor Settings for Flexible Instance"
+  type        = list(string)
+  default     = []
+}
