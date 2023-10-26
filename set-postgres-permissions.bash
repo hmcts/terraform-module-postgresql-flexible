@@ -43,11 +43,15 @@ JENKINS_SQL_COMMAND="
 GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
 "
 
+set -x
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}"
+set +x
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
+set -x
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
+set +x
 
 SQL_COMMAND="
 
@@ -57,6 +61,6 @@ GRANT USAGE ON SCHEMA public TO \"${DB_READER_USER}\";
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
 
 "
-
+set -x
 psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
-
+set +x
