@@ -1,27 +1,10 @@
 #!/usr/bin/env bash
 
+export PGPORT=5432
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
 
-# shellcheck disable=SC2155
-
-SQL_COMMAND_POSTGRES="
-DO
-\$do\$
-BEGIN
-   IF NOT EXISTS (
-      SELECT FROM pg_catalog.pg_roles  -- SELECT list can be empty for this
-      WHERE rolname = '${DB_READER_USER}') THEN
-
-      PERFORM pgaadauth_create_principal('${DB_READER_USER}', false, false);
-      
-   END IF;
-END
-\$do\$;
-
-"
-
-## Delay until DB DNS and propagated 
+## Delay until DB DNS and propagated
 COUNT=0;
 MAX=10;
 while true; do
@@ -41,16 +24,37 @@ export PGPASSWORD=$DB_PASSWORD
 
 JENKINS_SQL_COMMAND="
 GRANT ALL ON ALL TABLES IN SCHEMA public TO \"${DB_USER}\";
+GRANT ${DB_ADMIN} to \"${DB_USER}\";
+GRANT ${DB_ADMIN} to \"${DB_ADMIN_GROUP}\";
 "
 
 set -x
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_ADMIN}" -c "${JENKINS_SQL_COMMAND}"
+export PGDATABASE="${DB_NAME}"
+export PGUSER="${DB_ADMIN}"
+psql -c "${JENKINS_SQL_COMMAND}"
 set +x
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
+SQL_COMMAND_POSTGRES="
+DO
+\$do\$
+BEGIN
+   IF NOT EXISTS (
+      SELECT FROM pg_catalog.pg_roles  -- SELECT list can be empty for this
+      WHERE rolname = '${DB_READER_USER}') THEN
+
+      PERFORM pgaadauth_create_principal('${DB_READER_USER}', false, false);
+
+   END IF;
+END
+\$do\$;
+"
+
 set -x
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=postgres user=${DB_USER}" -c "${SQL_COMMAND_POSTGRES}"
+export PGDATABASE="postgres"
+export PGUSER="${DB_USER}"
+psql -c "${SQL_COMMAND_POSTGRES}"
 set +x
 
 SQL_COMMAND="
@@ -62,5 +66,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
 
 "
 set -x
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
+export PGDATABASE="${DB_NAME}"
+export PGUSER="${DB_USER}"
+psql -c "${SQL_COMMAND}"
 set +x
