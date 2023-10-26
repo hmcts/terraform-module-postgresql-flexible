@@ -156,7 +156,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
       DB_READER_USER = local.db_reader_user
       DB_NAME        = each.value.name
       DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-      DB_PASSWORD    = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+      DB_PASSWORD    = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
     }
   }
   depends_on = [
