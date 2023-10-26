@@ -66,5 +66,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"${DB_READER_USER}\";
 
 "
 set -x
-psql "sslmode=require host=${DB_HOST_NAME} port=5432 dbname=${DB_NAME} user=${DB_USER}" -c "${SQL_COMMAND}"
+export PGDATABASE="${DB_NAME}"
+export PGUSER="${DB_USER}"
+psql -c "${SQL_COMMAND}"
 set +x
