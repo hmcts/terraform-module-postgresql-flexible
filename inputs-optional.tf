@@ -107,3 +107,9 @@ variable "public_access" {
   default     = false
   description = "Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false."
 }
+
+variable "force_user_permissions_trigger" {
+  default     = ""
+  type        = string
+  description = "Update this to a new value to force the user permissions script to run again"
+}
