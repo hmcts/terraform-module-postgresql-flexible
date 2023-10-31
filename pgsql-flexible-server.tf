@@ -145,6 +145,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
     name           = local.name
     db_reader_user = local.db_reader_user
+    force_trigger  = var.force_user_permissions_trigger
   }
 
   provisioner "local-exec" {
