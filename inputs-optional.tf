@@ -113,3 +113,9 @@ variable "force_user_permissions_trigger" {
   type        = string
   description = "Update this to a new value to force the user permissions script to run again"
 }
+
+variable "subnet_suffix" {
+  default     = null
+  type        = string
+  description = "Suffix to append to the subnet name, the originally created one used by this module is full in a number of environments."
+}

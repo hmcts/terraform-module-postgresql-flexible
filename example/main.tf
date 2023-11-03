@@ -3,13 +3,15 @@ module "postgresql" {
   providers = {
     azurerm.postgres_network = azurerm.postgres_network
   }
-  
+
   source = "../"
   env    = var.env
 
   product       = "platops"
   component     = "example"
   business_area = "sds"
+
+  subnet_name = "expanded"
 
   common_tags = module.common_tags.common_tags
   pgsql_databases = [

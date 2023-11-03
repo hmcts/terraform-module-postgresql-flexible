@@ -32,6 +32,9 @@ module "postgresql" {
   component     = var.component
   business_area = "sds" # sds or cft
 
+  # The original subnet is full, this is required to use the new subnet for new databases
+  subnet_name = "expanded"
+
   pgsql_databases = [
     {
       name : "application"
@@ -124,6 +127,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of existing resource group to deploy resources into | `string` | `null` | no |
 | <a name="input_restore_time"></a> [restore\_time](#input\_restore\_time) | The point in time to restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_source_server_id"></a> [source\_server\_id](#input\_source\_server\_id) | Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
+| <a name="input_subnet_suffix"></a> [subnet\_suffix](#input\_subnet\_suffix) | Suffix to append to the subnet name, the originally created one used by this module is full in a number of environments. | `string` | `null` | no |
 
 ## Outputs
 
