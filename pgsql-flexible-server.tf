@@ -20,11 +20,12 @@ locals {
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
   high_availability              = var.high_availability == true || contains(local.high_availability_environments, local.env)
 
+  subnet_name = var.subnet_suffix != null ? "postgresql-${var.subnet_suffix}" : "postgresql"
 }
 
 data "azurerm_subnet" "pg_subnet" {
   provider             = azurerm.postgres_network
-  name                 = "postgresql"
+  name                 = local.subnet_name
   resource_group_name  = local.vnet_rg_name
   virtual_network_name = local.vnet_name
 
