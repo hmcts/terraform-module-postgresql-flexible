@@ -11,7 +11,7 @@ module "postgresql" {
   component     = "example"
   business_area = "sds"
 
-  subnet_name = "expanded"
+  subnet_suffix = "expanded"
 
   common_tags = module.common_tags.common_tags
   pgsql_databases = [

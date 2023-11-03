@@ -33,7 +33,7 @@ module "postgresql" {
   business_area = "sds" # sds or cft
 
   # The original subnet is full, this is required to use the new subnet for new databases
-  subnet_name = "expanded"
+  subnet_suffix = "expanded"
 
   pgsql_databases = [
     {
