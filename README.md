@@ -4,7 +4,7 @@ Terraform module for [Azure Database for PostgreSQL - Flexible Server](https://d
 ## Example
 
 provider.tf
-```hcl
+```terraform
 provider "azurerm" {
   features {}
 }
@@ -18,7 +18,7 @@ provider "azurerm" {
 ```
 
 postgres.tf
-```hcl
+```terraform
 module "postgresql" {
 
   providers = {
@@ -41,6 +41,7 @@ module "postgresql" {
     }
   ]
 
+  pgsql_sku     = "GP_Standard_D2ds_v4"
   pgsql_version = "15"
   
   # The ID of the principal to be granted admin access to the database server.
