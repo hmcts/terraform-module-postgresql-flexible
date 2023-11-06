@@ -13,6 +13,8 @@ module "postgresql" {
 
   subnet_suffix = "expanded"
 
+  enable_read_only_group_access = false
+
   common_tags = module.common_tags.common_tags
   pgsql_databases = [
     {
