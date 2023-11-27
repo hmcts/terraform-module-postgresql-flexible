@@ -22,11 +22,11 @@ variable "pgsql_sku" {
   default     = "GP_Standard_D2s_v3"
 
   validation {
-    condition = can(regex(".+(_v3|_v4)$", var.pgsql_sku))
+    condition = can(regex(".*(_v3|_v4|^B_.*$).*", var.pgsql_sku))
     # because v5 doesn't currently support reservations, if they are supported in the future this restriction should be removed
     # see https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/
     # search Ddsv5 and Edsv5
-    error_message = "The pgsql_sku value must use either a v3 or a v4 SKU."
+    error_message = "The pgsql_sku value must use either a v3, v4 or Burstable SKU."
   }
 }
 
