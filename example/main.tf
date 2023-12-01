@@ -21,7 +21,7 @@ module "postgresql" {
       name : "application"
     }
   ]
-  pgsql_version = "15"
+  pgsql_version = "16"
 }
 
 # only for use when building from ADO and as a quick example to get valid tags
