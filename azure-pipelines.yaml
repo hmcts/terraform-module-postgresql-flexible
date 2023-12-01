@@ -1,0 +1,57 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+
+pr:
+  - master
+
+resources:
+  repositories:
+    - repository: cnp-azuredevops-libraries
+      type: github
+      ref: refs/heads/master
+      name: hmcts/cnp-azuredevops-libraries
+      endpoint: 'hmcts'
+
+variables:
+  - name: timeoutInMinutes
+    value: 60
+  - name: agentImage
+    value: ubuntu-20.04
+  - template: vars/input-variables.yaml@cnp-azuredevops-libraries
+
+stages:
+  - stage: Precheck
+    jobs:
+      - job:
+        pool: 
+          vmImage: ${{ variables.agentImage }}
+        steps:
+          - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
+            parameters:
+              keyvaultName: 'infra-vault-nonprod'
+              keyvaultSecret: 'azure-devops-sp-token'
+              serviceConnection: 'azurerm-sandbox'
+              overrideAction: 'plan'
+              forcePreventParallelJobRun: true
+
+  - stage: Test
+    dependsOn: Precheck
+    jobs:
+      - job: TerraformTest
+        pool: 
+          vmImage: ${{ variables.agentImage }}
+        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
+        workspace:
+          clean: all
+        steps:
+        - task: AzureCLI@2
+          inputs:
+            azureSubscription: 'DTS-SHAREDSERVICESPTL-SBOX'
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              terraform init
+              terraform test
