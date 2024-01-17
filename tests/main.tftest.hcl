@@ -2,17 +2,6 @@ provider "azurerm" {
   features {}
 }
 
-variables {
-  env                       = var.env
-  common_tags               = var.common_tags
-  pgsql_databases           = var.pgsql_databases
-  pgsql_delegated_subnet_id = var.pgsql_delegated_subnet_id
-  pgsql_version             = var.pgsql_version
-  product                   = var.product
-  business_area             = var.business_area
-  component                 = var.component
-}
-
 run "setup" {
   module {
     source = "./tests/modules/setup"
@@ -36,7 +25,8 @@ run "default" {
   }
 
   assert {
-    condition     = length(.this) == 0
+    condition     = length(run.setup.azurerm_postgresql_flexible_server_database.pg_databases) == 0
     error_message = "Specified a managed database when none was provided"
   }
 }
+
