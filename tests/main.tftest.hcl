@@ -22,10 +22,6 @@ run "setup" {
 run "default" {
   command = plan
 
-  variables = {
-    common_tags = run.setup.common_tags
-  }
-
   providers = {
     azurerm.postgres_network = azurerm.postgres_network
   }
