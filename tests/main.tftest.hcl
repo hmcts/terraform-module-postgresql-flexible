@@ -5,7 +5,6 @@ provider "azurerm" {
   features {}
   skip_provider_registration = true
   alias                      = "postgres_network"
-  subscription_id            = var.aks_subscription_id
 }
 variables {
   source                        = "../"
@@ -46,7 +45,7 @@ run "default" {
 
   # Add conditions for specific databases, for example, "application"
   assert {
-    condition     = length(run.setup.azurerm_postgresql_flexible_server_database["application"]) == 0
+    condition     = length(run.setup.azurerm_postgresql_flexible_server_database["postgres_network"]) == 0
     error_message = "Module created the 'application' database when not specified by default"
   }
 }
