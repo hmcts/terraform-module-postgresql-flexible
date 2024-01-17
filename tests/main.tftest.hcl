@@ -11,7 +11,6 @@ variables {
   product                   = var.product
   business_area             = var.business_area
   component                 = var.component
-  azurerm.postgres_network  = azurerm.postgres_network
 }
 
 run "setup" {
@@ -23,17 +22,21 @@ run "setup" {
 run "default" {
   command = plan
 
-  variables {
+  variables = {
     common_tags = run.setup.common_tags
   }
 
-assert {
+  providers = {
+    azurerm.postgres_network = azurerm.postgres_network
+  }
+
+  assert {
     condition     = length(azurerm_postgresql_flexible_server_database.pg_databases) == 0
     error_message = "Module stood up a database when not specified by default"
   }
 
   assert {
-    condition     = length(azurerm_postgresql_flexible_server_database.pg_databases) == 0
     condition     = length(.this) == 0
     error_message = "Specified a managed database when none was provided"
   }
+}
