@@ -2,13 +2,7 @@ provider "azurerm" {
   features {}
 }
 
-  module "postgresql" {
-  providers = {
-    azurerm.postgres_network = azurerm.postgres_network
-  }
-
-  source = "../"
-
+variables {
   env                       = var.env
   common_tags               = var.common_tags
   pgsql_databases           = var.pgsql_databases
@@ -17,6 +11,7 @@ provider "azurerm" {
   product                   = var.product
   business_area             = var.business_area
   component                 = var.component
+  azurerm.postgres_network  = azurerm.postgres_network
 }
 
 run "setup" {
@@ -39,6 +34,6 @@ assert {
 
   assert {
     condition     = length(azurerm_postgresql_flexible_server_database.pg_databases) == 0
-    condition     = length(.this) == 1
+    condition     = length(.this) == 0
     error_message = "Specified a managed database when none was provided"
   }
