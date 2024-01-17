@@ -3,14 +3,17 @@ provider "azurerm" {
 }
 
 variables {
-  env                       = var.env
-  common_tags               = var.common_tags
-  pgsql_databases           = var.pgsql_databases
-  pgsql_delegated_subnet_id = var.pgsql_delegated_subnet_id
-  pgsql_version             = var.pgsql_version
-  product                   = var.product
-  business_area             = var.business_area
-  component                 = var.component
+  source                        = "../"
+  env                           = "test"
+  product                       = "terraform-module-sql-managed-instance-tests"
+  project                       = "sds"
+  component                     = ""
+  business_area                 = "sds"
+  subnet_suffix                 = "expanded"
+  enable_read_only_group_access = false
+  common_tags                   = {}
+  pgsql_databases               = [{ name = "application" }]
+  pgsql_version                 = "16"
 }
 
 run "setup" {

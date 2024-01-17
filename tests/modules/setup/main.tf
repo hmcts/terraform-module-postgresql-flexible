@@ -7,7 +7,7 @@ module "common_tags" {
 }
 
 resource "azurerm_resource_group" "test-rg" {
-  name     = "terraform-module-sql-managed-instance-tests-custom-rg"
+  name     = "terraform-module-s-managed-instance-tests-custom-rg"
   location = "uksouth"
 }
 
