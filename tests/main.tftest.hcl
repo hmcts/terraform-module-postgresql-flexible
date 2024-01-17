@@ -39,6 +39,6 @@ assert {
 
   assert {
     condition     = length(azurerm_postgresql_flexible_server_database.pg_databases) == 0
-    condition     = length(.this) == 0
+    condition     = length(.this) == 1
     error_message = "Specified a managed database when none was provided"
   }
