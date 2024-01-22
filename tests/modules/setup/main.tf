@@ -30,6 +30,8 @@ resource "azurerm_subnet" "test_snet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
+***************************************************************
+
 # Fetch data about an existing subnet (replace this with your specific requirements)
 # data "azurerm_subnet" "backend-postgresql" {
 #   name                 = "test_snet-2"
