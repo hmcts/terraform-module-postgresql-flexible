@@ -6,9 +6,15 @@ output "resource_group" {
   value = azurerm_resource_group.test-rg.name
 }
 
+
 output "location" {
   value = azurerm_resource_group.test-rg.location
 }
+
+# output "created_database_names" {
+#   value = [for db in azurerm_postgresql_flexible_server_database : db.name]
+# }
+
 
 output "vnet" {
   value = azurerm_virtual_network.test_vnet.name

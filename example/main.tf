@@ -33,3 +33,19 @@ module "common_tags" {
   environment = var.env
   product     = "sds-platform"
 }
+
+locals {
+  subnet_config = var.pgsql_delegated_subnet_id == "" ? {
+    name                 = "expanded"
+    resource_group_name  = azurerm_resource_group.test-rg.name
+    virtual_network_name = azurerm_virtual_network.test_vnet.name
+  } : null
+}
+
+data "azurerm_subnet" "pg_subnet" {
+  count = local.subnet_config != null ? 1 : 0
+
+  name                 = local.subnet_config.name
+  resource_group_name  = local.subnet_config.resource_group_name
+  virtual_network_name = local.subnet_config.virtual_network_name
+}
