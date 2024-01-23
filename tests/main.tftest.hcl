@@ -1,6 +1,8 @@
+
 provider "azurerm" {
   features {}
 }
+
 provider "azurerm" {
   features {}
   alias = "postgres_network"
