@@ -49,7 +49,7 @@ run "Test" {
 
   assert {
     condition     = length(azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin) == 0
-    error_message = "Module stood up a AAD Administrator when not specified by default"
+    error_message = "module should not create an Azure Active Directory (AAD) Administrator when not explicitly specified"
   }
 }
 
@@ -76,7 +76,7 @@ run "pg_subnet" {
 
   assert {
     condition     = length(data.azurerm_subnet.pg_subnet) == 1
-    error_message = "Module did not create the expected subnet."
+    error_message = "Module did not create the expected subnet"
   }
 }
 
@@ -99,6 +99,11 @@ run "Test_service_principal" {
   variables {
     common_tags                   = run.setup.common_tags
     enable_read_only_group_access = false
+  }
+
+  assert {
+    condition     = length(data.azuread_service_principal.mi_name) == 0
+    error_message = "Module stood up an Administrator when not specified by service_principal"
   }
 }
 
