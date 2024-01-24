@@ -11,7 +11,8 @@ output "username" {
 }
 
 output "password" {
-  value = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+  value     = azurerm_postgresql_flexible_server.pgsql_server.administrator_password
+  sensitive = true
 }
 
 output "fqdn" {
