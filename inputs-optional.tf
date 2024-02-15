@@ -122,6 +122,30 @@ variable "force_user_permissions_trigger" {
   description = "Update this to a new value to force the user permissions script to run again"
 }
 
+variable "force_schema_ownership_trigger" {
+  default     = ""
+  type        = string
+  description = "Update this to a new value to force the schema ownership script to run."
+}
+
+variable "kv_name" {
+  default = ""
+  type    = string
+  description = "Update this with the name of the key vault that stores the secrets to be used in the schema ownership script." 
+}
+
+variable "user_secret_name" {
+  default = ""
+  type    = string
+  description = "Update this with the name of the secret that stores the username to be used in the schema ownership script." 
+}
+
+variable "pass_secret_name" {
+  default = ""
+  type    = string
+  description = "Update this with the name of the secret that stores the password to be used in the schema ownership script." 
+}
+
 variable "subnet_suffix" {
   default     = null
   type        = string
