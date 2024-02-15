@@ -21,6 +21,11 @@ locals {
   high_availability              = var.high_availability == true || contains(local.high_availability_environments, local.env)
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
+
+  kv_subscription = local.is_prod ? "DCD-CNP-PROD" : "DCD-CNP-DEV"
+  kv_name = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
+  user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
+  pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -160,6 +165,34 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
       DB_NAME        = each.value.name
       DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
       DB_PASSWORD    = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
+    }
+  }
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
+    azurerm_postgresql_flexible_server_database.pg_databases
+  ]
+}
+
+resource "null_resource" "set-schema-ownership" {
+  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
+
+  triggers = {
+    script_hash    = filesha256("${path.module}/set-postgres-owner.bash")
+    name           = local.name
+    force_trigger  = var.force_user_permissions_trigger
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/set-postgres-owner.bash"
+
+    environment = {
+      PGHOST           = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_NAME          = each.value.name
+      DB_ADMIN         = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+      KV_NAME          = var.kv_name
+      KV_SUBSCRIPTION  = local.kv_subscription
+      USER_SECRET_NAME = local.user_secret_name
+      PASS_SECRET_NAME = local.pass_secret_name
     }
   }
   depends_on = [
