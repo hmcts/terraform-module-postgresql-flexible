@@ -134,12 +134,6 @@ variable "kv_name" {
   description = "Update this with the name of the key vault that stores the secrets to be used in the schema ownership script. Defaults to product-env." 
 }
 
-variable "kv_rg_name" {
-  default     = ""
-  type        = string
-  description = "Update this with the name of the resource group where the key vault is located. Defaults to product-env."
-}
-
 variable "user_secret_name" {
   default = ""
   type    = string

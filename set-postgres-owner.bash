@@ -20,15 +20,12 @@ while true; do
    sleep 5
 done
 
-# single server user secret name = ${product}-${component}-POSTGRES-USER
-# single server password secret name = ${product}-POSTGRES-PASS
-# use az cli to retrieve from key vault (Add optional variable for key vault name??)
-# run below script with credentials
-
 SINGLE_SERVER_USER=$(az keyvault secret show --vault-name "${KV_NAME}" --name "${USER_SECRET_NAME}" --subscription "${KV_SUBSCRIPTION}" --query value -o tsv)
 SINGLE_SERVER_PASS=$(az keyvault secret show --vault-name "${KV_NAME}" --name "${PASS_SECRET_NAME}" --subscription "${KV_SUBSCRIPTION}" --query value -o tsv)
 
-export PGPASSWORD=$SINGLE_SERVER_PASS
+if [[ $SINGLE_SERVER_USER == *'@'* ]]; then
+   SINGLE_SERVER_USER="${SINGLE_SERVER_USER%%@*}"
+fi
 
 SQL_COMMAND="
 GRANT ${DB_ADMIN} to ${SINGLE_SERVER_USER};
@@ -40,5 +37,6 @@ GRANT ${SINGLE_SERVER_USER} TO ${DB_ADMIN};
 set -x
 export PGDATABASE="${DB_NAME}"
 export PGUSER="${SINGLE_SERVER_USER}"
+export PGPASSWORD=$SINGLE_SERVER_PASS_VAL
 psql -c "${SQL_COMMAND}"
 set +x
