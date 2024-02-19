@@ -177,9 +177,9 @@ resource "null_resource" "set-schema-ownership" {
   for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
 
   triggers = {
-    script_hash    = filesha256("${path.module}/set-postgres-owner.bash")
-    name           = local.name
-    force_trigger  = var.force_user_permissions_trigger
+    script_hash   = filesha256("${path.module}/set-postgres-owner.bash")
+    name          = local.name
+    force_trigger = var.force_schema_ownership_trigger
   }
 
   provisioner "local-exec" {
