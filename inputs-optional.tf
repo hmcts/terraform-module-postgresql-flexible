@@ -122,6 +122,36 @@ variable "force_user_permissions_trigger" {
   description = "Update this to a new value to force the user permissions script to run again"
 }
 
+variable "force_schema_ownership_trigger" {
+  default     = null
+  type        = string
+  description = "Update this to a new value to force the schema ownership script to run."
+}
+
+variable "kv_subscription" {
+  default     = "DCD-CNP-DEV"
+  type        = string
+  description = "Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-DEV."
+}
+
+variable "kv_name" {
+  default     = ""
+  type        = string
+  description = "Update this with the name of the key vault that stores the secrets to be used in the schema ownership script. Defaults to product-env."
+}
+
+variable "user_secret_name" {
+  default     = ""
+  type        = string
+  description = "Update this with the name of the secret that stores the username to be used in the schema ownership script. Defaults to product-componenet-POSTGRES-USER."
+}
+
+variable "pass_secret_name" {
+  default     = ""
+  type        = string
+  description = "Update this with the name of the secret that stores the password to be used in the schema ownership script. Defaults to product-componenet-POSTGRES-PASS."
+}
+
 variable "subnet_suffix" {
   default     = null
   type        = string
