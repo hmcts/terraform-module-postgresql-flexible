@@ -22,7 +22,6 @@ locals {
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
 
-  kv_subscription  = var.kv_subscription != "" ? var.kv_subscription : "DCD-CNP-DEV"
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
@@ -190,7 +189,7 @@ resource "null_resource" "set-schema-ownership" {
       DB_NAME          = each.value.name
       DB_ADMIN         = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
       KV_NAME          = var.kv_name
-      KV_SUBSCRIPTION  = local.kv_subscription
+      KV_SUBSCRIPTION  = var.kv_subscription
       USER_SECRET_NAME = local.user_secret_name
       PASS_SECRET_NAME = local.pass_secret_name
     }
