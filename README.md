@@ -112,7 +112,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_force_schema_ownership_trigger"></a> [force\_schema\_ownership\_trigger](#input\_force\_schema\_ownership\_trigger) | Update this to a new value to force the schema ownership script to run. | `string` | `""` | no |
-| <a name="input_force_user_permissions_trigger"></a> [force\_user\_permissions\_trigger](#input\_force\_user\_permissions\_trigger) | Update this to a new value to force the user permissions script to run again | `string` | `""` | no |
+| <a name="input_force_user_permissions_trigger"></a> [force\_user\_permissions\_trigger](#input\_force\_user\_permissions\_trigger) | Update this to a new value to force the user permissions script to run again | `string` | `null` | no |
 | <a name="input_geo_redundant_backups"></a> [geo\_redundant\_backups](#input\_geo\_redundant\_backups) | Enable geo-redundant backups for the PGSql instance. | `bool` | `false` | no |
 | <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `false` | no |
 | <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the secrets to be used in the schema ownership script. Defaults to product-env. | `string` | `""` | no |
