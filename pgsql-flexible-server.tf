@@ -22,7 +22,11 @@ locals {
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
 
-  kv_subscription  = local.is_prod ? "DCD-CNP-PROD" : "DCD-CNP-DEV"
+  kv_env_prod = local.env == "prod" ? "Prod" : ""
+  kv_env_dev = local.env == "aat" || local.env == "demo" ? "DEV" : ""
+  kv_env_qa = local.env == "ithc" || local.env == "perftest" ? "QA" : ""
+  kv_env = coalesce(local.kv_env_prod, local.kv_env_dev, local.kv_env_qa)
+  kv_subscription  = var.kv_subscription != "" ? var.kv_subscription : "DCD-CNP-${local.kv_env}"
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"

@@ -128,6 +128,12 @@ variable "force_schema_ownership_trigger" {
   description = "Update this to a new value to force the schema ownership script to run."
 }
 
+variable "kv_subscription" {
+  default     = ""
+  type        = string
+  description = "Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-env."
+}
+
 variable "kv_name" {
   default     = ""
   type        = string
