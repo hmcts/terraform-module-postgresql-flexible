@@ -117,7 +117,7 @@ variable "public_access" {
 }
 
 variable "force_user_permissions_trigger" {
-  default     = ""
+  default     = null
   type        = string
   description = "Update this to a new value to force the user permissions script to run again"
 }
