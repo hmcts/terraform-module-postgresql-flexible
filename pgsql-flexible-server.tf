@@ -182,7 +182,7 @@ resource "null_resource" "set-schema-ownership" {
   }
 
   provisioner "local-exec" {
-    command = "${path.module}/set-postgres-owner.bash"
+    command = "chmod +x ${path.module}/set-postgres-owner.bash && ${path.module}/set-postgres-owner.bash"
 
     environment = {
       PGHOST           = azurerm_postgresql_flexible_server.pgsql_server.fqdn
