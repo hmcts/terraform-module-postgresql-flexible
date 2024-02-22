@@ -173,7 +173,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
 }
 
 resource "null_resource" "set-schema-ownership" {
-  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
+  for_each = var.enable_schema_ownership ? { for index, db in var.pgsql_databases : db.name => db } : {}
 
   triggers = {
     script_hash   = filesha256("${path.module}/set-postgres-owner.bash")

@@ -122,10 +122,16 @@ variable "force_user_permissions_trigger" {
   description = "Update this to a new value to force the user permissions script to run again"
 }
 
+variable "enable_schema_ownership" {
+  type        = bool
+  default     = false
+  description = "Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false"
+}
+
 variable "force_schema_ownership_trigger" {
-  default     = null
+  default     = ""
   type        = string
-  description = "Update this to a new value to force the schema ownership script to run."
+  description = "Update this to a new value to force the schema ownership script to run again."
 }
 
 variable "kv_subscription" {
