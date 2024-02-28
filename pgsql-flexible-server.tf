@@ -66,7 +66,8 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   administrator_login    = var.pgsql_admin_username
   administrator_password = random_password.password.result
 
-  storage_mb = var.pgsql_storage_mb
+  storage_mb        = var.pgsql_storage_mb
+  auto_grow_enabled = var.auto_grow_enabled
 
   sku_name = var.pgsql_sku
 
