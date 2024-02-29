@@ -163,3 +163,9 @@ variable "subnet_suffix" {
   type        = string
   description = "Suffix to append to the subnet name, the originally created one used by this module is full in a number of environments."
 }
+
+variable "auto_grow_enabled" {
+  type        = bool
+  default     = false
+  description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false."
+}
