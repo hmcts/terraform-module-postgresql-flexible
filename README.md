@@ -117,11 +117,11 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="input_force_user_permissions_trigger"></a> [force\_user\_permissions\_trigger](#input\_force\_user\_permissions\_trigger) | Update this to a new value to force the user permissions script to run again | `string` | `""` | no |
 | <a name="input_geo_redundant_backups"></a> [geo\_redundant\_backups](#input\_geo\_redundant\_backups) | Enable geo-redundant backups for the PGSql instance. | `bool` | `false` | no |
 | <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `false` | no |
-| <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the secrets to be used in the schema ownership script. Defaults to product-env. | `string` | `""` | no |
+| <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the single server secrets. Defaults to product-env. | `string` | `""` | no |
 | <a name="input_kv_subscription"></a> [kv\_subscription](#input\_kv\_subscription) | Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-DEV. | `string` | `"DCD-CNP-DEV"` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
-| <a name="input_pass_secret_name"></a> [pass\_secret\_name](#input\_pass\_secret\_name) | Update this with the name of the secret that stores the password to be used in the schema ownership script. Defaults to product-componenet-POSTGRES-PASS. | `string` | `""` | no |
+| <a name="input_pass_secret_name"></a> [pass\_secret\_name](#input\_pass\_secret\_name) | Update this with the name of the secret that stores the single server password. Defaults to product-componenet-POSTGRES-PASS. | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |
 | <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | `list(object({ name : string, collation : optional(string), charset : optional(string) }))` | n/a | yes |
 | <a name="input_pgsql_delegated_subnet_id"></a> [pgsql\_delegated\_subnet\_id](#input\_pgsql\_delegated\_subnet\_id) | PGSql delegated subnet id. | `string` | `""` | no |
@@ -136,7 +136,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="input_restore_time"></a> [restore\_time](#input\_restore\_time) | The point in time to restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_source_server_id"></a> [source\_server\_id](#input\_source\_server\_id) | Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_subnet_suffix"></a> [subnet\_suffix](#input\_subnet\_suffix) | Suffix to append to the subnet name, the originally created one used by this module is full in a number of environments. | `string` | `null` | no |
-| <a name="input_user_secret_name"></a> [user\_secret\_name](#input\_user\_secret\_name) | Update this with the name of the secret that stores the username to be used in the schema ownership script. Defaults to product-componenet-POSTGRES-USER. | `string` | `""` | no |
+| <a name="input_user_secret_name"></a> [user\_secret\_name](#input\_user\_secret\_name) | Update this with the name of the secret that stores the single server username. Defaults to product-componenet-POSTGRES-USER. | `string` | `""` | no |
 
 ## Outputs
 
