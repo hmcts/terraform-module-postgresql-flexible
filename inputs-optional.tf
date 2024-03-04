@@ -143,19 +143,19 @@ variable "kv_subscription" {
 variable "kv_name" {
   default     = ""
   type        = string
-  description = "Update this with the name of the key vault that stores the secrets to be used in the schema ownership script. Defaults to product-env."
+  description = "Update this with the name of the key vault that stores the single server secrets. Defaults to product-env."
 }
 
 variable "user_secret_name" {
   default     = ""
   type        = string
-  description = "Update this with the name of the secret that stores the username to be used in the schema ownership script. Defaults to product-componenet-POSTGRES-USER."
+  description = "Update this with the name of the secret that stores the single server username. Defaults to product-componenet-POSTGRES-USER."
 }
 
 variable "pass_secret_name" {
   default     = ""
   type        = string
-  description = "Update this with the name of the secret that stores the password to be used in the schema ownership script. Defaults to product-componenet-POSTGRES-PASS."
+  description = "Update this with the name of the secret that stores the single server password. Defaults to product-componenet-POSTGRES-PASS."
 }
 
 variable "subnet_suffix" {
