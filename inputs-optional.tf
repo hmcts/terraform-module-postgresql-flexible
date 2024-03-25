@@ -36,7 +36,7 @@ variable "pgsql_storage_mb" {
   default     = 65536
 }
 
-variable "psql_storage_tier" {
+variable "pgsql_storage_tier" {
   description = "The storage tier, this should be left as null but may need to be overriden to allow increased storage."
   type        = string
   default     = null
