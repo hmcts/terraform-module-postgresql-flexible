@@ -106,7 +106,7 @@ variable "charset" {
 
 variable "high_availability" {
   type        = bool
-  default     = false
+  default     = null
   description = "Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself."
 }
 
