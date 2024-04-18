@@ -18,7 +18,7 @@ locals {
 
 
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
-  high_availability              = var.high_availability == true || contains(local.high_availability_environments, local.env)
+  high_availability              = var.high_availability == null ? contains(local.high_availability_environments, local.env) : var.high_availability
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
 
