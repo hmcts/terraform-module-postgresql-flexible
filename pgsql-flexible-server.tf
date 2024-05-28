@@ -66,7 +66,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 
   delegated_subnet_id           = var.public_access == true ? null : var.pgsql_delegated_subnet_id == "" ? data.azurerm_subnet.pg_subnet[0].id : var.pgsql_delegated_subnet_id
   private_dns_zone_id           = var.public_access == true ? null : local.private_dns_zone_id
-  public_network_access_enabled = var.public_access == true
+  public_network_access_enabled = var.public_access
 
   administrator_login    = var.pgsql_admin_username
   administrator_password = random_password.password.result
