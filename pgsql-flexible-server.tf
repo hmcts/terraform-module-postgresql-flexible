@@ -18,7 +18,7 @@ locals {
 
 
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
-  high_availability              = var.high_availability == true || contains(local.high_availability_environments, local.env)
+  high_availability              = var.high_availability == null ? contains(local.high_availability_environments, local.env) : var.high_availability
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
 
@@ -55,10 +55,11 @@ resource "random_password" "password" {
 }
 
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
-  name                = local.server_name
-  resource_group_name = local.postgresql_rg_name
-  location            = local.postgresql_rg_location
-  version             = var.pgsql_version
+  name                          = local.server_name
+  resource_group_name           = local.postgresql_rg_name
+  location                      = local.postgresql_rg_location
+  version                       = var.pgsql_version
+  public_network_access_enabled = var.public_access
 
   create_mode                       = var.create_mode
   point_in_time_restore_time_in_utc = var.restore_time
