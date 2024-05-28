@@ -75,8 +75,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 
   sku_name = var.pgsql_sku
 
-  public_network_access_enabled = var.public_access == true ? true : false
-
+  public_network_access_enabled = var.public_access
 
   authentication {
     active_directory_auth_enabled = true
