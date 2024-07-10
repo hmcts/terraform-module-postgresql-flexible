@@ -48,10 +48,18 @@ data "azuread_service_principal" "mi_name" {
   object_id = var.admin_user_object_id
 }
 
+resource "terraform_data" "trigger_password_reset" {
+  input = var.trigger_password_reset
+}
+
 resource "random_password" "password" {
   length = 20
   # safer set of special characters for pasting in the shell
   override_special = "()-_"
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.trigger_password_reset]
+  }
 }
 
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
