@@ -175,3 +175,9 @@ variable "auto_grow_enabled" {
   default     = false
   description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false."
 }
+
+variable "trigger_password_reset" {
+  type        = string
+  default     = ""
+  description = "Setting this to a different value will trigge the module to rotate the password."
+}
