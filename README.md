@@ -17,6 +17,18 @@ provider "azurerm" {
 }
 ```
 
+variables.tf
+```terraform
+variable "postgres_geo_redundant_backups" {
+  default = false
+}
+```
+
+prod.tfvars
+```terraform
+postgres_geo_redundant_backups = true
+```
+
 postgres.tf
 ```terraform
 module "postgresql" {
@@ -43,6 +55,8 @@ module "postgresql" {
 
   pgsql_sku     = "GP_Standard_D2ds_v4"
   pgsql_version = "16"
+
+  geo_redundant_backups = var.postgres_geo_redundant_backups
   
   # The ID of the principal to be granted admin access to the database server.
   # On Jenkins it will be injected for you automatically as jenkins_AAD_objectId.
