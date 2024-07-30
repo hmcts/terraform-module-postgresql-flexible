@@ -5,7 +5,7 @@ terraform {
       configuration_aliases = [azurerm.postgres_network]
     }
     random = {
-      source  = "hashicorp/random"
+      source = "hashicorp/random"
     }
   }
 }
