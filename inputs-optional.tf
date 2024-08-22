@@ -179,5 +179,5 @@ variable "auto_grow_enabled" {
 variable "trigger_password_reset" {
   type        = string
   default     = ""
-  description = "Setting this to a different value will trigge the module to rotate the password."
+  description = "Setting this to a different value, e.g. '1' will trigger terraform to rotate the password."
 }
