@@ -134,9 +134,8 @@ POSTGRES_HOST=rpe-draft-store-aat.postgres.database.azure.com
 # this matches the `database_name` parameter you pass in the module
 DB_NAME=draftstore
 
-# Update the suffix after the @ to the server name
-DB_USER="DTS\ CFT\ DB\ Access\ Reader@rpe-draft-store-aat" # read access
-#DB_USER="DTS\ Platform\ Operations@rpe-draft-store-aat" # operations team administrative access
+DB_USER="DTS\ CFT\ DB\ Access\ Reader" # read access
+#DB_USER="DTS\ Platform\ Operations" # operations team administrative access
 
 psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
 ```
@@ -159,9 +158,8 @@ export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --quer
 # this matches the `database_name` parameter you pass in the module
 DB_NAME=draftstore
 
-# Update the suffix after the @ to the server name
-DB_USER="DTS\ CFT\ DB\ Access\ Reader@rpe-draft-store-aat" # read access
-#DB_USER="DTS\ Platform\ Operations@rpe-draft-store-aat" # operations team administrative access
+DB_USER="DTS\ CFT\ DB\ Access\ Reader" # read access
+#DB_USER="DTS\ Platform\ Operations" # operations team administrative access
 
 psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
 ```
@@ -214,9 +212,8 @@ POSTGRES_HOST=rpe-draft-store-prod.postgres.database.azure.com
 DB_NAME=draftstore
 
 # make sure you update the product name in the middle to your product
-# and also update the suffix after the @ to the server name
-DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC@rpe-draft-store-prod" # read access
-#DB_USER="DTS\ Platform\ Operations\ SC@rpe-draft-store-prod" # operations team administrative access
+DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC" # read access
+#DB_USER="DTS\ Platform\ Operations\ SC" # operations team administrative access
 
 psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
 # note: some users have experienced caching issues with their AAD token:
@@ -244,9 +241,8 @@ export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --quer
 DB_NAME=draftstore
 
 # make sure you update the product name in the middle to your product
-# and also update the suffix after the @ to the server name
-DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC@rpe-draft-store-prod" # read access
-#DB_USER="DTS\ Platform\ Operations\ SC@rpe-draft-store-prod" # operations team administrative access
+DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC" # read access
+#DB_USER="DTS\ Platform\ Operations\ SC" # operations team administrative access
 
 psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
 ```
