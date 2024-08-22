@@ -57,6 +57,9 @@ module "postgresql" {
   pgsql_version = "16"
 
   geo_redundant_backups = var.postgres_geo_redundant_backups
+
+  # Changing the value of the trigger_password_reset variable will trigger Terraform to rotate the password of the pgadmin user.
+  trigger_password_reset = "any value here"
   
   # The ID of the principal to be granted admin access to the database server.
   # On Jenkins it will be injected for you automatically as jenkins_AAD_objectId.
@@ -72,6 +75,183 @@ variables.tf
 variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
 ```
 
+
+## Access to databases
+
+Databases are restricted to access from specific subnets, these can be updated in the [cnp-database-subnet-whitelisting](https://github.com/hmcts/cnp-database-subnet-whitelisting)
+GitHub repo.
+
+Typically, you will need to set up an SSH tunnel to access the database you want to.
+
+All developers can access non production databases with reader access.
+
+Security cleared developers can access production DBs using just in time access and an approved business justification.
+
+_Note: access is only granted on a case by case basis, and is removed automatically_
+
+More process details to follow, it's currently being worked out.
+
+### Non production:
+
+#### First time setup
+
+1. Join either  'DTS CFT Developers' or 'DTS SDS Developers'  AAD group via [GitHub pull request](https://github.com/hmcts/devops-azure-ad/blob/master/users/prod_users.yml)
+
+<details>
+
+<summary>Bastion configuration</summary>
+
+Ensure you have Azure CLI version 2.22.1 or later installed
+
+Run `az login`
+
+Ensure ssh extension for the Azure CLI is installed: 'az extension add --name ssh'
+
+Run `az ssh config --ip \*.platform.hmcts.net --file ~/.ssh/config`
+
+</details>
+
+#### Steps to access
+
+1. Connect to the VPN
+2. Request access to the non production bastion via [JIT](https://myaccess.microsoft.com/@HMCTS.NET#/access-packages/4894e58f-920e-404d-9db4-dc2ab8513794),
+this will be automatically approved, and lasts for 24 hours.
+3. Copy below script, update the variables (search for all references to draft-store and replace with your DB) and run it
+
+```bash
+# If you haven't logged in before you may need to login, uncomment the below line:
+# az login
+# this should give you a long JWT token, you will need this later on
+az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv
+
+ssh bastion-nonprod.platform.hmcts.net
+
+export PGPASSWORD=<result-from-earlier>
+
+# you can get this from the portal, or determine it via the inputs your pass to this module in your code
+POSTGRES_HOST=rpe-draft-store-aat.postgres.database.azure.com
+
+# this matches the `database_name` parameter you pass in the module
+DB_NAME=draftstore
+
+# Update the suffix after the @ to the server name
+DB_USER="DTS\ CFT\ DB\ Access\ Reader@rpe-draft-store-aat" # read access
+#DB_USER="DTS\ Platform\ Operations@rpe-draft-store-aat" # operations team administrative access
+
+psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
+```
+
+_Note: it's also possible to tunnel the connection to your own machine and use other tools to log in, IntelliJ database tools works, pgAdmin 4 works with a workaround for the password field length limit, when creating a new connection untick the "Connect now?" option and don't set the password, save the connection, afterwards when trying to connect a newly created db connection, the password pop up will accept the long password token generated._
+
+<details>
+
+<summary>Tunnel version of the script</summary>
+
+```shell
+# you can get this from the portal, or determine it via the inputs your pass to this module in your code
+POSTGRES_HOST=rpe-draft-store-aat.postgres.database.azure.com
+
+ssh -N bastion-nonprod.platform.hmcts.net -L 5440:${POSTGRES_HOST}:5432
+# expect no more output in this terminal you won't get an interactive prompt
+
+# in a separate terminal run:
+export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
+# this matches the `database_name` parameter you pass in the module
+DB_NAME=draftstore
+
+# Update the suffix after the @ to the server name
+DB_USER="DTS\ CFT\ DB\ Access\ Reader@rpe-draft-store-aat" # read access
+#DB_USER="DTS\ Platform\ Operations@rpe-draft-store-aat" # operations team administrative access
+
+psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
+```
+
+</details>
+
+### Production
+
+#### First time setup
+
+1. Join either 'DTS CFT Developers' or 'DTS SDS Developers' AAD group via [GitHub pull request](https://github.com/hmcts/devops-azure-ad/blob/master/users/prod_users.yml)
+2. Request access to production via [JIT](https://myaccess.microsoft.com/@HMCTS.NET#/access-packages/738a7496-7ad4-4004-8b05-0e98677f4a9f), this requires SC clearance, or an approved exception.
+   _Note: after this is approved it can take some time for the other packages to show up, try logging out and back in._
+
+<details>
+
+Ensure you have Azure CLI version 2.22.1 or later installed
+
+Run `az login`
+
+Ensure ssh extension for the Azure CLI is installed: 'az extension add --name ssh'
+
+Run `az ssh config --ip \*.platform.hmcts.net --file ~/.ssh/config`
+
+</details>
+
+#### Steps to access
+
+1. Request access to the database that you need via [JIT](https://myaccess.microsoft.com/@CJSCommonPlatform.onmicrosoft.com#/access-packages),
+   the naming convention is `Database - <product> (read|write) access`.
+2. Wait till it's approved, you can also message in #db-self-service on slack.
+3. Connect to the VPN
+4. Copy below script, update the variables (search for all references to draft-store and replace with your DB), and run it
+
+```bash
+# If you haven't logged in before you may need to login, uncomment the below line:
+# az login
+# this should give you a long JWT token, you will need this later on
+az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv
+
+# follow the prompts to login
+ssh bastion-prod.platform.hmcts.net
+
+export PGPASSWORD=<result-from-earlier>
+
+# you can get this from the portal, or determine it via the inputs your pass to this module in your code
+POSTGRES_HOST=rpe-draft-store-prod.postgres.database.azure.com
+
+# this matches the `database_name` parameter you pass in the module
+DB_NAME=draftstore
+
+# make sure you update the product name in the middle to your product
+# and also update the suffix after the @ to the server name
+DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC@rpe-draft-store-prod" # read access
+#DB_USER="DTS\ Platform\ Operations\ SC@rpe-draft-store-prod" # operations team administrative access
+
+psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
+# note: some users have experienced caching issues with their AAD token:
+# psql: error: FATAL:  Azure AD access token not valid for role DTS JIT Access send-letter DB Reader SC (does not contain group ID c9e865ee-bc88-40d9-a5c1-23831f0ce255)
+# the fix is to clear the cache and login again: rm -rf ~/.azure && az login
+```
+
+_Note: it's also possible to tunnel the connection to your own machine and use other tools to log in, IntelliJ database tools works, pgAdmin 4 works with a workaround for the password field length limit, when creating a new connection untick the "Connect now?" option and don't set the password, save the connection, afterwards when trying to connect a newly created db connection, the password pop up will accept the long password token generated._
+
+<details>
+
+<summary>Tunnel version of the script</summary>
+
+```shell
+# you can get this from the portal, or determine it via the inputs your pass to this module in your code
+POSTGRES_HOST=rpe-draft-store-prod.postgres.database.azure.com
+
+ssh bastion-prod.platform.hmcts.net -L 5440:${POSTGRES_HOST}:5432
+# expect no more output in this terminal you won't get an interactive prompt
+
+# in a separate terminal run:
+export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
+
+# this matches the `database_name` parameter you pass in the module
+DB_NAME=draftstore
+
+# make sure you update the product name in the middle to your product
+# and also update the suffix after the @ to the server name
+DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC@rpe-draft-store-prod" # read access
+#DB_USER="DTS\ Platform\ Operations\ SC@rpe-draft-store-prod" # operations team administrative access
+
+psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
+```
+
+</details>
 
 <!-- BEGIN_TF_DOCS -->
 
