@@ -78,10 +78,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 
 ## Access to databases
 
-Databases are restricted to access from specific subnets, these can be updated in the [cnp-database-subnet-whitelisting](https://github.com/hmcts/cnp-database-subnet-whitelisting)
-GitHub repo.
-
-Typically, you will need to set up an SSH tunnel to access the database you want to.
+VNet injection is used to restrict network access to PostgreSQL flexible servers. This means that you can't access the database directly from your local machine. Typically, you will need to set up an SSH tunnel to access the database you want to.
 
 All developers can access non production databases with reader access.
 
