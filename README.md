@@ -148,7 +148,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 | <a name="input_restore_time"></a> [restore\_time](#input\_restore\_time) | The point in time to restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_source_server_id"></a> [source\_server\_id](#input\_source\_server\_id) | Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_subnet_suffix"></a> [subnet\_suffix](#input\_subnet\_suffix) | Suffix to append to the subnet name, the originally created one used by this module is full in a number of environments. | `string` | `null` | no |
-| <a name="input_trigger_password_reset"></a> [trigger\_password\_reset](#input\_trigger\_password\_reset) | Setting this to a different value will trigge the module to rotate the password. | `string` | `""` | no |
+| <a name="input_trigger_password_reset"></a> [trigger\_password\_reset](#input\_trigger\_password\_reset) | Setting this to a different value, e.g. '1' will trigger terraform to rotate the password. | `string` | `""` | no |
 | <a name="input_user_secret_name"></a> [user\_secret\_name](#input\_user\_secret\_name) | Update this with the name of the secret that stores the single server username. Defaults to product-componenet-POSTGRES-USER. | `string` | `""` | no |
 
 ## Outputs
