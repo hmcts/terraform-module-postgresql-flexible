@@ -147,7 +147,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = "531ff96d-0ae9-462a-8d2d-bec7c0b42082"
   object_id           = var.admin_user_object_id
-  principal_name      = jenkins-cftptl-intsvc-mi"
+  principal_name      = "jenkins-cftptl-intsvc-mi"
   principal_type      = "ServicePrincipal"
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
