@@ -132,7 +132,7 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
+  tenant_id           = "531ff96d-0ae9-462a-8d2d-bec7c0b42082"
   object_id           = local.is_prod ? "4d0554dd-fe60-424a-be9c-36636826d927" : "e7ea2042-4ced-45dd-8ae3-e051c6551789"
   principal_name      = local.admin_group
   principal_type      = "Group"
