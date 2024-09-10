@@ -145,9 +145,9 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   count               = var.enable_read_only_group_access ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
+  tenant_id           = "531ff96d-0ae9-462a-8d2d-bec7c0b42082"
   object_id           = var.admin_user_object_id
-  principal_name      = data.azuread_service_principal.mi_name[0].display_name
+  principal_name      = jenkins-cftptl-intsvc-mi"
   principal_type      = "ServicePrincipal"
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
