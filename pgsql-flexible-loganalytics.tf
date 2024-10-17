@@ -11,7 +11,7 @@ resource "azurerm_monitor_diagnostic_setting" "pgsql_diag" {
   count                      = var.enable_qpi ? 1 : 0
   name                       = "${local.server_name}-to-log-analytics"
   target_resource_id         = azurerm_postgresql_flexible_server.pgsql_server.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.pgsql_log_analytics_workspace.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.pgsql_log_analytics_workspace[0].id
 
   enabled_log {
     category_group = "PostgreSQLLogs"
@@ -19,6 +19,6 @@ resource "azurerm_monitor_diagnostic_setting" "pgsql_diag" {
 
   depends_on = [
     azurerm_postgresql_flexible_server.pgsql_server,
-    azurerm_log_analytics_workspace.pgsql_log_analytics_workspace
+    azurerm_log_analytics_workspace.pgsql_log_analytics_workspace[0]
   ]
 }
