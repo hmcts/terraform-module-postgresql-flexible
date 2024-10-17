@@ -119,17 +119,6 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
-  for_each = {
-    for index, config in var.pgsql_server_configuration :
-    config.name => config
-  }
-
-  name      = each.value.name
-  server_id = azurerm_postgresql_flexible_server.pgsql_server.id
-  value     = each.value.value
-}
-
-resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
   for_each = merge(
     {
       for config in var.pgsql_server_configuration :
