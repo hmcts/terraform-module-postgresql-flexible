@@ -129,6 +129,24 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
   value     = each.value.value
 }
 
+resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
+  for_each = merge(
+    {
+      for config in var.pgsql_server_configuration :
+      config.name => config
+    },
+    var.enable_qpi ? {
+      "pg_qs.query_capture_mode"              = { name = "pg_qs.query_capture_mode", value = "ALL" },
+      "log_lock_waits"                        = { name = "log_lock_waits", value = "on" },
+      "pgms_wait_sampling.query_capture_mode" = { name = "pgms_wait_sampling.query_capture_mode", value = "ALL" }
+    } : {}
+  )
+
+  name      = each.value.name
+  server_id = azurerm_postgresql_flexible_server.pgsql_server.id
+  value     = each.value.value
+}
+
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
