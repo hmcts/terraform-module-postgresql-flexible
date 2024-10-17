@@ -1,8 +1,8 @@
 resource "azurerm_log_analytics_workspace" "pgsql_log_analytics_workspace" {
   count               = var.enable_qpi ? 1 : 0
   name                = "${local.server_name}-workspace"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  location            = local.postgresql_rg_location
+  resource_group_name = local.postgresql_rg_name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
