@@ -128,6 +128,7 @@ resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config
       "pg_qs.query_capture_mode"              = { name = "pg_qs.query_capture_mode", value = "ALL" },
       "log_lock_waits"                        = { name = "log_lock_waits", value = "on" },
       "pgms_wait_sampling.query_capture_mode" = { name = "pgms_wait_sampling.query_capture_mode", value = "ALL" }
+      "track_io_timing"                       = { name = "track_io_timing", value = "on"}
     } : {}
   )
 
