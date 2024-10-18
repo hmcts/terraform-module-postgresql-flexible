@@ -4,7 +4,7 @@ resource "azurerm_log_analytics_workspace" "pgsql_log_analytics_workspace" {
   location            = local.postgresql_rg_location
   resource_group_name = local.postgresql_rg_name
   sku                 = "PerGB2018"
-  retention_in_days   = 30
+  retention_in_days   = 7
 }
 
 resource "azurerm_monitor_diagnostic_setting" "pgsql_diag" {
@@ -14,7 +14,22 @@ resource "azurerm_monitor_diagnostic_setting" "pgsql_diag" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.pgsql_log_analytics_workspace[0].id
 
   enabled_log {
-    category_group = "PostgreSQLLogs"
+    category = "PostgreSQLFlexDatabaseXacts"
+  }
+  enabled_log {
+    category = "PostgreSQLFlexQueryStoreRuntime"
+  }
+  enabled_log {
+    category = "PostgreSQLFlexQueryStoreWaitStats"
+  }
+  enabled_log {
+    category = "PostgreSQLFlexSessions"
+  }
+  enabled_log {
+    category = "PostgreSQLFlexTableStats"
+  }
+  enabled_log {
+    category = "PostgreSQLLogs"
   }
 
   depends_on = [
