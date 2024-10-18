@@ -181,3 +181,9 @@ variable "trigger_password_reset" {
   default     = ""
   description = "Setting this to a different value, e.g. '1' will trigger terraform to rotate the password."
 }
+
+variable "enable_qpi" {
+  type        = bool
+  default     = false
+  description = "Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed"
+}

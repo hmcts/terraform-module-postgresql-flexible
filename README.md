@@ -264,6 +264,8 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 
 | Name | Type |
 |------|------|
+| [azurerm_log_analytics_workspace.pgsql_log_analytics_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) | resource |
+| [azurerm_monitor_diagnostic_setting.pgsql_diag](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
 | [azurerm_postgresql_flexible_server.pgsql_server](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
@@ -294,6 +296,7 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Common tag to be applied to resources. | `map(string)` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
 | <a name="input_create_mode"></a> [create\_mode](#input\_create\_mode) | The creation mode which can be used to restore or replicate existing servers | `string` | `"Default"` | no |
+| <a name="input_enable_qpi"></a> [enable\_qpi](#input\_enable\_qpi) | Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed | `bool` | `false` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_enable_schema_ownership"></a> [enable\_schema\_ownership](#input\_enable\_schema\_ownership) | Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false | `bool` | `false` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
@@ -310,7 +313,7 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 | <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | `list(object({ name : string, collation : optional(string), charset : optional(string) }))` | n/a | yes |
 | <a name="input_pgsql_delegated_subnet_id"></a> [pgsql\_delegated\_subnet\_id](#input\_pgsql\_delegated\_subnet\_id) | PGSql delegated subnet id. | `string` | `""` | no |
 | <a name="input_pgsql_firewall_rules"></a> [pgsql\_firewall\_rules](#input\_pgsql\_firewall\_rules) | Postgres firewall rules | `list(object({ name : string, start_ip_address : string, end_ip_address : string }))` | `[]` | no |
-| <a name="input_pgsql_server_configuration"></a> [pgsql\_server\_configuration](#input\_pgsql\_server\_configuration) | Postgres server configuration | `list(object({ name : string, value : string }))` | <pre>[<br>  {<br>    "name": "backslash_quote",<br>    "value": "on"<br>  }<br>]</pre> | no |
+| <a name="input_pgsql_server_configuration"></a> [pgsql\_server\_configuration](#input\_pgsql\_server\_configuration) | Postgres server configuration | `list(object({ name : string, value : string }))` | <pre>[<br/>  {<br/>    "name": "backslash_quote",<br/>    "value": "on"<br/>  }<br/>]</pre> | no |
 | <a name="input_pgsql_sku"></a> [pgsql\_sku](#input\_pgsql\_sku) | The PGSql flexible server instance sku | `string` | `"GP_Standard_D2s_v3"` | no |
 | <a name="input_pgsql_storage_mb"></a> [pgsql\_storage\_mb](#input\_pgsql\_storage\_mb) | Max storage allowed for the PGSql Flexibile instance | `number` | `65536` | no |
 | <a name="input_pgsql_storage_tier"></a> [pgsql\_storage\_tier](#input\_pgsql\_storage\_tier) | The storage tier, this should be left as null but may need to be overriden to allow increased storage. | `string` | `null` | no |
