@@ -4,7 +4,7 @@ resource "azurerm_log_analytics_workspace" "pgsql_log_analytics_workspace" {
   location            = local.postgresql_rg_location
   resource_group_name = local.postgresql_rg_name
   sku                 = "PerGB2018"
-  retention_in_days   = 7
+  retention_in_days   = 30
 }
 
 resource "azurerm_monitor_diagnostic_setting" "pgsql_diag" {
