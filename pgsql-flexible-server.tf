@@ -53,11 +53,6 @@ data "azurerm_key_vault" "key_vault" {
   resource_group_name = local.kv_name
 }
 
-data "azurerm_key_vault_secret" "slack_monitoring_address" {
-  name         = "slack_monitoring_address"
-  key_vault_id = data.azurerm_key_vault.key_vault.id
-}
-
 resource "terraform_data" "trigger_password_reset" {
   input = var.trigger_password_reset
 }

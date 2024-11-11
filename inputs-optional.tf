@@ -179,3 +179,75 @@ variable "enable_qpi" {
   default     = false
   description = "Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed"
 }
+
+variable "action_group_name" {
+  description = "The name of the Action Group to create."
+  type        = string
+}
+
+variable "email_receivers" {
+  description = "A map of email receivers, with keys as names and values as email addresses."
+  type        = map(string)
+  default     = {}
+}
+
+variable "sms_receivers" {
+  description = "A map of SMS receivers, with keys as names and values as maps containing country code and phone number."
+  type        = map(object({
+    country_code = string
+    phone_number = string
+  }))
+  default = {}
+}
+
+variable "webhook_receivers" {
+  description = "A map of webhook receivers, with keys as names and values as URLs."
+  type        = map(string)
+  default     = {}
+}
+
+variable "cpu_threshold" {
+  default     = 80
+  type        = number
+  description = "Average CPU utilisation threshold"
+}
+
+variable "memory_threshold" {
+  default     = 80
+  type        = number
+  description = "Average memory utilisation threshold"
+}
+
+variable "storage_threshold" {
+  default     = 80
+  type        = number
+  description = "Average storage utilisation threshold"
+}
+
+variable "alert_name" {
+  description = "The name of the alert rule to create."
+  type        = string
+}
+
+variable "alert_metric_name" {
+  description = "The name of the metric to monitor in the alert."
+  type        = string
+}
+
+variable "alert_severity" {
+  description = "The severity level of the alert (1=Critical, 2=Warning ...)."
+  type        = number
+  default     = 1
+}
+
+variable "alert_frequency" {
+  description = "The frequency of the alert check."
+  type        = string
+  default     = "PT1H"
+}
+
+variable "alert_window_size" {
+  description = "The period over which the metric is evaluated."
+  type        = string
+  default     = "P1D"
+}

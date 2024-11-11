@@ -4,8 +4,9 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
   description         = "Whenever the cpu utilization is greater than 80"
-  frequency           = "PT1H"
-  window_size         = "P1D"
+  severity            = var.alert_severity
+  frequency           = var.alert_frequency
+  window_size         = var.alert_window_size
 
   tags = var.common_tags
 
@@ -14,10 +15,10 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
     metric_name      = "cpu_percent"
     aggregation      = "Average"
     operator         = "GreaterThan"
-    threshold        = 80
+    threshold        = var.cpu_threshold
   }
   action {
-    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
+    action_group_id = azurerm_monitor_action_group.db-alerts-action-group.id
   }
 }
 
@@ -27,8 +28,9 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
   description         = "Whenever the memory utilization is greater than 80"
-  frequency           = "PT1H"
-  window_size         = "P1D"
+  severity            = var.alert_severity
+  frequency           = var.alert_frequency
+  window_size         = var.alert_window_size
 
   tags = var.common_tags
 
@@ -37,10 +39,10 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
     metric_name      = "memory_percent"
     aggregation      = "Average"
     operator         = "GreaterThan"
-    threshold        = 80
+    threshold        = var.memory_threshold
   }
   action {
-    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
+    action_group_id = azurerm_monitor_action_group.db-alerts-action-group.id
   }
 }
 
@@ -51,8 +53,9 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
   description         = "Whenever the storage utilization is greater than 80"
-  frequency           = "PT1H"
-  window_size         = "P1D"
+  severity            = var.alert_severity
+  frequency           = var.alert_frequency
+  window_size         = var.alert_window_size
 
   tags = var.common_tags
 
@@ -61,9 +64,9 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
     metric_name      = "storage_percent"
     aggregation      = "Average"
     operator         = "GreaterThan"
-    threshold        = 80
+    threshold        = var.storage_threshold
   }
   action {
-    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
+    action_group_id = azurerm_monitor_action_group.db-alerts-action-group.id
   }
 }
