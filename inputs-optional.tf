@@ -224,16 +224,6 @@ variable "storage_threshold" {
   description = "Average storage utilisation threshold"
 }
 
-variable "alert_name" {
-  description = "The name of the alert rule to create."
-  type        = string
-}
-
-variable "alert_metric_name" {
-  description = "The name of the metric to monitor in the alert."
-  type        = string
-}
-
 variable "alert_severity" {
   description = "The severity level of the alert (1=Critical, 2=Warning ...)."
   type        = number
