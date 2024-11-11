@@ -8,8 +8,8 @@ resource "azurerm_monitor_action_group" "db-alerts-action-group" {
   dynamic "email_receiver" {
     for_each = var.email_receivers
     content {
-      name                   = email_receiver.key
-      email_address          = email_receiver.value
+      name                    = email_receiver.key
+      email_address           = email_receiver.value
       use_common_alert_schema = true
     }
   }
@@ -17,9 +17,9 @@ resource "azurerm_monitor_action_group" "db-alerts-action-group" {
   dynamic "sms_receiver" {
     for_each = var.sms_receivers
     content {
-      name          = sms_receiver.key
-      country_code  = sms_receiver.value.country_code
-      phone_number  = sms_receiver.value.phone_number
+      name         = sms_receiver.key
+      country_code = sms_receiver.value.country_code
+      phone_number = sms_receiver.value.phone_number
     }
   }
 

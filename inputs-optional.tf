@@ -193,7 +193,7 @@ variable "email_receivers" {
 
 variable "sms_receivers" {
   description = "A map of SMS receivers, with keys as names and values as maps containing country code and phone number."
-  type        = map(object({
+  type = map(object({
     country_code = string
     phone_number = string
   }))
