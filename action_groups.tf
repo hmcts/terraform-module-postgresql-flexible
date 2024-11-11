@@ -1,7 +1,7 @@
 resource "azurerm_monitor_action_group" "db-alerts-action-group" {
   name                = var.action_group_name
   resource_group_name = local.postgresql_rg_name
-  short_name          = var.action_group_name
+  short_name          = substr(var.action_group_name, 0, 12)
 
   tags = var.common_tags
 
