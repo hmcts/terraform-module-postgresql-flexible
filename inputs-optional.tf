@@ -183,6 +183,7 @@ variable "enable_qpi" {
 variable "action_group_name" {
   description = "The name of the Action Group to create."
   type        = string
+  default     = "db_alerts_action_group_name"
 }
 
 variable "email_receivers" {
