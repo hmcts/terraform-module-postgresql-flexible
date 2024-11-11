@@ -48,11 +48,6 @@ data "azuread_service_principal" "mi_name" {
   object_id = var.admin_user_object_id
 }
 
-data "azurerm_key_vault" "key_vault" {
-  name                = "key_vault_name"
-  resource_group_name = local.kv_name
-}
-
 resource "terraform_data" "trigger_password_reset" {
   input = var.trigger_password_reset
 }
