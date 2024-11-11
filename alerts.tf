@@ -1,5 +1,4 @@
 resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
-  count               = var.env == "prod" ? 1 : 0
   name                = "db_cpu_percent_80_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
@@ -23,7 +22,6 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
 }
 
 resource "azurerm_monitor_metric_alert" "db_alert_memory" {
-  count               = var.env == "prod" ? 1 : 0
   name                = "db_memory_percent_80_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
@@ -47,7 +45,6 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
 }
 
 resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
-  count = var.env == "prod" ? 1 : 0
   name  = "db_storage_utilization_80_${local.server_name}"
 
   resource_group_name = local.postgresql_rg_name
