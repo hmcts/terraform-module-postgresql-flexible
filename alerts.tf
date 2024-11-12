@@ -45,7 +45,7 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
 }
 
 resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
-  name = "db_storage_utilization_${local.server_name}"
+  name                = "db_storage_utilization_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
   description         = "Whenever the storage utilization is greater than 80"
