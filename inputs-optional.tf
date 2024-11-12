@@ -242,3 +242,15 @@ variable "alert_window_size" {
   type        = string
   default     = "P1D"
 }
+
+variable "email_address_key" {
+  description = "Email address key in azure Key Vault."
+  type        = string
+  default     = ""
+}
+
+variable "email_address_key_vault_id" {
+  description = "Email address Key Vault Id."
+  type        = string
+  default     = ""
+}

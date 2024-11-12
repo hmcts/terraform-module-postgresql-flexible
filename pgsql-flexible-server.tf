@@ -27,6 +27,12 @@ locals {
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
 }
 
+data "azurerm_key_vault_secret" "email_address" {
+  count        = var.email_address_key == "" ? 0 : 1
+  name         = var.email_address_key
+  key_vault_id = var.email_address_key_vault_id
+}
+
 data "azurerm_subnet" "pg_subnet" {
   provider             = azurerm.postgres_network
   name                 = local.subnet_name
