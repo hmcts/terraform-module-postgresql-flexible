@@ -8,7 +8,7 @@ resource "azurerm_monitor_action_group" "db-alerts-action-group" {
 
   email_receiver {
     name                    = "Email Receiver"
-    email_address           = data.azurerm_key_vault_secret.email_address.value
+    email_address           = data.azurerm_key_vault_secret.email_address[count.index].value
     use_common_alert_schema = true
   }
 }
