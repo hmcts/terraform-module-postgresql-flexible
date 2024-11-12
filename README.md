@@ -75,6 +75,24 @@ variables.tf
 variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
 ```
 
+variables.tf
+```hcl
+email_receivers = {
+   "slack_email" = "slack_email@example.com"
+}
+
+sms_receivers = {
+   "sms" = {
+      country_code = "44"
+      phone_number = "1234567890"
+   }
+}
+
+webhook_receivers = {
+   "web_hook" = "https://example.com/webhook"
+}
+```
+
 
 ## Access to databases
 
