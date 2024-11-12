@@ -284,6 +284,7 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
+| [azurerm_key_vault_secret.email_address](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_subnet.pg_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
 
@@ -305,6 +306,8 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
 | <a name="input_cpu_threshold"></a> [cpu\_threshold](#input\_cpu\_threshold) | Average CPU utilisation threshold | `number` | `80` | no |
 | <a name="input_create_mode"></a> [create\_mode](#input\_create\_mode) | The creation mode which can be used to restore or replicate existing servers | `string` | `"Default"` | no |
+| <a name="input_email_address_key"></a> [email\_address\_key](#input\_email\_address\_key) | Email address key in azure Key Vault. | `string` | `""` | no |
+| <a name="input_email_address_key_vault_id"></a> [email\_address\_key\_vault\_id](#input\_email\_address\_key\_vault\_id) | Email address Key Vault Id. | `string` | `""` | no |
 | <a name="input_email_receivers"></a> [email\_receivers](#input\_email\_receivers) | A map of email receivers, with keys as names and values as email addresses. | `map(string)` | `{}` | no |
 | <a name="input_enable_qpi"></a> [enable\_qpi](#input\_enable\_qpi) | Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed | `bool` | `false` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
