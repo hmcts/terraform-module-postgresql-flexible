@@ -1,5 +1,5 @@
 resource "azurerm_monitor_action_group" "db-alerts-action-group" {
-  count               = var.email_address_key == "" ? 0 : 1
+  count               = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
   name                = var.action_group_name
   resource_group_name = local.postgresql_rg_name
   short_name          = substr(var.action_group_name, 0, 12)
