@@ -47,7 +47,7 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
 }
 
 resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
-  count               = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1 ? 0 : 1
+  count               = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
   name                = "db_storage_utilization_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
