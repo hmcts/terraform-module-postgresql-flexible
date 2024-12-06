@@ -3,7 +3,7 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
   name                = "db_cpu_percent_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
-  description         = "Whenever the cpu utilization is greater than ${var.cpu_threshold}"
+  description         = "Whenever the cpu utilization is greater than ${var.cpu_threshold}%"
   severity            = var.alert_severity
   frequency           = var.alert_frequency
   window_size         = var.alert_window_size
@@ -27,7 +27,7 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
   name                = "db_memory_percent_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
-  description         = "Whenever the memory utilization is greater than ${var.memory_threshold}"
+  description         = "Whenever the memory utilization is greater than ${var.memory_threshold}%"
   severity            = var.alert_severity
   frequency           = var.alert_frequency
   window_size         = var.alert_window_size
@@ -51,7 +51,7 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
   name                = "db_storage_utilization_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
-  description         = "Whenever the storage utilization is greater than ${var.storage_threshold}"
+  description         = "Whenever the storage utilization is greater than ${var.storage_threshold}%"
   severity            = var.alert_severity
   frequency           = var.alert_frequency
   window_size         = var.alert_window_size
