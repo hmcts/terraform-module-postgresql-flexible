@@ -294,9 +294,9 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 |------|-------------|------|---------|:--------:|
 | <a name="input_action_group_name"></a> [action\_group\_name](#input\_action\_group\_name) | The name of the Action Group to create. | `string` | `"db_alerts_action_group_name"` | no |
 | <a name="input_admin_user_object_id"></a> [admin\_user\_object\_id](#input\_admin\_user\_object\_id) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally. If you are using Jenkins pass through the variable 'jenkins\_AAD\_objectId'. | `any` | `null` | no |
-| <a name="input_alert_frequency"></a> [alert\_frequency](#input\_alert\_frequency) | The frequency of the alert check. | `string` | `"PT1H"` | no |
+| <a name="input_alert_frequency"></a> [alert\_frequency](#input\_alert\_frequency) | The frequency of the alert check. | `string` | `"PT5M"` | no |
 | <a name="input_alert_severity"></a> [alert\_severity](#input\_alert\_severity) | The severity level of the alert (1=Critical, 2=Warning ...). | `number` | `1` | no |
-| <a name="input_alert_window_size"></a> [alert\_window\_size](#input\_alert\_window\_size) | The period over which the metric is evaluated. | `string` | `"P1D"` | no |
+| <a name="input_alert_window_size"></a> [alert\_window\_size](#input\_alert\_window\_size) | The period over which the metric is evaluated. | `string` | `"PT15M"` | no |
 | <a name="input_auto_grow_enabled"></a> [auto\_grow\_enabled](#input\_auto\_grow\_enabled) | Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false. | `bool` | `false` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `35` | no |
 | <a name="input_business_area"></a> [business\_area](#input\_business\_area) | business\_area name - sds or cft. | `any` | n/a | yes |
