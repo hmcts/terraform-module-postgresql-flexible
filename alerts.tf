@@ -16,6 +16,8 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
     aggregation      = "Average"
     operator         = "GreaterThan"
     threshold        = var.cpu_threshold
+    evaluation_total_count = 4
+    evaluation_failure_count = 1
   }
   action {
     action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
@@ -40,6 +42,8 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
     aggregation      = "Average"
     operator         = "GreaterThan"
     threshold        = var.memory_threshold
+    evaluation_total_count = 4
+    evaluation_failure_count = 1
   }
   action {
     action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
@@ -64,6 +68,8 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
     aggregation      = "Average"
     operator         = "GreaterThan"
     threshold        = var.storage_threshold
+    evaluation_total_count = 4
+    evaluation_failure_count = 1
   }
   action {
     action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
