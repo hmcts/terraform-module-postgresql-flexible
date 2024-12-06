@@ -14,10 +14,8 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
     metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
     metric_name      = "cpu_percent"
     aggregation      = "Average"
-    operator         = "GreaterThan"
+    operator         = "GreaterThanOrEqual"
     threshold        = var.cpu_threshold
-    evaluation_total_count = 4
-    evaluation_failure_count = 1
   }
   action {
     action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
@@ -40,10 +38,8 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
     metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
     metric_name      = "memory_percent"
     aggregation      = "Average"
-    operator         = "GreaterThan"
+    operator         = "GreaterThanOrEqual"
     threshold        = var.memory_threshold
-    evaluation_total_count = 4
-    evaluation_failure_count = 1
   }
   action {
     action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
@@ -66,10 +62,8 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
     metric_namespace = "Microsoft.DBforPostgreSQL/flexibleServers"
     metric_name      = "storage_percent"
     aggregation      = "Average"
-    operator         = "GreaterThan"
+    operator         = "GreaterThanOrEqual"
     threshold        = var.storage_threshold
-    evaluation_total_count = 4
-    evaluation_failure_count = 1
   }
   action {
     action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
