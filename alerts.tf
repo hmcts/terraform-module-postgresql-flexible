@@ -6,7 +6,6 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
   description         = "Whenever the cpu utilization is greater than ${var.cpu_threshold}"
   severity            = var.alert_severity
   frequency           = var.alert_frequency
-  window_size         = var.alert_window_size
 
   tags = var.common_tags
 
@@ -30,7 +29,6 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
   description         = "Whenever the memory utilization is greater than ${var.memory_threshold}"
   severity            = var.alert_severity
   frequency           = var.alert_frequency
-  window_size         = var.alert_window_size
 
   tags = var.common_tags
 
@@ -54,7 +52,6 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
   description         = "Whenever the storage utilization is greater than ${var.storage_threshold}"
   severity            = var.alert_severity
   frequency           = var.alert_frequency
-  window_size         = var.alert_window_size
 
   tags = var.common_tags
 
