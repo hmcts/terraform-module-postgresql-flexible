@@ -234,13 +234,13 @@ variable "alert_severity" {
 variable "alert_frequency" {
   description = "The frequency of the alert check."
   type        = string
-  default     = "PT1H"
+  default     = "PT5M"
 }
 
 variable "alert_window_size" {
   description = "The period over which the metric is evaluated."
   type        = string
-  default     = "P1D"
+  default     = "PT15M"
 }
 
 variable "email_address_key" {
