@@ -240,7 +240,7 @@ variable "alert_frequency" {
 variable "alert_window_size" {
   description = "The period over which the metric is evaluated."
   type        = string
-  default     = "PT30D"
+  default     = "PT15M"
 }
 
 variable "email_address_key" {
