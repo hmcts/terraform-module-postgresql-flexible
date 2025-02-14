@@ -19,7 +19,7 @@ variables:
   - name: timeoutInMinutes
     value: 60
   - name: agentImage
-    value: ubuntu-20.04
+    value: ubuntu-latest
   - template: vars/input-variables.yaml@cnp-azuredevops-libraries
 
 stages:
