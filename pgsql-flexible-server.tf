@@ -50,7 +50,7 @@ data "azuread_group" "db_admin" {
 }
 
 data "azuread_service_principal" "mi_name" {
-  count     = var.enable_read_only_group_access ? 1 : 0
+  count     = var.admin_user_object_id != null ? 1 : 0
   object_id = var.admin_user_object_id
 }
 
@@ -156,7 +156,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
-  count               = var.enable_read_only_group_access ? 1 : 0
+  count               = var.admin_user_object_id != null ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -169,7 +169,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
+  for_each = var.enable_read_only_group_access && var.admin_user_object_id != null ? { for index, db in var.pgsql_databases : db.name => db } : {}
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
