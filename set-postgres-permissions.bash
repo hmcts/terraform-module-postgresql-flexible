@@ -70,3 +70,14 @@ export PGDATABASE="${DB_NAME}"
 export PGUSER="${DB_USER}"
 psql -c "${SQL_COMMAND}"
 set +x
+
+# New Section: Remove a specific group from the database
+REMOVE_GROUP_COMMAND="
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM \"DTS Platform Operations\";
+DROP ROLE IF EXISTS \"DTS Platform Operations\";
+"
+
+echo "Removing group 'DTS Platform Operations' from database '${DB_NAME}'..."
+set -x
+psql -h "$DB_HOST_NAME" -U "$DB_ADMIN" -d "$DB_NAME" -c "${REMOVE_GROUP_COMMAND}"
+set +x

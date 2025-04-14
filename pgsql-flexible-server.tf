@@ -13,7 +13,7 @@ locals {
 
   is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
-  admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  # admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 
@@ -44,10 +44,10 @@ data "azurerm_subnet" "pg_subnet" {
 
 data "azurerm_client_config" "current" {}
 
-data "azuread_group" "db_admin" {
-  display_name     = local.admin_group
-  security_enabled = true
-}
+# data "azuread_group" "db_admin" {
+#   display_name     = local.admin_group
+#   security_enabled = true
+# }
 
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
