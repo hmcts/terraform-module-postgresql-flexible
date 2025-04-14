@@ -38,21 +38,21 @@ stages:
               forcePreventParallelJobRun: true
 
 
-  #- stage: Test
-    #dependsOn: Precheck
-    #jobs:
-      #- job: TerraformTest
-        #pool: 
-          #vmImage: ${{ variables.agentImage }}
-        #timeoutInMinutes: ${{ variables.timeoutInMinutes }}
-        #workspace:
-          #clean: all
-        #steps:
-        #- task: AzureCLI@2
-          #inputs:
-            #azureSubscription: 'DTS-SHAREDSERVICES-TEST'
-            #scriptType: 'bash'
-            #scriptLocation: 'inlineScript'
-            #inlineScript: |
-              #terraform init
-              #terraform test
+  - stage: Test
+    dependsOn: Precheck
+    jobs:
+      - job: TerraformTest
+        pool: 
+          vmImage: ${{ variables.agentImage }}
+        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
+        workspace:
+          clean: all
+        steps:
+        - task: AzureCLI@2
+          inputs:
+            azureSubscription: 'DTS-SHAREDSERVICES-TEST'
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              terraform init
+              terraform test
