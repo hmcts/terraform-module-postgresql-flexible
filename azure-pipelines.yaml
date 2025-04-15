@@ -37,13 +37,17 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
-          - template: steps/install-use-tfswitch.yaml@cnp-azuredevops-libraries
+  - stage: Precheck
+    jobs:
+      - job:
+        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
+        steps:
+          - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
             parameters:
-              keyvaultName: 'infra-vault-nonprod'
-              keyvaultSecret: 'azure-devops-sp-token'
-              serviceConnection: 'azurerm-sandbox'
-              overrideAction: 'plan'
-              forcePreventParallelJobRun: true
+              overrideAction: ${{ parameters.action }}
+              keyvaultName: "infra-vault-nonprod"
+              keyvaultSecret: "azure-devops-sp-token"
+              serviceConnection: "DCD-CFT-Sandbox"
 
 
   - stage: Test
