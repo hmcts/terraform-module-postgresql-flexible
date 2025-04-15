@@ -25,9 +25,12 @@ variables:
 stages:
   - stage: PrecheckAndTest
     jobs:
-      - job: Precheck
+      - job: PrecheckAndTest
         pool: 
           vmImage: ${{ variables.agentImage }}
+        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
+        workspace:
+          clean: all
         steps:
           - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
             parameters:
@@ -37,19 +40,7 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
-      - job: Test
-        dependsOn: Precheck
-        pool: 
-          vmImage: ${{ variables.agentImage }}
-        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
-        workspace:
-          clean: all
-        steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'DTS-SHAREDSERVICES-TEST'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                terraform init
-                terraform test
+          - script: |
+              terraform init
+              terraform test
+            displayName: "Run Terraform Commands"
