@@ -15,16 +15,6 @@ resources:
       name: hmcts/cnp-azuredevops-libraries
       endpoint: 'hmcts'
 
-
-parameters:
-  - name: action
-    displayName: Action
-    type: string
-    default: plan
-    values:
-      - plan
-      - apply
-
 variables:
   - name: timeoutInMinutes
     value: 60
@@ -46,13 +36,6 @@ stages:
               serviceConnection: 'azurerm-sandbox'
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
-
-          - template: steps/install-use-tfswitch.yaml@cnp-azuredevops-libraries
-            parameters:
-              overrideAction: ${{ parameters.action }}
-              keyvaultName: "infra-vault-nonprod"
-              keyvaultSecret: "azure-devops-sp-token"
-              serviceConnection: "DCD-CFT-Sandbox"
 
 
   - stage: Test
