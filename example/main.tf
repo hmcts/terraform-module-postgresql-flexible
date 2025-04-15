@@ -1,3 +1,5 @@
+/* Removing temp DB - platops-example-test
+
 module "postgresql" {
 
   providers = {
@@ -33,3 +35,4 @@ module "common_tags" {
   environment = var.env
   product     = "sds-platform"
 }
+*/
