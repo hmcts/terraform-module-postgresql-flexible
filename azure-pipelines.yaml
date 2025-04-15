@@ -23,29 +23,9 @@ variables:
   - template: vars/input-variables.yaml@cnp-azuredevops-libraries
 
 stages:
-  - stage: InstallTerraform
-    displayName: Install Terraform
+  - stage: PrecheckAndTest
     jobs:
-      - job: InstallTerraformJob
-        displayName: Install Terraform
-        pool:
-          vmImage: ${{ variables.agentImage }}
-        steps:
-          - task: Bash@3
-            displayName: Install Terraform
-            inputs:
-              targetType: 'inline'
-              script: |
-                echo "Installing Terraform..."
-                curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-                echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-                apt-get update && apt-get install -y terraform
-                terraform --version
-
-  - stage: Precheck
-    dependsOn: InstallTerraform
-    jobs:
-      - job:
+      - job: Precheck
         pool: 
           vmImage: ${{ variables.agentImage }}
         steps:
@@ -57,21 +37,19 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
-  - stage: Test
-    dependsOn: Precheck
-    jobs:
-      - job: TerraformTest
+      - job: Test
+        dependsOn: Precheck
         pool: 
           vmImage: ${{ variables.agentImage }}
         timeoutInMinutes: ${{ variables.timeoutInMinutes }}
         workspace:
           clean: all
         steps:
-        - task: AzureCLI@2
-          inputs:
-            azureSubscription: 'DTS-SHAREDSERVICES-TEST'
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: |
-              terraform init
-              terraform test
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'DTS-SHAREDSERVICES-TEST'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                terraform init
+                terraform test
