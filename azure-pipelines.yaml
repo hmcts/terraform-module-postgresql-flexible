@@ -47,7 +47,7 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
-          - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
+          - template: steps/install-use-tfswitch.yaml@cnp-azuredevops-libraries
             parameters:
               overrideAction: ${{ parameters.action }}
               keyvaultName: "infra-vault-nonprod"
