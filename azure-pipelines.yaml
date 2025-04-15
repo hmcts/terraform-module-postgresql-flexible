@@ -15,6 +15,16 @@ resources:
       name: hmcts/cnp-azuredevops-libraries
       endpoint: 'hmcts'
 
+
+parameters:
+  - name: action
+    displayName: Action
+    type: string
+    default: plan
+    values:
+      - plan
+      - apply
+
 variables:
   - name: timeoutInMinutes
     value: 60
