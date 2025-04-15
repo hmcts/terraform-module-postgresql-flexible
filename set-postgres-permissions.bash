@@ -36,6 +36,22 @@ set +x
 
 export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)
 
+
+REMOVE_GROUP_COMMAND="
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM \"DTS Platform Operations\";
+DROP ROLE IF EXISTS \"DTS Platform Operations\";
+"
+
+echo "Removing group 'DTS Platform Operations' from database '${DB_NAME}'..."
+set -x
+psql -h "$DB_HOST_NAME" -U "$DB_ADMIN" -d "$DB_NAME" -c "${REMOVE_GROUP_COMMAND}"
+set +x
+
+echo "Removing 'DTS Platform Operations' from Entra Admin Users..."
+az ad group delete --group "DTS Platform Operations"
+
+echo "Group removal process completed."
+
 SQL_COMMAND_POSTGRES="
 DO
 \$do\$
@@ -71,12 +87,3 @@ export PGUSER="${DB_USER}"
 psql -c "${SQL_COMMAND}"
 set +x
 
-REMOVE_GROUP_COMMAND="
-REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM \"DTS Platform Operations\";
-DROP ROLE IF EXISTS \"DTS Platform Operations\";
-"
-
-echo "Removing group 'DTS Platform Operations' from database '${DB_NAME}'..."
-set -x
-psql -h "$DB_HOST_NAME" -U "$DB_ADMIN" -d "$DB_NAME" -c "${REMOVE_GROUP_COMMAND}"
-set +x
