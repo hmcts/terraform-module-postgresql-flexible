@@ -37,6 +37,15 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
+          - template: steps/install-use-tfswitch.yaml@cnp-azuredevops-libraries
+            parameters:
+              keyvaultName: 'infra-vault-nonprod'
+              keyvaultSecret: 'azure-devops-sp-token'
+              serviceConnection: 'azurerm-sandbox'
+              overrideAction: 'plan'
+              forcePreventParallelJobRun: true
+
+
   - stage: Test
     dependsOn: Precheck
     jobs:
