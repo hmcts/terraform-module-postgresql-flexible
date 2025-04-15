@@ -47,11 +47,6 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
-  - stage: Precheck
-    jobs:
-      - job:
-        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
-        steps:
           - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
             parameters:
               overrideAction: ${{ parameters.action }}
