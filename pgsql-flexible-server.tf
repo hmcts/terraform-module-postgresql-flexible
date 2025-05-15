@@ -14,6 +14,7 @@ locals {
   is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  db_report_group = "DTS Production DB Reporting"
   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 
@@ -155,6 +156,19 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   ]
 }
 
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_db_report_admin" {
+  count                = local.is_prod && var.enable_db_report_privileges ? 1 : 0
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azuread_group.db_admin.object_id
+  principal_name      = local.db_report_group
+  principal_type      = "Group"
+  depends_on = [
+    azurerm_postgresql_flexible_server.pgsql_server
+  ]
+}
+
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
   count               = var.enable_read_only_group_access ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
@@ -222,5 +236,44 @@ resource "null_resource" "set-schema-ownership" {
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
+  ]
+}
+
+resource "null_resource" "set-db-report-privileges" {
+  for_each = local.is_prod && var.enable_db_report_privileges ? {
+    for db in var.pgsql_databases :
+    db.name => db
+    if (
+      contains(keys(db), "report_privilege_schema") &&
+      contains(keys(db), "report_privilege_tables") &&
+      length(db.report_privilege_schema) > 0 &&
+      length(db.report_privilege_tables) > 0
+    )
+  } : {}
+  triggers = {
+    script_hash   = filesha256("${path.module}/set-postgres-db-report-privileges.bash")
+    name          = local.name
+    force_trigger = var.force_db_report_privileges_trigger
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/set-postgres-db-report-privileges.bash"
+
+    environment = {
+      PGHOST           = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_NAME          = each.value.name
+      KV_NAME          = var.kv_name
+      KV_SUBSCRIPTION  = var.kv_subscription
+      USER_SECRET_NAME = local.user_secret_name
+      PASS_SECRET_NAME = local.pass_secret_name
+      REPORT_GROUP     = local.db_report_group
+      REPORT_PRIVILEGE_SCHEMA   = try(each.value.report_privilege_schema, "")
+      REPORT_PRIVILEGE_TABLES   = join(" ", try(each.value.report_privilege_tables, []))
+    }
+  }
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
+    azurerm_postgresql_flexible_server_database.pg_databases,
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin
   ]
 }

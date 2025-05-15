@@ -254,3 +254,15 @@ variable "email_address_key_vault_id" {
   type        = string
   default     = ""
 }
+
+variable "enable_db_report_privileges" {
+  description = "Bool for if db is used in postgresql-cron-jobs pipeline. Sets perms."
+  type = bool
+  default = false
+}
+
+variable "force_db_report_privileges_trigger" {
+ description = "Update this to a new value to force set_db_report_permissions script to re-run."
+ type = string
+ default = "" 
+}
