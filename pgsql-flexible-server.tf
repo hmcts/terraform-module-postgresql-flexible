@@ -244,11 +244,9 @@ resource "null_resource" "set-db-report-privileges" {
     for db in var.pgsql_databases :
     db.name => db
     if (
-      contains(keys(db), "report_privilege_schema") &&
-      contains(keys(db), "report_privilege_tables") &&
-      length(db.report_privilege_schema) > 0 &&
-      length(db.report_privilege_tables) > 0
-    )
+    try(length(db.report_privilege_schema), 0) > 0 &&
+    try(length(db.report_privilege_tables), 0) > 0
+  )
   } : {}
   triggers = {
     script_hash   = filesha256("${path.module}/set-postgres-db-report-privileges.bash")
