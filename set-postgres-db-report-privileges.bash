@@ -28,7 +28,7 @@ if [[ $SINGLE_SERVER_USER == *'@'* ]]; then
 fi
 
 export PGUSER="${SINGLE_SERVER_USER}"
-export PGPASSWORD=$SINGLE_SERVER_PASS
+export PGPASSWORD="${SINGLE_SERVER_PASS}"
 export PGDATABASE="${DB_NAME}"
 
 IFS=' ' read -r -a TABLES <<< "$REPORT_TABLES"
