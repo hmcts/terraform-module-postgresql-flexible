@@ -50,6 +50,11 @@ data "azuread_group" "db_admin" {
   security_enabled = true
 }
 
+data "azuread_group" "db_report_admin" {
+  display_name     = local.db_report_group
+  security_enabled = true
+}
+
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
   object_id = var.admin_user_object_id
@@ -161,7 +166,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_group.db_admin.object_id
+  object_id           = data.azuread_group.db_report_group.object_id
   principal_name      = local.db_report_group
   principal_type      = "Group"
   depends_on = [
