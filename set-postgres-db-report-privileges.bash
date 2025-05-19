@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -x # enable debug mode
 export PGPORT=5432
 #export AZURE_CONFIG_DIR=~/.azure-db-manager
 #az login --identity
@@ -33,7 +33,6 @@ export PGDATABASE="${DB_NAME}"
 
 IFS=' ' read -r -a TABLES <<< "$REPORT_TABLES"
 
-set -x # enable debug mode
 # Loop through tables object per DB/Schema
 for table in "${TABLES[@]}"; do
    SQL_COMMAND="GRANT SELECT ON TABLE $REPORT_PRIVILEGE_SCHEMA.$table TO \"$REPORT_GROUP\";"
