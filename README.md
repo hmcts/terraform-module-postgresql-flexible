@@ -246,6 +246,42 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 
 </details>
 
+## Reporting through postgresql-cron-jobs pipeline
+
+### Terraform configuration
+
+If your database is queried by the postgresql-cron-jobs pipeline, read permissions can be assigned to tables for the 'DTS Production DB Reporting' group utilized in the pipeline in the following way.
+
+First enable this feature with the following bool parameter:
+
+```yaml
+enable_db_report_privileges = true
+```
+
+Where pgsql_databases is defined, add the following for each database object declaration:
+
+```yaml
+pgsql_databases = [
+    {
+      name : "pg_database"
+      report_privilege_schema : "public"
+      report_privilege_tables : ["beetroot", "carrot"]
+    },
+    {
+      name : "pg_database2"
+    }
+]
+```
+In this example _beetroot_ and _carrot_ tables in _pg_database_ will be granted read rights for 'DTS Production DB Reporting' Entra group; no tables on _pg_database2_ will be granted read rights.
+
+### Retriggering 
+
+The database privileges will be granted only on the first terraform run. To reapply, the terraform can be retriggered to run by setting the following parameter and subsequently updating its value each time a reapply is needed:
+
+```yaml
+force_db_report_privileges_trigger = "1"
+```
+
 <!-- BEGIN_TF_DOCS -->
 
 

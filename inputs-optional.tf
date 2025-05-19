@@ -256,7 +256,7 @@ variable "email_address_key_vault_id" {
 }
 
 variable "enable_db_report_privileges" {
-  description = "Bool for if db is used in postgresql-cron-jobs pipeline. Sets perms."
+  description = "Bool for if db is used in postgresql-cron-jobs pipeline. Sets read perms on tables listed in pgsql_databases."
   type = bool
   default = false
 }
