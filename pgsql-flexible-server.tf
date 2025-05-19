@@ -11,7 +11,7 @@ locals {
 
   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
 
-  is_prod = true
+  is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
   db_report_group = "DTS Production DB Reporting"
