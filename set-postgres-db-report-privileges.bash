@@ -8,7 +8,7 @@ az login --identity
 COUNT=0;
 MAX=10;
 while true; do
-   ping -c 1 $DB_HOST_NAME &>/dev/null
+   ping -c 1 $PGHOST &>/dev/null
    if [[ $? -eq 0 ]]; then
       break
    fi
