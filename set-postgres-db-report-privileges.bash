@@ -36,7 +36,7 @@ IFS=' ' read -r -a TABLES <<< "$REPORT_TABLES"
 set -x # enable debug mode
 # Loop through tables object per DB/Schema
 for table in "${TABLES[@]}"; do
-   SQL_COMMAND="GRANT SELECT ON TABLE $REPORT_PRIVILEGE_SCHEMA.$table TO $REPORT_GROUP;"
+   SQL_COMMAND="GRANT SELECT ON TABLE $REPORT_PRIVILEGE_SCHEMA.$table TO \"$REPORT_GROUP\";"
    psql -c "${SQL_COMMAND}"
 done
 set +x # disable debug mode
