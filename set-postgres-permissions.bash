@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 export PGPORT=5432
-export AZURE_CONFIG_DIR=~/.azure-db-manager
-az login --identity
+#export AZURE_CONFIG_DIR=~/.azure-db-manager
+#az login --identity
 
 ## Delay until DB DNS and propagated
 COUNT=0;
