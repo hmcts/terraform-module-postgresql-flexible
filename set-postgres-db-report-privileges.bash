@@ -31,8 +31,8 @@ export PGUSER="${SINGLE_SERVER_USER}"
 export PGPASSWORD="${SINGLE_SERVER_PASS}"
 export PGDATABASE="${DB_NAME}"
 
-echo 'Report Tables: ' $REPORT_TABLES
-IFS=' ' read -r -a TABLES <<< "$REPORT_TABLES"
+echo 'Report Tables: ' $REPORT_PRIVILEGE_TABLES
+IFS=' ' read -r -a TABLES <<< "$REPORT_PRIVILEGE_TABLES"
 echo 'TABLES: ' "${TABLES[@]}"
 # Loop through tables object per DB/Schema
 for table in "${TABLES[@]}"; do
