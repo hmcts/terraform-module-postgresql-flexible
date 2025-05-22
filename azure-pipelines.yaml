@@ -44,3 +44,4 @@ stages:
               terraform init
               terraform test
             displayName: "Run Terraform Commands"
+            workingDirectory: $(Build.SourcesDirectory)/tests
