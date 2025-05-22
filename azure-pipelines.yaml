@@ -23,14 +23,11 @@ variables:
   - template: vars/input-variables.yaml@cnp-azuredevops-libraries
 
 stages:
-  - stage: PrecheckAndTest
+  - stage: Precheck
     jobs:
-      - job: PrecheckAndTest
+      - job:
         pool: 
           vmImage: ${{ variables.agentImage }}
-        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
-        workspace:
-          clean: all
         steps:
           - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
             parameters:
@@ -40,8 +37,22 @@ stages:
               overrideAction: 'plan'
               forcePreventParallelJobRun: true
 
-          - script: |
-              terraform init
-              terraform test
-            displayName: "Run Terraform Commands"
-            workingDirectory: $(Build.SourcesDirectory)/terraform-module-postgresql-flexible/tests
+
+  # - stage: Test
+  #   dependsOn: Precheck
+  #   jobs:
+  #     - job: TerraformTest
+  #       pool: 
+  #         vmImage: ${{ variables.agentImage }}
+  #       timeoutInMinutes: ${{ variables.timeoutInMinutes }}
+  #       workspace:
+  #         clean: all
+  #       steps:
+  #       - task: AzureCLI@2
+  #         inputs:
+  #           azureSubscription: 'DTS-SHAREDSERVICES-TEST'
+  #           scriptType: 'bash'
+  #           scriptLocation: 'inlineScript'
+  #           inlineScript: |
+  #             terraform init
+  #             terraform test
