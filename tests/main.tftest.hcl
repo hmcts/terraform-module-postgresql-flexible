@@ -27,7 +27,7 @@ variables {
 
 run "setup" {
   module {
-    source = "./tests/modules/setup"
+    source = "./modules/setup"
   }
 }
 run "default" {
