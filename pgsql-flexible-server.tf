@@ -26,14 +26,19 @@ locals {
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
+
+  email_address_key_vault_data = var.email_address_key != "" && var.email_address_key_vault_id != "" ? {
+    name         = var.email_address_key,
+    key_vault_id = var.email_address_key_vault_id
+  } : {}
 }
 
 data "azurerm_key_vault_secret" "email_address" {
-  count        = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
-  name         = var.email_address_key
-  key_vault_id = var.email_address_key_vault_id
-}
+  for_each = local.email_address_key_vault_data != {} ? { "email_address" : local.email_address_key_vault_data } : {}
 
+  name         = each.value.name
+  key_vault_id = each.value.key_vault_id
+}
 data "azurerm_subnet" "pg_subnet" {
   provider             = azurerm.postgres_network
   name                 = local.subnet_name

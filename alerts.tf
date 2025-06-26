@@ -1,5 +1,5 @@
 resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
-  count               = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
+  for_each            = local.email_address_key_vault_data != {} ? { "email_address" : local.email_address_key_vault_data } : {}
   name                = "db_cpu_percent_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
@@ -18,12 +18,12 @@ resource "azurerm_monitor_metric_alert" "db_alert_cpu" {
     threshold        = var.cpu_threshold
   }
   action {
-    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
+    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[each.key].id
   }
 }
 
 resource "azurerm_monitor_metric_alert" "db_alert_memory" {
-  count               = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
+  for_each            = local.email_address_key_vault_data != {} ? { "email_address" : local.email_address_key_vault_data } : {}
   name                = "db_memory_percent_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
@@ -42,12 +42,12 @@ resource "azurerm_monitor_metric_alert" "db_alert_memory" {
     threshold        = var.memory_threshold
   }
   action {
-    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
+    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[each.key].id
   }
 }
 
 resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
-  count               = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
+  for_each            = local.email_address_key_vault_data != {} ? { "email_address" : local.email_address_key_vault_data } : {}
   name                = "db_storage_utilization_${local.server_name}"
   resource_group_name = local.postgresql_rg_name
   scopes              = [azurerm_postgresql_flexible_server.pgsql_server.id]
@@ -66,6 +66,6 @@ resource "azurerm_monitor_metric_alert" "db_alert_storage_utilization" {
     threshold        = var.storage_threshold
   }
   action {
-    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[count.index].id
+    action_group_id = azurerm_monitor_action_group.db-alerts-action-group[each.key].id
   }
 }
