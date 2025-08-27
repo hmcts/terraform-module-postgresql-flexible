@@ -265,7 +265,7 @@ resource "null_resource" "set-db-report-privileges" {
     environment = {
       PGHOST                  = azurerm_postgresql_flexible_server.pgsql_server.fqdn
       DB_NAME                 = each.value.name
-      KV_NAME                 = var.kv_name
+      KV_NAME                 = local.kv_name
       KV_SUBSCRIPTION         = var.kv_subscription
       USER_SECRET_NAME        = local.user_secret_name
       PASS_SECRET_NAME        = local.pass_secret_name
