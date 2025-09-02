@@ -159,6 +159,17 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   depends_on = [
     azurerm_postgresql_flexible_server.pgsql_server
   ]
+
+  lifecycle {
+    # Prevent replacement due to provider bug with AD administrator management
+    # See: https://github.com/hashicorp/terraform-provider-azurerm/issues/23851
+    # See: https://github.com/hashicorp/terraform-provider-azurerm/issues/27383
+    ignore_changes = [
+      object_id,
+      principal_name,
+      tenant_id
+    ]
+  }
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_db_report_admin" {
@@ -185,6 +196,17 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
   ]
+
+  lifecycle {
+    # Prevent replacement due to provider bug with AD administrator management
+    # See: https://github.com/hashicorp/terraform-provider-azurerm/issues/23851
+    # See: https://github.com/hashicorp/terraform-provider-azurerm/issues/27383
+    ignore_changes = [
+      object_id,
+      principal_name,
+      tenant_id
+    ]
+  }
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
