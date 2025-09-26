@@ -1,3 +1,5 @@
+/* Removing temp DB - platops-example-test
+
 module "postgresql" {
 
   providers = {
@@ -15,10 +17,16 @@ module "postgresql" {
 
   enable_read_only_group_access = false
 
+  # If using postgresql-cron-jobs for reporting, set this to apply appropriate read permissions
+  enable_db_report_privileges = true
+
   common_tags = module.common_tags.common_tags
   pgsql_databases = [
     {
       name : "application"
+      # If using postgresql-cron-jobs for reporting, set these to apply appropriate read permissions
+      report_privilege_schema : "public"
+      report_privilege_tables : ["nutmeg", "ginger"]
     }
   ]
   pgsql_version = "16"
@@ -33,3 +41,4 @@ module "common_tags" {
   environment = var.env
   product     = "sds-platform"
 }
+*/

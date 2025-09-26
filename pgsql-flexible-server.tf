@@ -13,8 +13,9 @@ locals {
 
   is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
-  admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
-  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
+  admin_group     = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  db_report_group = "DTS Production DB Reporting"
+  db_reader_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
@@ -25,6 +26,12 @@ locals {
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
+}
+
+data "azurerm_key_vault_secret" "email_address" {
+  count        = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
+  name         = var.email_address_key
+  key_vault_id = var.email_address_key_vault_id
 }
 
 data "azurerm_subnet" "pg_subnet" {
@@ -43,22 +50,36 @@ data "azuread_group" "db_admin" {
   security_enabled = true
 }
 
+data "azuread_group" "db_report_admin" {
+  display_name     = local.db_report_group
+  security_enabled = true
+}
+
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
   object_id = var.admin_user_object_id
+}
+
+resource "terraform_data" "trigger_password_reset" {
+  input = var.trigger_password_reset
 }
 
 resource "random_password" "password" {
   length = 20
   # safer set of special characters for pasting in the shell
   override_special = "()-_"
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.trigger_password_reset]
+  }
 }
 
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
-  name                = local.server_name
-  resource_group_name = local.postgresql_rg_name
-  location            = local.postgresql_rg_location
-  version             = var.pgsql_version
+  name                          = local.server_name
+  resource_group_name           = local.postgresql_rg_name
+  location                      = local.postgresql_rg_location
+  version                       = var.pgsql_version
+  public_network_access_enabled = var.public_access
 
   create_mode                       = var.create_mode
   point_in_time_restore_time_in_utc = var.restore_time
@@ -71,6 +92,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   administrator_password = random_password.password.result
 
   storage_mb        = var.pgsql_storage_mb
+  storage_tier      = var.pgsql_storage_tier
   auto_grow_enabled = var.auto_grow_enabled
 
   sku_name = var.pgsql_sku
@@ -109,10 +131,18 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 }
 
 resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
-  for_each = {
-    for index, config in var.pgsql_server_configuration :
-    config.name => config
-  }
+  for_each = merge(
+    {
+      for config in var.pgsql_server_configuration :
+      config.name => config
+    },
+    var.enable_qpi ? {
+      "pg_qs.query_capture_mode"              = { name = "pg_qs.query_capture_mode", value = "ALL" },
+      "log_lock_waits"                        = { name = "log_lock_waits", value = "on" },
+      "pgms_wait_sampling.query_capture_mode" = { name = "pgms_wait_sampling.query_capture_mode", value = "ALL" }
+      "track_io_timing"                       = { name = "track_io_timing", value = "on" }
+    } : {}
+  )
 
   name      = each.value.name
   server_id = azurerm_postgresql_flexible_server.pgsql_server.id
@@ -125,6 +155,19 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   tenant_id           = data.azurerm_client_config.current.tenant_id
   object_id           = data.azuread_group.db_admin.object_id
   principal_name      = local.admin_group
+  principal_type      = "Group"
+  depends_on = [
+    azurerm_postgresql_flexible_server.pgsql_server
+  ]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_db_report_admin" {
+  count               = local.is_prod && var.enable_db_report_privileges ? 1 : 0
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azuread_group.db_report_admin.object_id
+  principal_name      = local.db_report_group
   principal_type      = "Group"
   depends_on = [
     azurerm_postgresql_flexible_server.pgsql_server
@@ -198,5 +241,42 @@ resource "null_resource" "set-schema-ownership" {
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
+  ]
+}
+
+resource "null_resource" "set-db-report-privileges" {
+  for_each = local.is_prod && var.enable_db_report_privileges ? {
+    for db in var.pgsql_databases :
+    db.name => db
+    if(
+      try(length(db.report_privilege_schema), 0) > 0 &&
+      try(length(db.report_privilege_tables), 0) > 0
+    )
+  } : {}
+  triggers = {
+    script_hash   = filesha256("${path.module}/set-postgres-db-report-privileges.bash")
+    name          = local.name
+    force_trigger = var.force_db_report_privileges_trigger
+  }
+
+  provisioner "local-exec" {
+    command = "${path.module}/set-postgres-db-report-privileges.bash"
+
+    environment = {
+      PGHOST                  = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_NAME                 = each.value.name
+      KV_NAME                 = local.kv_name
+      KV_SUBSCRIPTION         = var.kv_subscription
+      USER_SECRET_NAME        = local.user_secret_name
+      PASS_SECRET_NAME        = local.pass_secret_name
+      REPORT_GROUP            = local.db_report_group
+      REPORT_PRIVILEGE_SCHEMA = try(each.value.report_privilege_schema, "")
+      REPORT_PRIVILEGE_TABLES = join(" ", try(each.value.report_privilege_tables, []))
+    }
+  }
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
+    azurerm_postgresql_flexible_server_database.pg_databases,
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin
   ]
 }

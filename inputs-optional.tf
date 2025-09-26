@@ -20,20 +20,18 @@ variable "pgsql_sku" {
   description = "The PGSql flexible server instance sku"
   type        = string
   default     = "GP_Standard_D2s_v3"
-
-  validation {
-    condition = can(regex(".*(_v3|_v4|^B_.*$).*", var.pgsql_sku))
-    # because v5 doesn't currently support reservations, if they are supported in the future this restriction should be removed
-    # see https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/
-    # search Ddsv5 and Edsv5
-    error_message = "The pgsql_sku value must use either a v3, v4 or Burstable SKU."
-  }
 }
 
 variable "pgsql_storage_mb" {
   description = "Max storage allowed for the PGSql Flexibile instance"
   type        = number
   default     = 65536
+}
+
+variable "pgsql_storage_tier" {
+  description = "The storage tier, this should be left as null but may need to be overriden to allow increased storage."
+  type        = string
+  default     = null
 }
 
 variable "pgsql_server_configuration" {
@@ -106,7 +104,7 @@ variable "charset" {
 
 variable "high_availability" {
   type        = bool
-  default     = false
+  default     = null
   description = "Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself."
 }
 
@@ -168,4 +166,103 @@ variable "auto_grow_enabled" {
   type        = bool
   default     = false
   description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false."
+}
+
+variable "trigger_password_reset" {
+  type        = string
+  default     = ""
+  description = "Setting this to a different value, e.g. '1' will trigger terraform to rotate the password."
+}
+
+variable "enable_qpi" {
+  type        = bool
+  default     = false
+  description = "Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed"
+}
+
+variable "action_group_name" {
+  description = "The name of the Action Group to create."
+  type        = string
+  default     = "db_alerts_action_group_name"
+}
+
+variable "email_receivers" {
+  description = "A map of email receivers, with keys as names and values as email addresses."
+  type        = map(string)
+  default     = {}
+}
+
+variable "sms_receivers" {
+  description = "A map of SMS receivers, with keys as names and values as maps containing country code and phone number."
+  type = map(object({
+    country_code = string
+    phone_number = string
+  }))
+  default = {}
+}
+
+variable "webhook_receivers" {
+  description = "A map of webhook receivers, with keys as names and values as URLs."
+  type        = map(string)
+  default     = {}
+}
+
+variable "cpu_threshold" {
+  default     = 80
+  type        = number
+  description = "Average CPU utilisation threshold"
+}
+
+variable "memory_threshold" {
+  default     = 80
+  type        = number
+  description = "Average memory utilisation threshold"
+}
+
+variable "storage_threshold" {
+  default     = 80
+  type        = number
+  description = "Average storage utilisation threshold"
+}
+
+variable "alert_severity" {
+  description = "The severity level of the alert (1=Critical, 2=Warning ...)."
+  type        = number
+  default     = 1
+}
+
+variable "alert_frequency" {
+  description = "The frequency of the alert check."
+  type        = string
+  default     = "PT5M"
+}
+
+variable "alert_window_size" {
+  description = "The period over which the metric is evaluated."
+  type        = string
+  default     = "PT15M"
+}
+
+variable "email_address_key" {
+  description = "Email address key in azure Key Vault."
+  type        = string
+  default     = ""
+}
+
+variable "email_address_key_vault_id" {
+  description = "Email address Key Vault Id."
+  type        = string
+  default     = ""
+}
+
+variable "enable_db_report_privileges" {
+  description = "Bool for if db is used in postgresql-cron-jobs pipeline. Sets read perms on tables listed in pgsql_databases."
+  type        = bool
+  default     = false
+}
+
+variable "force_db_report_privileges_trigger" {
+  description = "Update this to a new value to force set_db_report_permissions script to re-run."
+  type        = string
+  default     = ""
 }
