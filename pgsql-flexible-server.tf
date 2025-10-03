@@ -13,7 +13,7 @@ locals {
 
   is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
-  admin_group     = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  admin_group     = local.is_prod ? "DTS Platform Operations PostgreSQL Admin Access SC" : "DTS Platform Operations PostgreSQL Admin Access"
   db_report_group = "DTS Production DB Reporting"
   db_reader_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
