@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 export PGPORT=5432
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
