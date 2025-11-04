@@ -3,6 +3,12 @@
 export PGPORT=5432
 export AZURE_CONFIG_DIR=~/.azure-db-manager
 az login --identity
+# Jenkins withSubscriptionLogin exports ARM_SUBSCRIPTION_ID; az login resets it.
+if [[ -n "${ARM_SUBSCRIPTION_ID:-}" ]]; then
+  az account set --subscription "${ARM_SUBSCRIPTION_ID}"
+else
+  echo "Warning: ARM_SUBSCRIPTION_ID not set; continuing with default subscription" >&2
+fi
 
 ## Delay until DB DNS and propagated
 COUNT=0;
