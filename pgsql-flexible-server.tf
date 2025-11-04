@@ -29,7 +29,7 @@ locals {
 }
 
 data "azurerm_key_vault_secret" "email_address" {
-  count        = var.email_address_key == "" || var.email_address_key_vault_id == "" ? 0 : 1
+  count        = can(var.email_address_key) || can(var.email_address_key_vault_id) ? 1 : 0
   name         = var.email_address_key
   key_vault_id = var.email_address_key_vault_id
 }
