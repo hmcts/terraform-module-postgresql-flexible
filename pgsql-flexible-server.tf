@@ -195,6 +195,10 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     name           = local.name
     db_reader_user = local.db_reader_user
     force_trigger  = var.force_user_permissions_trigger
+    db_reader_schemas = join(
+      ",",
+      coalesce(each.value.schemas_for_reader_access, ["public"])
+    )
   }
 
   provisioner "local-exec" {
@@ -208,6 +212,10 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
       DB_NAME        = each.value.name
       DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
       DB_PASSWORD    = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
+      DB_READER_SCHEMAS = join(
+        ",",
+        coalesce(each.value.schemas_for_reader_access, ["public"])
+      )
     }
   }
   depends_on = [
