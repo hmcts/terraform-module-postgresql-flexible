@@ -49,7 +49,8 @@ module "postgresql" {
 
   pgsql_databases = [
     {
-      name : "application"
+      name                      : "application"
+      schemas_for_reader_access : ["public"]
     }
   ]
 
@@ -266,13 +267,17 @@ pgsql_databases = [
       name : "pg_database"
       report_privilege_schema : "public"
       report_privilege_tables : ["beetroot", "carrot"]
+      schemas_for_reader_access : ["public", "my-custom-schema"]
     },
     {
       name : "pg_database2"
+      schemas_for_reader_access : ["public", "a-different-schema"]
     }
 ]
 ```
 In this example _beetroot_ and _carrot_ tables in _pg_database_ will be granted read rights for 'DTS Production DB Reporting' Entra group; no tables on _pg_database2_ will be granted read rights.
+
+Use the optional `schemas_for_reader_access` list to define which schemas the `DTS JIT Access <product> DB Reader SC` group can read. If it is omitted the module defaults to `["public"]`.
 
 ### Retriggering 
 
@@ -365,7 +370,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pass_secret_name"></a> [pass\_secret\_name](#input\_pass\_secret\_name) | Update this with the name of the secret that stores the single server password. Defaults to product-componenet-POSTGRES-PASS. | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |
-| <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | `list(object({ name : string, collation : optional(string), charset : optional(string), report_privilege_schema : optional(string), report_privilege_tables : optional(list(string)) }))` | n/a | yes |
+| <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | <pre>list(object({<br/>    name                      : string,<br/>    collation                 : optional(string),<br/>    charset                   : optional(string),<br/>    report_privilege_schema   : optional(string),<br/>    report_privilege_tables   : optional(list(string)),<br/>    schemas_for_reader_access : optional(list(string))<br/>  }))</pre> | n/a | yes |
 | <a name="input_pgsql_delegated_subnet_id"></a> [pgsql\_delegated\_subnet\_id](#input\_pgsql\_delegated\_subnet\_id) | PGSql delegated subnet id. | `string` | `""` | no |
 | <a name="input_pgsql_firewall_rules"></a> [pgsql\_firewall\_rules](#input\_pgsql\_firewall\_rules) | Postgres firewall rules | `list(object({ name : string, start_ip_address : string, end_ip_address : string }))` | `[]` | no |
 | <a name="input_pgsql_server_configuration"></a> [pgsql\_server\_configuration](#input\_pgsql\_server\_configuration) | Postgres server configuration | `list(object({ name : string, value : string }))` | <pre>[<br/>  {<br/>    "name": "backslash_quote",<br/>    "value": "on"<br/>  }<br/>]</pre> | no |
