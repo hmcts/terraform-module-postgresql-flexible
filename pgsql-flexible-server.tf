@@ -18,7 +18,7 @@ locals {
   db_reader_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
 
 
-  high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
+  high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod", "test"]
   high_availability              = var.high_availability == null ? contains(local.high_availability_environments, local.env) : var.high_availability
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
