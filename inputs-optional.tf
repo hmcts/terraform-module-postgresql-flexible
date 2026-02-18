@@ -266,3 +266,38 @@ variable "force_db_report_privileges_trigger" {
   type        = string
   default     = ""
 }
+
+variable "service_criticality" {
+  description = "Service criticality rating from 1-5. Services with criticality >= 4 are enrolled in immutable backup vault when enable_immutable_backups is true."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.service_criticality >= 1 && var.service_criticality <= 5
+    error_message = "Service criticality must be between 1 and 5."
+  }
+}
+
+variable "backup_vault_id" {
+  description = "Resource ID of the Azure Data Protection Backup Vault."
+  type        = string
+  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg"
+}
+
+variable "backup_vault_principal_id" {
+  description = "Principal ID of the backup vault's managed identity. Update if vault is recreated."
+  type        = string
+  default     = "14eb7826-b394-488c-b55a-627c58a5d2c3"
+}
+
+variable "backup_policy_id" {
+  description = "Resource ID of the backup policy within the backup vault."
+  type        = string
+  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg/backupPolicies/postgresql-crit4-5"
+}
+
+variable "manage_reader_role_on_rg" {
+  description = "Whether this module should create the Reader role on the resource group for the backup vault's managed identity. Set to false if managed externally."
+  type        = bool
+  default     = true
+}
