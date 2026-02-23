@@ -305,6 +305,7 @@ force_db_report_privileges_trigger = "1"
 
 | Name | Type |
 |------|------|
+| [azurerm_data_protection_backup_instance_postgresql_flexible_server.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/data_protection_backup_instance_postgresql_flexible_server) | resource |
 | [azurerm_log_analytics_workspace.pgsql_log_analytics_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) | resource |
 | [azurerm_monitor_action_group.db-alerts-action-group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
 | [azurerm_monitor_diagnostic_setting.pgsql_diag](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
@@ -319,6 +320,8 @@ force_db_report_privileges_trigger = "1"
 | [azurerm_postgresql_flexible_server_database.pg_databases](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
 | [azurerm_postgresql_flexible_server_firewall_rule.pg_firewall_rules](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_firewall_rule) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
+| [azurerm_role_assignment.backup_vault_postgres_ltr](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_role_assignment.backup_vault_rg_reader](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [null_resource.set-db-report-privileges](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.set-schema-ownership](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.set-user-permissions-additionaldbs](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
@@ -342,7 +345,10 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_alert_severity"></a> [alert\_severity](#input\_alert\_severity) | The severity level of the alert (1=Critical, 2=Warning ...). | `number` | `1` | no |
 | <a name="input_alert_window_size"></a> [alert\_window\_size](#input\_alert\_window\_size) | The period over which the metric is evaluated. | `string` | `"PT15M"` | no |
 | <a name="input_auto_grow_enabled"></a> [auto\_grow\_enabled](#input\_auto\_grow\_enabled) | Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false. | `bool` | `false` | no |
+| <a name="input_backup_policy_id"></a> [backup\_policy\_id](#input\_backup\_policy\_id) | Resource ID of the backup policy within the backup vault. | `string` | `"/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg/backupPolicies/postgresql-crit4-5"` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `35` | no |
+| <a name="input_backup_vault_id"></a> [backup\_vault\_id](#input\_backup\_vault\_id) | Resource ID of the Azure Data Protection Backup Vault. | `string` | `"/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg"` | no |
+| <a name="input_backup_vault_principal_id"></a> [backup\_vault\_principal\_id](#input\_backup\_vault\_principal\_id) | Principal ID of the backup vault's managed identity. Update if vault is recreated. | `string` | `"14eb7826-b394-488c-b55a-627c58a5d2c3"` | no |
 | <a name="input_business_area"></a> [business\_area](#input\_business\_area) | business\_area name - sds or cft. | `any` | n/a | yes |
 | <a name="input_charset"></a> [charset](#input\_charset) | Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset. | `string` | `"utf8"` | no |
 | <a name="input_collation"></a> [collation](#input\_collation) | Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation. | `string` | `"en_GB.utf8"` | no |
@@ -366,6 +372,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the single server secrets. Defaults to product-env. | `string` | `""` | no |
 | <a name="input_kv_subscription"></a> [kv\_subscription](#input\_kv\_subscription) | Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-DEV. | `string` | `"DCD-CNP-DEV"` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
+| <a name="input_manage_reader_role_on_rg"></a> [manage\_reader\_role\_on\_rg](#input\_manage\_reader\_role\_on\_rg) | Whether this module should create the Reader role on the resource group for the backup vault's managed identity. Set to false if managed externally. | `bool` | `true` | no |
 | <a name="input_memory_threshold"></a> [memory\_threshold](#input\_memory\_threshold) | Average memory utilisation threshold | `number` | `80` | no |
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pass_secret_name"></a> [pass\_secret\_name](#input\_pass\_secret\_name) | Update this with the name of the secret that stores the single server password. Defaults to product-componenet-POSTGRES-PASS. | `string` | `""` | no |
@@ -382,6 +389,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_public_access"></a> [public\_access](#input\_public\_access) | Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false. | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of existing resource group to deploy resources into | `string` | `null` | no |
 | <a name="input_restore_time"></a> [restore\_time](#input\_restore\_time) | The point in time to restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
+| <a name="input_service_criticality"></a> [service\_criticality](#input\_service\_criticality) | Service criticality rating from 1-5. Services with criticality >= 4 are enrolled in immutable backup vault when enable\_immutable\_backups is true. | `number` | `1` | no |
 | <a name="input_sms_receivers"></a> [sms\_receivers](#input\_sms\_receivers) | A map of SMS receivers, with keys as names and values as maps containing country code and phone number. | <pre>map(object({<br/>    country_code = string<br/>    phone_number = string<br/>  }))</pre> | `{}` | no |
 | <a name="input_source_server_id"></a> [source\_server\_id](#input\_source\_server\_id) | Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_storage_threshold"></a> [storage\_threshold](#input\_storage\_threshold) | Average storage utilisation threshold | `number` | `80` | no |
@@ -394,8 +402,11 @@ force_db_report_privileges_trigger = "1"
 
 | Name | Description |
 |------|-------------|
+| <a name="output_backup_instance_id"></a> [backup\_instance\_id](#output\_backup\_instance\_id) | The ID of the backup instance. Null if not enrolled. |
+| <a name="output_backup_instance_name"></a> [backup\_instance\_name](#output\_backup\_instance\_name) | The name of the backup instance. Null if not enrolled. |
 | <a name="output_fqdn"></a> [fqdn](#output\_fqdn) | n/a |
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | n/a |
+| <a name="output_is_enrolled_in_backup_vault"></a> [is\_enrolled\_in\_backup\_vault](#output\_is\_enrolled\_in\_backup\_vault) | Whether this PostgreSQL server is enrolled in a backup vault. |
 | <a name="output_password"></a> [password](#output\_password) | n/a |
 | <a name="output_resource_group_location"></a> [resource\_group\_location](#output\_resource\_group\_location) | n/a |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | n/a |
