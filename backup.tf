@@ -51,9 +51,9 @@ resource "azurerm_data_protection_backup_instance_postgresql_flexible_server" "m
   name     = "${local.server_name}-backup-instance"
   location = local.postgresql_rg_location
 
-  vault_id         = data.azurerm_data_protection_backup_vault[0].id
+  vault_id         = data.azurerm_data_protection_backup_vault.vault[0].id
   server_id        = azurerm_postgresql_flexible_server.pgsql_server.id
-  backup_policy_id = var.backup_policy_id
+  backup_policy_id = local.backup_policy_id
 
   depends_on = [
     azurerm_role_assignment.backup_vault_postgres_ltr,
