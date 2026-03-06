@@ -287,7 +287,7 @@ variable "backup_vault_id" {
 variable "backup_vault_principal_id" {
   description = "Principal ID of the backup vault's managed identity. Update if vault is recreated."
   type        = string
-  default     = "14eb7826-b394-488c-b55a-627c58a5d2c3"
+  default     = "851fbf32-435f-454f-9bca-86cda520f567"
 }
 
 variable "backup_policy_id" {
