@@ -331,7 +331,6 @@ force_db_report_privileges_trigger = "1"
 | [azuread_group.db_report_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
-| [azurerm_data_protection_backup_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/data_protection_backup_vault) | data source |
 | [azurerm_key_vault_secret.email_address](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_subnet.pg_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
@@ -346,10 +345,10 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_alert_severity"></a> [alert\_severity](#input\_alert\_severity) | The severity level of the alert (1=Critical, 2=Warning ...). | `number` | `1` | no |
 | <a name="input_alert_window_size"></a> [alert\_window\_size](#input\_alert\_window\_size) | The period over which the metric is evaluated. | `string` | `"PT15M"` | no |
 | <a name="input_auto_grow_enabled"></a> [auto\_grow\_enabled](#input\_auto\_grow\_enabled) | Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false. | `bool` | `false` | no |
-| <a name="input_backup_policy_name"></a> [backup\_policy\_name](#input\_backup\_policy\_name) | Resource ID of the backup policy within the backup vault. | `string` | `"postgresql-crit4-5"` | no |
+| <a name="input_backup_policy_id"></a> [backup\_policy\_id](#input\_backup\_policy\_id) | Resource ID of the backup policy within the backup vault. | `string` | `"/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault/backupPolicies/postgresql-crit4-5"` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `35` | no |
-| <a name="input_backup_vault_name"></a> [backup\_vault\_name](#input\_backup\_vault\_name) | Resource ID of the Azure Data Protection Backup Vault. | `string` | `"cnp-backup-vault"` | no |
-| <a name="input_backup_vault_resource_group"></a> [backup\_vault\_resource\_group](#input\_backup\_vault\_resource\_group) | Resource group name containing the Azure Data Protection Backup Vault. | `string` | `"mgmt-infra-prod-rg"` | no |
+| <a name="input_backup_vault_id"></a> [backup\_vault\_id](#input\_backup\_vault\_id) | Resource ID of the Azure Data Protection Backup Vault. | `string` | `"/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault"` | no |
+| <a name="input_backup_vault_principal_id"></a> [backup\_vault\_principal\_id](#input\_backup\_vault\_principal\_id) | Principal ID of the backup vault's managed identity. Update if vault is recreated. | `string` | `"14eb7826-b394-488c-b55a-627c58a5d2c3"` | no |
 | <a name="input_business_area"></a> [business\_area](#input\_business\_area) | business\_area name - sds or cft. | `any` | n/a | yes |
 | <a name="input_charset"></a> [charset](#input\_charset) | Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset. | `string` | `"utf8"` | no |
 | <a name="input_collation"></a> [collation](#input\_collation) | Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation. | `string` | `"en_GB.utf8"` | no |
