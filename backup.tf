@@ -8,6 +8,7 @@ locals {
 
 
 data "azurerm_data_protection_backup_vault" "vault" {
+  provider            = azurerm.backup
   count               = local.enable_backup_enrollment ? 1 : 0
   name                = var.backup_vault_name
   resource_group_name = var.backup_vault_resource_group

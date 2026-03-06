@@ -281,7 +281,7 @@ variable "service_criticality" {
 variable "backup_vault_name" {
   description = "Resource ID of the Azure Data Protection Backup Vault."
   type        = string
-  default     = "cnp-backup-vault"
+  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg"
 }
 
 variable "backup_vault_resource_group" {
@@ -291,10 +291,10 @@ variable "backup_vault_resource_group" {
 }
 
 
-variable "backup_policy_name" {
+variable "backup_policy_id" {
   description = "Resource ID of the backup policy within the backup vault."
   type        = string
-  default     = "postgresql-crit4-5"
+  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg/backupPolicies/postgresql-crit4-5"
 }
 
 variable "manage_reader_role_on_rg" {
