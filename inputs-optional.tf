@@ -278,22 +278,22 @@ variable "service_criticality" {
   }
 }
 
-variable "backup_vault_id" {
-  description = "Resource ID of the Azure Data Protection Backup Vault."
+variable "backup_vault_name" {
+  description = "Name of the Azure Data Protection Backup Vault."
   type        = string
-  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg"
+  default     = "cnp-backup-vault"
 }
 
-variable "backup_vault_principal_id" {
-  description = "Principal ID of the backup vault's managed identity. Update if vault is recreated."
+variable "backup_vault_resource_group_name" {
+  description = "Name of the resource group containing the backup vault."
   type        = string
-  default     = "14eb7826-b394-488c-b55a-627c58a5d2c3"
+  default     = "mgmt-infra-prod-rg"
 }
 
-variable "backup_policy_id" {
-  description = "Resource ID of the backup policy within the backup vault."
+variable "backup_policy_name" {
+  description = "Name of the backup policy within the backup vault."
   type        = string
-  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault-pg/backupPolicies/postgresql-crit4-5"
+  default     = "postgresql-crit4-5"
 }
 
 variable "manage_reader_role_on_rg" {
