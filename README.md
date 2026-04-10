@@ -247,6 +247,30 @@ psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}
 
 </details>
 
+## Automated backups for Disaster Recovery
+
+### Scope & Function
+
+If your _service criticality_ rating is 4 or 5, you should enrol your **production** database for automated backups. With this enabled, an immutable backup will be taken weekly at 02:00 UTC on Sundays with lifecycle rules aligning with HMCTS policy. 
+
+Your database size **must** be under 1TB for this functionality. If your database size is larger, please **do not** enable this.
+
+### Enroling
+
+To enrol, add the _service_criticality_ parameter to this module call in your infrastructure code.
+
+```yaml
+module "postgresql_flexible" {
+   ...
+   ...
+   service_criticality = var.service_criticality
+}
+```
+Then declare the variable in your prod.tfvars
+```yaml
+service_criticality = 5
+```
+
 ## Reporting through postgresql-cron-jobs pipeline
 
 ### Terraform configuration
