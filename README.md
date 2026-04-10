@@ -261,7 +261,7 @@ To enrol, define and assign the _service_criticality_ variable in your codebase 
 
 [Example PR](https://github.com/hmcts/sds-toffee-recipes-service/pull/691/files)
 
-Declare service_crticality as a variable in variables.tf:
+Declare service_criticality as a variable in variables.tf:
 
 ```yaml
 variable "service_criticality" {
