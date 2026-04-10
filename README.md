@@ -257,7 +257,7 @@ Your database size **must** be under 1TB for this functionality. If your databas
 
 ### Enroling
 
-To enrol, define and assign the _service_criticality_ variable in your codebase and use as the value for _service_criticality_ parameter in this module call. 
+To enrol, define and assign the _service_criticality_ variable in your codebase and use as the value for _service_criticality_ parameter for this module call. 
 
 [Example PR](https://github.com/hmcts/sds-toffee-recipes-service/pull/691/files)
 
