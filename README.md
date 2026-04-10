@@ -257,18 +257,32 @@ Your database size **must** be under 1TB for this functionality. If your databas
 
 ### Enroling
 
-To enrol, add the _service_criticality_ parameter to this module call in your infrastructure code.
+To enrol, define and assign the _service_criticality_ variable in your codebase and use as the value for _service_criticality_ parameter to this module call. 
 
+[Example PR](https://github.com/hmcts/sds-toffee-recipes-service/pull/691/files)
+
+Declare service_crticality as a variable in variables.tf:
+
+```yaml
+variable "service_criticality" {
+  description = "Service criticality rating from 1-5."
+  type        = number
+  default     = 1
+}
+```
+
+Set variable in your prod.tfvars **only**:
+```yaml
+service_criticality = 5
+```
+
+Pass to the module:
 ```yaml
 module "postgresql_flexible" {
    ...
    ...
    service_criticality = var.service_criticality
 }
-```
-Then declare the variable in your prod.tfvars
-```yaml
-service_criticality = 5
 ```
 
 ## Reporting through postgresql-cron-jobs pipeline
