@@ -84,6 +84,8 @@ module "postgresql" {
 }
 ```
 
+After the old admin has had database ownership reassigned and no longer owns dependent objects, remove `existing_admin_user_object_id` in a separate apply. That later apply will intentionally move the stateful `pgsql_principal_admin` resource to `admin_user_object_id`.
+
 variables.tf
 ```hcl
 variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
@@ -415,10 +417,10 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_email_address_key_vault_id"></a> [email\_address\_key\_vault\_id](#input\_email\_address\_key\_vault\_id) | Email address Key Vault Id. | `string` | `""` | no |
 | <a name="input_email_receivers"></a> [email\_receivers](#input\_email\_receivers) | A map of email receivers, with keys as names and values as email addresses. | `map(string)` | `{}` | no |
 | <a name="input_enable_db_report_privileges"></a> [enable\_db\_report\_privileges](#input\_enable\_db\_report\_privileges) | Bool for if db is used in postgresql-cron-jobs pipeline. Sets read perms on tables listed in pgsql\_databases. | `bool` | `false` | no |
-| <a name="input_existing_admin_user_object_id"></a> [existing\_admin\_user\_object\_id](#input\_existing\_admin\_user\_object\_id) | Existing service principal admin object ID to keep as the stateful principal admin while adding admin_user_object_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects. | `string` | `null` | no |
 | <a name="input_enable_qpi"></a> [enable\_qpi](#input\_enable\_qpi) | Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed | `bool` | `false` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_enable_schema_ownership"></a> [enable\_schema\_ownership](#input\_enable\_schema\_ownership) | Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false | `bool` | `false` | no |
+| <a name="input_existing_admin_user_object_id"></a> [existing\_admin\_user\_object\_id](#input\_existing\_admin\_user\_object\_id) | Existing service principal admin object ID to keep as the stateful principal admin while adding admin\_user\_object\_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects. | `string` | `null` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_force_db_report_privileges_trigger"></a> [force\_db\_report\_privileges\_trigger](#input\_force\_db\_report\_privileges\_trigger) | Update this to a new value to force set\_db\_report\_permissions script to re-run. | `string` | `""` | no |
 | <a name="input_force_schema_ownership_trigger"></a> [force\_schema\_ownership\_trigger](#input\_force\_schema\_ownership\_trigger) | Update this to a new value to force the schema ownership script to run again. | `string` | `""` | no |

@@ -27,12 +27,14 @@ locals {
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
 
-  principal_admin_object_id = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : var.admin_user_object_id
+  principal_admin_object_id   = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : var.admin_user_object_id
+  admin_migration_in_progress = var.existing_admin_user_object_id != null && var.admin_user_object_id != null
+  admin_candidates = distinct(concat(
+    local.admin_migration_in_progress ? [var.admin_user_object_id] : [],
+    var.additional_admin_user_object_ids
+  ))
   additional_admin_user_object_ids = toset([
-    for object_id in distinct(concat(
-      var.existing_admin_user_object_id != null && var.admin_user_object_id != null ? [var.admin_user_object_id] : [],
-      var.additional_admin_user_object_ids
-    )) : object_id
+    for object_id in local.admin_candidates : object_id
     if object_id != local.principal_admin_object_id
   ])
 }

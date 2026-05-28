@@ -88,6 +88,11 @@ variable "existing_admin_user_object_id" {
   type        = string
   default     = null
   description = "Existing service principal admin object ID to keep as the stateful principal admin while adding admin_user_object_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects."
+
+  validation {
+    condition     = var.existing_admin_user_object_id == null || var.admin_user_object_id != null
+    error_message = "admin_user_object_id must be set when existing_admin_user_object_id is set."
+  }
 }
 
 variable "additional_admin_user_object_ids" {
