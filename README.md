@@ -74,17 +74,15 @@ module "postgresql" {
 During Jenkins identity migrations, keep the existing PostgreSQL Entra admin in place and add the new Jenkins identity as an additional admin:
 
 ```hcl
-data "azurerm_user_assigned_identity" "jenkins_cftptl_intsvc" {
-  provider            = azurerm.cftptl_intsvc
-  name                = "jenkins-cftptl-intsvc-mi"
-  resource_group_name = "managed-identities-cftptl-intsvc-rg"
+data "azuread_service_principal" "jenkins_cftptl_intsvc" {
+  display_name = "jenkins-cftptl-intsvc-mi"
 }
 
 module "postgresql" {
   source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
 
   admin_user_object_id          = var.jenkins_AAD_objectId
-  existing_admin_user_object_id = data.azurerm_user_assigned_identity.jenkins_cftptl_intsvc.principal_id
+  existing_admin_user_object_id = data.azuread_service_principal.jenkins_cftptl_intsvc.object_id
 
   # Other module inputs omitted.
 }
