@@ -92,7 +92,7 @@ run "service_principal" {
   }
 
   assert {
-    condition     = length(data.azuread_service_principal.mi_name) == 0
+    condition     = length(data.azuread_service_principal.ptl_jenkins) == 0
     error_message = "Module stood up an Administrator when not specified by service_principal"
   }
 }
@@ -106,7 +106,7 @@ run "Test_service_principal" {
   }
 
   assert {
-    condition     = length(data.azuread_service_principal.mi_name) == 0
+    condition     = length(data.azuread_service_principal.ptl_jenkins) == 0
     error_message = "Module stood up an Administrator when not specified by service_principal"
   }
 }
