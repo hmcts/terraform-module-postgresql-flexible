@@ -27,7 +27,7 @@ locals {
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
 
-  ptl_jenkins_object_id = business_area == "CFT" && var.env != "sbox" ? "ca6d5085-485a-417d-8480-c3cefa29df31" : (business_area != "CFT" && var.env != "sbox") ? "7ef3b6ce-3974-41ab-8512-c3ef4bb8ae01" : (business_area == "CFT" && var.env == "sbox") ? "0292f26e-288e-4f5b-85fc-b99a53f0a2b1" : (business_area != "CFT" && var.env == "sbox") ? "5356a0e7-324e-4efa-970b-4b4aec3f0ba3" : null
+  ptl_jenkins_object_id = var.business_area == "CFT" && var.env != "sbox" ? "ca6d5085-485a-417d-8480-c3cefa29df31" : (var.business_area != "CFT" && var.env != "sbox") ? "7ef3b6ce-3974-41ab-8512-c3ef4bb8ae01" : (var.business_area == "CFT" && var.env == "sbox") ? "0292f26e-288e-4f5b-85fc-b99a53f0a2b1" : (var.business_area != "CFT" && var.env == "sbox") ? "5356a0e7-324e-4efa-970b-4b4aec3f0ba3" : null
 }
 
 data "azurerm_key_vault_secret" "email_address" {
@@ -55,6 +55,11 @@ data "azuread_group" "db_admin" {
 data "azuread_group" "db_report_admin" {
   display_name     = local.db_report_group
   security_enabled = true
+}
+
+data "azuread_service_principal" "ptl_jenkins" {
+  count        = var.enable_read_only_group_access ? 1 : 0 && local.ptl_jenkins_object_id != null ? 1 : 0
+  display_name = local.ptl_jenkins_object_id
 }
 
 data "azuread_service_principal" "env_jenkins" {
