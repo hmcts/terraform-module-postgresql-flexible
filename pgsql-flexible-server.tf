@@ -60,7 +60,7 @@ data "azuread_group" "db_report_admin" {
 
 data "azuread_service_principal" "ptl_jenkins" {
   count     = var.enable_read_only_group_access ? 1 : 0
-  object_id = local.ptl_jenkins_object_id
+  object_id = var.admin_user_object_id
 }
 
 data "azuread_service_principal" "env_jenkins" {
