@@ -71,6 +71,19 @@ module "postgresql" {
 }
 ```
 
+During Jenkins identity migrations, keep the existing PostgreSQL Entra admin in place and add the new Jenkins identity as an additional admin:
+
+```hcl
+module "postgresql" {
+  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
+
+  admin_user_object_id          = var.jenkins_AAD_objectId
+  existing_admin_user_object_id = "ca6d5085-485a-417d-8480-c3cefa29df31" # jenkins-cftptl-intsvc-mi
+
+  # Other module inputs omitted.
+}
+```
+
 variables.tf
 ```hcl
 variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
@@ -352,6 +365,7 @@ force_db_report_privileges_trigger = "1"
 | [azurerm_monitor_metric_alert.db_alert_storage_utilization](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_postgresql_flexible_server.pgsql_server](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
+| [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_configuration.pgsql_server_config](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_configuration) | resource |
@@ -367,7 +381,9 @@ force_db_report_privileges_trigger = "1"
 | [terraform_data.trigger_password_reset](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_group.db_report_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
+| [azuread_service_principal.additional_mi_names](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.principal_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 | [azurerm_key_vault_secret.email_address](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_subnet.pg_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
@@ -378,6 +394,7 @@ force_db_report_privileges_trigger = "1"
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_action_group_name"></a> [action\_group\_name](#input\_action\_group\_name) | The name of the Action Group to create. | `string` | `"db_alerts_action_group_name"` | no |
+| <a name="input_additional_admin_user_object_ids"></a> [additional\_admin\_user\_object\_ids](#input\_additional\_admin\_user\_object\_ids) | Additional service principal object IDs to grant PostgreSQL Entra admin access. | `list(string)` | `[]` | no |
 | <a name="input_admin_user_object_id"></a> [admin\_user\_object\_id](#input\_admin\_user\_object\_id) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally. If you are using Jenkins pass through the variable 'jenkins\_AAD\_objectId'. | `any` | `null` | no |
 | <a name="input_alert_frequency"></a> [alert\_frequency](#input\_alert\_frequency) | The frequency of the alert check. | `string` | `"PT5M"` | no |
 | <a name="input_alert_severity"></a> [alert\_severity](#input\_alert\_severity) | The severity level of the alert (1=Critical, 2=Warning ...). | `number` | `1` | no |
@@ -398,6 +415,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_email_address_key_vault_id"></a> [email\_address\_key\_vault\_id](#input\_email\_address\_key\_vault\_id) | Email address Key Vault Id. | `string` | `""` | no |
 | <a name="input_email_receivers"></a> [email\_receivers](#input\_email\_receivers) | A map of email receivers, with keys as names and values as email addresses. | `map(string)` | `{}` | no |
 | <a name="input_enable_db_report_privileges"></a> [enable\_db\_report\_privileges](#input\_enable\_db\_report\_privileges) | Bool for if db is used in postgresql-cron-jobs pipeline. Sets read perms on tables listed in pgsql\_databases. | `bool` | `false` | no |
+| <a name="input_existing_admin_user_object_id"></a> [existing\_admin\_user\_object\_id](#input\_existing\_admin\_user\_object\_id) | Existing service principal admin object ID to keep as the stateful principal admin while adding admin_user_object_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects. | `string` | `null` | no |
 | <a name="input_enable_qpi"></a> [enable\_qpi](#input\_enable\_qpi) | Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed | `bool` | `false` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_enable_schema_ownership"></a> [enable\_schema\_ownership](#input\_enable\_schema\_ownership) | Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false | `bool` | `false` | no |

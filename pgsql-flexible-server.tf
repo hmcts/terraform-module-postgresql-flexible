@@ -26,6 +26,15 @@ locals {
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
+
+  principal_admin_object_id = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : var.admin_user_object_id
+  additional_admin_user_object_ids = toset([
+    for object_id in distinct(concat(
+      var.existing_admin_user_object_id != null && var.admin_user_object_id != null ? [var.admin_user_object_id] : [],
+      var.additional_admin_user_object_ids
+    )) : object_id
+    if object_id != local.principal_admin_object_id
+  ])
 }
 
 data "azurerm_key_vault_secret" "email_address" {
@@ -58,6 +67,16 @@ data "azuread_group" "db_report_admin" {
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
   object_id = var.admin_user_object_id
+}
+
+data "azuread_service_principal" "principal_admin" {
+  count     = var.enable_read_only_group_access ? 1 : 0
+  object_id = local.principal_admin_object_id
+}
+
+data "azuread_service_principal" "additional_mi_names" {
+  for_each  = var.enable_read_only_group_access ? local.additional_admin_user_object_ids : toset([])
+  object_id = each.value
 }
 
 resource "terraform_data" "trigger_password_reset" {
@@ -179,11 +198,24 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = var.admin_user_object_id
-  principal_name      = data.azuread_service_principal.mi_name[0].display_name
+  object_id           = local.principal_admin_object_id
+  principal_name      = data.azuread_service_principal.principal_admin[0].display_name
   principal_type      = "ServicePrincipal"
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
+  ]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_additional_principal_admin" {
+  for_each            = var.enable_read_only_group_access ? local.additional_admin_user_object_ids : toset([])
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = each.value
+  principal_name      = data.azuread_service_principal.additional_mi_names[each.key].display_name
+  principal_type      = "ServicePrincipal"
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
   ]
 }
 
@@ -219,6 +251,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
@@ -247,6 +280,7 @@ resource "null_resource" "set-schema-ownership" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
@@ -283,6 +317,7 @@ resource "null_resource" "set-db-report-privileges" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin
