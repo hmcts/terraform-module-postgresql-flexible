@@ -227,7 +227,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
 
     environment = {
       PGHOST         = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = data.azuread_service_principal.mi_name[0].display_name
+      DB_USER        = data.azuread_service_principal.ptl_jenkins[0].display_name
       DB_ADMIN_GROUP = local.admin_group
       DB_READER_USER = local.db_reader_user
       DB_NAME        = each.value.name
