@@ -62,9 +62,10 @@ data "azuread_service_principal" "ptl_jenkins" {
   object_id = local.ptl_jenkins_object_id
 }
 
-data "azuread_service_principal" "env_jenkins" {
-  count        = var.enable_read_only_group_access ? 1 : 0
-  display_name = "jenkins-${var.env}-mi"
+data "azurerm_user_assigned_identity" "env_jenkins" {
+  count               = var.enable_read_only_group_access ? 1 : 0
+  name                = "jenkins-${var.env}-mi"
+  resource_group_name = "managed-identities-${var.env}-rg"
 }
 
 resource "terraform_data" "trigger_password_reset" {
@@ -199,8 +200,8 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "en
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_service_principal.env_jenkins[0].object_id
-  principal_name      = data.azuread_service_principal.env_jenkins[0].display_name
+  object_id           = data.azurerm_user_assigned_identity.env_jenkins[0].principal_id
+  principal_name      = data.azurerm_user_assigned_identity.env_jenkins[0].name
   principal_type      = "ServicePrincipal"
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
