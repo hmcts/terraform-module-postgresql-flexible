@@ -71,24 +71,19 @@ module "postgresql" {
 }
 ```
 
-During Jenkins identity migrations, keep the existing PostgreSQL Entra admin in place and add the new Jenkins identity as an additional admin:
+During Jenkins identity migrations, the module keeps the legacy Jenkins PTL PostgreSQL Entra admin in place and adds the current Jenkins identity as an additional admin. This avoids replacing the existing admin while it may still own database objects.
 
 ```hcl
-data "azuread_service_principal" "jenkins_cftptl_intsvc" {
-  display_name = "jenkins-cftptl-intsvc-mi"
-}
-
 module "postgresql" {
   source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
 
-  admin_user_object_id          = var.jenkins_AAD_objectId
-  existing_admin_user_object_id = data.azuread_service_principal.jenkins_cftptl_intsvc.object_id
+  admin_user_object_id = var.jenkins_AAD_objectId
 
   # Other module inputs omitted.
 }
 ```
 
-After the old admin has had database ownership reassigned and no longer owns dependent objects, remove `existing_admin_user_object_id` in a separate apply. That later apply will intentionally move the stateful `pgsql_principal_admin` resource to `admin_user_object_id`.
+After the old admin has had database ownership reassigned and no longer owns dependent objects, set `preserve_legacy_jenkins_admin = false` in a separate apply. That later apply will intentionally move the stateful `pgsql_principal_admin` resource to `admin_user_object_id`.
 
 variables.tf
 ```hcl
@@ -388,6 +383,7 @@ force_db_report_privileges_trigger = "1"
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_group.db_report_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_service_principal.additional_mi_names](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.legacy_jenkins_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azuread_service_principal.principal_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
@@ -433,6 +429,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `null` | no |
 | <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the single server secrets. Defaults to product-env. | `string` | `""` | no |
 | <a name="input_kv_subscription"></a> [kv\_subscription](#input\_kv\_subscription) | Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-DEV. | `string` | `"DCD-CNP-DEV"` | no |
+| <a name="input_legacy_jenkins_admin_display_name"></a> [legacy\_jenkins\_admin\_display\_name](#input\_legacy\_jenkins\_admin\_display\_name) | Legacy Jenkins PTL service principal display name to preserve as the stateful PostgreSQL Entra admin. Defaults from business\_area. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
 | <a name="input_manage_reader_role_on_rg"></a> [manage\_reader\_role\_on\_rg](#input\_manage\_reader\_role\_on\_rg) | Whether this module should create the Reader role on the resource group for the backup vault's managed identity. Set to false if managed externally. | `bool` | `true` | no |
 | <a name="input_memory_threshold"></a> [memory\_threshold](#input\_memory\_threshold) | Average memory utilisation threshold | `number` | `80` | no |
@@ -447,6 +444,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_pgsql_storage_mb"></a> [pgsql\_storage\_mb](#input\_pgsql\_storage\_mb) | Max storage allowed for the PGSql Flexibile instance | `number` | `65536` | no |
 | <a name="input_pgsql_storage_tier"></a> [pgsql\_storage\_tier](#input\_pgsql\_storage\_tier) | The storage tier, this should be left as null but may need to be overriden to allow increased storage. | `string` | `null` | no |
 | <a name="input_pgsql_version"></a> [pgsql\_version](#input\_pgsql\_version) | The PGSql flexible server instance version. | `string` | n/a | yes |
+| <a name="input_preserve_legacy_jenkins_admin"></a> [preserve\_legacy\_jenkins\_admin](#input\_preserve\_legacy\_jenkins\_admin) | Keep the legacy Jenkins PTL service principal as the stateful PostgreSQL Entra admin while adding admin\_user\_object\_id as an additional admin. Disable after database ownership has been reassigned from the legacy role. | `bool` | `true` | no |
 | <a name="input_product"></a> [product](#input\_product) | https://hmcts.github.io/glossary/#product | `string` | n/a | yes |
 | <a name="input_public_access"></a> [public\_access](#input\_public\_access) | Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false. | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of existing resource group to deploy resources into | `string` | `null` | no |

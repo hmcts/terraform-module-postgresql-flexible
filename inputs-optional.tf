@@ -95,6 +95,18 @@ variable "existing_admin_user_object_id" {
   }
 }
 
+variable "preserve_legacy_jenkins_admin" {
+  type        = bool
+  default     = true
+  description = "Keep the legacy Jenkins PTL service principal as the stateful PostgreSQL Entra admin while adding admin_user_object_id as an additional admin. Disable after database ownership has been reassigned from the legacy role."
+}
+
+variable "legacy_jenkins_admin_display_name" {
+  type        = string
+  default     = null
+  description = "Legacy Jenkins PTL service principal display name to preserve as the stateful PostgreSQL Entra admin. Defaults from business_area."
+}
+
 variable "additional_admin_user_object_ids" {
   type        = list(string)
   default     = []

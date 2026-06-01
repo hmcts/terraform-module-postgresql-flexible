@@ -27,8 +27,18 @@ locals {
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
 
-  principal_admin_object_id   = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : var.admin_user_object_id
-  admin_migration_in_progress = var.existing_admin_user_object_id != null && var.admin_user_object_id != null
+  business_area_normalised = lower(var.business_area)
+  legacy_jenkins_admin_display_names = {
+    cft = "jenkins-cftptl-intsvc-mi"
+    sds = "jenkins-ptl-mi"
+  }
+  legacy_jenkins_admin_display_name       = var.legacy_jenkins_admin_display_name != null ? var.legacy_jenkins_admin_display_name : lookup(local.legacy_jenkins_admin_display_names, local.business_area_normalised, local.legacy_jenkins_admin_display_names.cft)
+  use_legacy_jenkins_admin                = var.preserve_legacy_jenkins_admin && var.existing_admin_user_object_id == null && var.admin_user_object_id != null
+  legacy_jenkins_admin_object_id          = local.use_legacy_jenkins_admin ? data.azuread_service_principal.legacy_jenkins_admin[0].object_id : null
+  effective_existing_admin_user_object_id = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : local.legacy_jenkins_admin_object_id
+
+  principal_admin_object_id   = local.effective_existing_admin_user_object_id != null ? local.effective_existing_admin_user_object_id : var.admin_user_object_id
+  admin_migration_in_progress = local.effective_existing_admin_user_object_id != null && var.admin_user_object_id != null
   admin_candidates = distinct(concat(
     local.admin_migration_in_progress ? [var.admin_user_object_id] : [],
     var.additional_admin_user_object_ids
@@ -69,6 +79,11 @@ data "azuread_group" "db_report_admin" {
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
   object_id = var.admin_user_object_id
+}
+
+data "azuread_service_principal" "legacy_jenkins_admin" {
+  count        = var.enable_read_only_group_access && local.use_legacy_jenkins_admin ? 1 : 0
+  display_name = local.legacy_jenkins_admin_display_name
 }
 
 data "azuread_service_principal" "principal_admin" {
