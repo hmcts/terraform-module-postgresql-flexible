@@ -29,10 +29,13 @@ locals {
 
   business_area_normalised = lower(var.business_area)
   legacy_jenkins_admin_display_names = {
-    cft = "jenkins-cftptl-intsvc-mi"
-    sds = "jenkins-ptl-mi"
+    cft        = "jenkins-cftptl-intsvc-mi"
+    sds        = "jenkins-ptl-mi"
+    "cft:sbox" = "jenkins-cftsbox-intsvc-mi"
+    "sds:sbox" = "jenkins-ptlsbox-mi"
   }
-  legacy_jenkins_admin_display_name       = var.legacy_jenkins_admin_display_name != null ? var.legacy_jenkins_admin_display_name : lookup(local.legacy_jenkins_admin_display_names, local.business_area_normalised, local.legacy_jenkins_admin_display_names.cft)
+  legacy_jenkins_admin_key                = "${local.business_area_normalised}:${local.env}"
+  legacy_jenkins_admin_display_name       = var.legacy_jenkins_admin_display_name != null ? var.legacy_jenkins_admin_display_name : lookup(local.legacy_jenkins_admin_display_names, local.legacy_jenkins_admin_key, lookup(local.legacy_jenkins_admin_display_names, local.business_area_normalised, local.legacy_jenkins_admin_display_names.cft))
   use_legacy_jenkins_admin                = var.preserve_legacy_jenkins_admin && var.existing_admin_user_object_id == null && var.admin_user_object_id != null
   legacy_jenkins_admin_object_id          = local.use_legacy_jenkins_admin ? data.azuread_service_principal.legacy_jenkins_admin[0].object_id : null
   effective_existing_admin_user_object_id = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : local.legacy_jenkins_admin_object_id

@@ -71,7 +71,7 @@ module "postgresql" {
 }
 ```
 
-During Jenkins identity migrations, the module keeps the legacy Jenkins PTL PostgreSQL Entra admin in place and adds the current Jenkins identity as an additional admin. This avoids replacing the existing admin while it may still own database objects.
+During Jenkins identity migrations, the module keeps the legacy Jenkins PTL PostgreSQL Entra admin in place and adds the current Jenkins identity as an additional admin. This avoids replacing the existing admin while it may still own database objects. Sandbox environments preserve the legacy sandbox PTL identity and add the current sandbox Jenkins identity.
 
 ```hcl
 module "postgresql" {
