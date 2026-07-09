@@ -119,6 +119,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   }
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       zone,
       high_availability.0.standby_availability_zone,
