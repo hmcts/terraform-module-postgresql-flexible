@@ -16,7 +16,8 @@ variable "pgsql_databases" {
     charset : optional(string),
     report_privilege_schema : optional(string),
     report_privilege_tables : optional(list(string)),
-    schemas_for_reader_access : optional(list(string))
+    schemas_for_reader_access : optional(list(string)),
+    schemas_for_writer_access : optional(list(string))
   }))
 }
 

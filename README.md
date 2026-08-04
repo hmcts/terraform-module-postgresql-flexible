@@ -51,8 +51,13 @@ module "postgresql" {
     {
       name                      : "application"
       schemas_for_reader_access : ["public"]
+      schemas_for_writer_access : ["public"]
     }
   ]
+
+  # Enables write access grants for the matching DB writer Entra group.
+  # This is disabled by default.
+  enable_write_group_access = true
 
   pgsql_sku     = "GP_Standard_D2ds_v4"
   pgsql_version = "16"
@@ -82,6 +87,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 VNet injection is used to restrict network access to PostgreSQL flexible servers. This means that you can't access the database directly from your local machine. Typically, you will need to set up an SSH tunnel to access the database you want to.
 
 All developers can access non production databases with reader access.
+Write access can be enabled per module by setting `enable_write_group_access = true`.
 
 Security cleared developers can access production DBs using just in time access and an approved business justification.
 
@@ -133,6 +139,7 @@ POSTGRES_HOST=rpe-draft-store-aat.postgres.database.azure.com
 DB_NAME=draftstore
 
 DB_USER="DTS\ CFT\ DB\ Access\ Reader" # read access
+#DB_USER="DTS\ CFT\ DB\ Access\ Writer" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations" # operations team administrative access
 
 psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
@@ -157,6 +164,7 @@ export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --quer
 DB_NAME=draftstore
 
 DB_USER="DTS\ CFT\ DB\ Access\ Reader" # read access
+#DB_USER="DTS\ CFT\ DB\ Access\ Writer" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations" # operations team administrative access
 
 psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
@@ -211,6 +219,7 @@ DB_NAME=draftstore
 
 # make sure you update the product name in the middle to your product
 DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC" # read access
+#DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Writer\ SC" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations\ SC" # operations team administrative access
 
 psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
@@ -240,6 +249,7 @@ DB_NAME=draftstore
 
 # make sure you update the product name in the middle to your product
 DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC" # read access
+#DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Writer\ SC" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations\ SC" # operations team administrative access
 
 psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
@@ -297,6 +307,12 @@ First enable this feature with the following bool parameter:
 enable_db_report_privileges = true
 ```
 
+To grant database write access to the matching DB writer Entra group, enable:
+
+```yaml
+enable_write_group_access = true
+```
+
 Where pgsql_databases is defined, add the following for each database object declaration:
 
 ```yaml
@@ -306,16 +322,19 @@ pgsql_databases = [
       report_privilege_schema : "public"
       report_privilege_tables : ["beetroot", "carrot"]
       schemas_for_reader_access : ["public", "my-custom-schema"]
+      schemas_for_writer_access : ["public"]
     },
     {
       name : "pg_database2"
       schemas_for_reader_access : ["public", "a-different-schema"]
+      schemas_for_writer_access : ["public", "a-different-schema"]
     }
 ]
 ```
 In this example _beetroot_ and _carrot_ tables in _pg_database_ will be granted read rights for 'DTS Production DB Reporting' Entra group; no tables on _pg_database2_ will be granted read rights.
 
 Use the optional `schemas_for_reader_access` list to define which schemas the `DTS JIT Access <product> DB Reader SC` group can read. If it is omitted the module defaults to `["public"]`.
+Use the optional `schemas_for_writer_access` list to define which schemas the `DTS JIT Access <product> DB Writer SC` group can write to. If it is omitted the module uses `schemas_for_reader_access`, or defaults to `["public"]`.
 
 ### Retriggering 
 
@@ -401,6 +420,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_enable_qpi"></a> [enable\_qpi](#input\_enable\_qpi) | Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed | `bool` | `false` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_enable_schema_ownership"></a> [enable\_schema\_ownership](#input\_enable\_schema\_ownership) | Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false | `bool` | `false` | no |
+| <a name="input_enable_write_group_access"></a> [enable\_write\_group\_access](#input\_enable\_write\_group\_access) | Enables write group support for accessing the database | `bool` | `false` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_force_db_report_privileges_trigger"></a> [force\_db\_report\_privileges\_trigger](#input\_force\_db\_report\_privileges\_trigger) | Update this to a new value to force set\_db\_report\_permissions script to re-run. | `string` | `""` | no |
 | <a name="input_force_schema_ownership_trigger"></a> [force\_schema\_ownership\_trigger](#input\_force\_schema\_ownership\_trigger) | Update this to a new value to force the schema ownership script to run again. | `string` | `""` | no |
@@ -415,7 +435,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pass_secret_name"></a> [pass\_secret\_name](#input\_pass\_secret\_name) | Update this with the name of the secret that stores the single server password. Defaults to product-componenet-POSTGRES-PASS. | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |
-| <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | <pre>list(object({<br/>    name : string,<br/>    collation : optional(string),<br/>    charset : optional(string),<br/>    report_privilege_schema : optional(string),<br/>    report_privilege_tables : optional(list(string)),<br/>    schemas_for_reader_access : optional(list(string))<br/>  }))</pre> | n/a | yes |
+| <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | <pre>list(object({<br/>    name : string,<br/>    collation : optional(string),<br/>    charset : optional(string),<br/>    report_privilege_schema : optional(string),<br/>    report_privilege_tables : optional(list(string)),<br/>    schemas_for_reader_access : optional(list(string)),<br/>    schemas_for_writer_access : optional(list(string))<br/>  }))</pre> | n/a | yes |
 | <a name="input_pgsql_delegated_subnet_id"></a> [pgsql\_delegated\_subnet\_id](#input\_pgsql\_delegated\_subnet\_id) | PGSql delegated subnet id. | `string` | `""` | no |
 | <a name="input_pgsql_firewall_rules"></a> [pgsql\_firewall\_rules](#input\_pgsql\_firewall\_rules) | Postgres firewall rules | `list(object({ name : string, start_ip_address : string, end_ip_address : string }))` | `[]` | no |
 | <a name="input_pgsql_server_configuration"></a> [pgsql\_server\_configuration](#input\_pgsql\_server\_configuration) | Postgres server configuration | `list(object({ name : string, value : string }))` | <pre>[<br/>  {<br/>    "name": "backslash_quote",<br/>    "value": "on"<br/>  }<br/>]</pre> | no |
