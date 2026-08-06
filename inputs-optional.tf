@@ -90,6 +90,12 @@ variable "enable_read_only_group_access" {
   description = "Enables read only group support for accessing the database"
 }
 
+variable "enable_write_group_access" {
+  type        = bool
+  default     = false
+  description = "Enables write group support for accessing the database"
+}
+
 variable "collation" {
   type        = string
   default     = "en_GB.utf8"
