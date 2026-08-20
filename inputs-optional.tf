@@ -23,7 +23,7 @@ variable "pgsql_sku" {
 }
 
 variable "pgsql_storage_mb" {
-  description = "Max storage allowed for the PGSql Flexibile instance"
+  description = "Storage size for the PGSql Flexible instance. Used when the server is created, then ignored to avoid shrink plans after Azure auto-grows storage."
   type        = number
   default     = 65536
 }
@@ -119,6 +119,12 @@ variable "enable_read_only_group_access" {
   description = "Enables read only group support for accessing the database"
 }
 
+variable "enable_write_group_access" {
+  type        = bool
+  default     = false
+  description = "Enables write group support for accessing the database"
+}
+
 variable "collation" {
   type        = string
   default     = "en_GB.utf8"
@@ -194,7 +200,7 @@ variable "subnet_suffix" {
 variable "auto_grow_enabled" {
   type        = bool
   default     = false
-  description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false."
+  description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled."
 }
 
 variable "trigger_password_reset" {

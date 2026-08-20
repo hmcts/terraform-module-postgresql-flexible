@@ -16,6 +16,9 @@ locals {
   admin_group     = local.is_prod ? "DTS Platform Operations PostgreSQL Admin Access SC" : "DTS Platform Operations PostgreSQL Admin Access"
   db_report_group = "DTS Production DB Reporting"
   db_reader_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
+  db_writer_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Writer SC" : "DTS ${upper(var.business_area)} DB Access Writer"
+
+  enable_aad_group_access = var.enable_read_only_group_access || var.enable_write_group_access
 
 
   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod", "test"]
@@ -80,7 +83,7 @@ data "azuread_group" "db_report_admin" {
 }
 
 data "azuread_service_principal" "mi_name" {
-  count     = var.enable_read_only_group_access ? 1 : 0
+  count     = local.enable_aad_group_access ? 1 : 0
   object_id = var.admin_user_object_id
 }
 
@@ -161,6 +164,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
     ignore_changes = [
       zone,
       high_availability.0.standby_availability_zone,
+      storage_mb,
     ]
   }
 
@@ -214,7 +218,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
-  count               = var.enable_read_only_group_access ? 1 : 0
+  count               = local.enable_aad_group_access ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -240,16 +244,23 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
+  for_each = local.enable_aad_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
     name           = local.name
     db_reader_user = local.db_reader_user
+    db_writer_user = local.db_writer_user
     force_trigger  = var.force_user_permissions_trigger
+    enable_read    = tostring(var.enable_read_only_group_access)
+    enable_write   = tostring(var.enable_write_group_access)
     db_reader_schemas = join(
       ",",
       coalesce(each.value.schemas_for_reader_access, ["public"])
+    )
+    db_writer_schemas = join(
+      ",",
+      coalesce(each.value.schemas_for_writer_access, each.value.schemas_for_reader_access, ["public"])
     )
   }
 
@@ -257,16 +268,23 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     command = "${path.module}/set-postgres-permissions.bash"
 
     environment = {
-      PGHOST         = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = data.azuread_service_principal.mi_name[0].display_name
-      DB_ADMIN_GROUP = local.admin_group
-      DB_READER_USER = local.db_reader_user
-      DB_NAME        = each.value.name
-      DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-      DB_PASSWORD    = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
+      PGHOST                        = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER                       = data.azuread_service_principal.mi_name[0].display_name
+      DB_ADMIN_GROUP                = local.admin_group
+      DB_READER_USER                = local.db_reader_user
+      DB_WRITER_USER                = local.db_writer_user
+      DB_NAME                       = each.value.name
+      DB_ADMIN                      = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+      DB_PASSWORD                   = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
+      ENABLE_READ_ONLY_GROUP_ACCESS = tostring(var.enable_read_only_group_access)
+      ENABLE_WRITE_GROUP_ACCESS     = tostring(var.enable_write_group_access)
       DB_READER_SCHEMAS = join(
         ",",
         coalesce(each.value.schemas_for_reader_access, ["public"])
+      )
+      DB_WRITER_SCHEMAS = join(
+        ",",
+        coalesce(each.value.schemas_for_writer_access, each.value.schemas_for_reader_access, ["public"])
       )
     }
   }
