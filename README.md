@@ -76,6 +76,20 @@ module "postgresql" {
 }
 ```
 
+During Jenkins identity migrations, the module keeps the legacy Jenkins PTL PostgreSQL Entra admin in place and adds the current Jenkins identity as an additional admin. This avoids replacing the existing admin while it may still own database objects. Sandbox environments preserve the legacy sandbox PTL identity and add the current sandbox Jenkins identity.
+
+```hcl
+module "postgresql" {
+  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
+
+  admin_user_object_id = var.jenkins_AAD_objectId
+
+  # Other module inputs omitted.
+}
+```
+
+After the old admin has had database ownership reassigned and no longer owns dependent objects, set `preserve_legacy_jenkins_admin = false` in a separate apply. That later apply will intentionally move the stateful `pgsql_principal_admin` resource to `admin_user_object_id`.
+
 variables.tf
 ```hcl
 variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
@@ -371,6 +385,7 @@ force_db_report_privileges_trigger = "1"
 | [azurerm_monitor_metric_alert.db_alert_storage_utilization](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_postgresql_flexible_server.pgsql_server](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
+| [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_configuration.pgsql_server_config](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_configuration) | resource |
@@ -386,7 +401,10 @@ force_db_report_privileges_trigger = "1"
 | [terraform_data.trigger_password_reset](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_group.db_report_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
+| [azuread_service_principal.additional_mi_names](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.legacy_jenkins_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.principal_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 | [azurerm_key_vault_secret.email_address](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_subnet.pg_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
@@ -397,6 +415,7 @@ force_db_report_privileges_trigger = "1"
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_action_group_name"></a> [action\_group\_name](#input\_action\_group\_name) | The name of the Action Group to create. | `string` | `"db_alerts_action_group_name"` | no |
+| <a name="input_additional_admin_user_object_ids"></a> [additional\_admin\_user\_object\_ids](#input\_additional\_admin\_user\_object\_ids) | Additional service principal object IDs to grant PostgreSQL Entra admin access. | `list(string)` | `[]` | no |
 | <a name="input_admin_user_object_id"></a> [admin\_user\_object\_id](#input\_admin\_user\_object\_id) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally. If you are using Jenkins pass through the variable 'jenkins\_AAD\_objectId'. | `any` | `null` | no |
 | <a name="input_alert_frequency"></a> [alert\_frequency](#input\_alert\_frequency) | The frequency of the alert check. | `string` | `"PT5M"` | no |
 | <a name="input_alert_severity"></a> [alert\_severity](#input\_alert\_severity) | The severity level of the alert (1=Critical, 2=Warning ...). | `number` | `1` | no |
@@ -421,6 +440,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_enable_schema_ownership"></a> [enable\_schema\_ownership](#input\_enable\_schema\_ownership) | Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false | `bool` | `false` | no |
 | <a name="input_enable_write_group_access"></a> [enable\_write\_group\_access](#input\_enable\_write\_group\_access) | Enables write group support for accessing the database | `bool` | `false` | no |
+| <a name="input_existing_admin_user_object_id"></a> [existing\_admin\_user\_object\_id](#input\_existing\_admin\_user\_object\_id) | Existing service principal admin object ID to keep as the stateful principal admin while adding admin\_user\_object\_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects. | `string` | `null` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
 | <a name="input_force_db_report_privileges_trigger"></a> [force\_db\_report\_privileges\_trigger](#input\_force\_db\_report\_privileges\_trigger) | Update this to a new value to force set\_db\_report\_permissions script to re-run. | `string` | `""` | no |
 | <a name="input_force_schema_ownership_trigger"></a> [force\_schema\_ownership\_trigger](#input\_force\_schema\_ownership\_trigger) | Update this to a new value to force the schema ownership script to run again. | `string` | `""` | no |
@@ -429,6 +449,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `null` | no |
 | <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the single server secrets. Defaults to product-env. | `string` | `""` | no |
 | <a name="input_kv_subscription"></a> [kv\_subscription](#input\_kv\_subscription) | Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-DEV. | `string` | `"DCD-CNP-DEV"` | no |
+| <a name="input_legacy_jenkins_admin_display_name"></a> [legacy\_jenkins\_admin\_display\_name](#input\_legacy\_jenkins\_admin\_display\_name) | Legacy Jenkins PTL service principal display name to preserve as the stateful PostgreSQL Entra admin. Defaults from business\_area. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
 | <a name="input_manage_reader_role_on_rg"></a> [manage\_reader\_role\_on\_rg](#input\_manage\_reader\_role\_on\_rg) | Whether this module should create the Reader role on the resource group for the backup vault's managed identity. Set to false if managed externally. | `bool` | `true` | no |
 | <a name="input_memory_threshold"></a> [memory\_threshold](#input\_memory\_threshold) | Average memory utilisation threshold | `number` | `80` | no |
@@ -443,6 +464,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_pgsql_storage_mb"></a> [pgsql\_storage\_mb](#input\_pgsql\_storage\_mb) | Storage size for the PGSql Flexible instance. Used when the server is created, then ignored to avoid shrink plans after Azure auto-grows storage. | `number` | `65536` | no |
 | <a name="input_pgsql_storage_tier"></a> [pgsql\_storage\_tier](#input\_pgsql\_storage\_tier) | The storage tier, this should be left as null but may need to be overriden to allow increased storage. | `string` | `null` | no |
 | <a name="input_pgsql_version"></a> [pgsql\_version](#input\_pgsql\_version) | The PGSql flexible server instance version. | `string` | n/a | yes |
+| <a name="input_preserve_legacy_jenkins_admin"></a> [preserve\_legacy\_jenkins\_admin](#input\_preserve\_legacy\_jenkins\_admin) | Keep the legacy Jenkins PTL service principal as the stateful PostgreSQL Entra admin while adding admin\_user\_object\_id as an additional admin. Disable after database ownership has been reassigned from the legacy role. | `bool` | `true` | no |
 | <a name="input_product"></a> [product](#input\_product) | https://hmcts.github.io/glossary/#product | `string` | n/a | yes |
 | <a name="input_public_access"></a> [public\_access](#input\_public\_access) | Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false. | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of existing resource group to deploy resources into | `string` | `null` | no |

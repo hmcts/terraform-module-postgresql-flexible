@@ -84,6 +84,35 @@ variable "admin_user_object_id" {
   description = "The ID of the principal to be granted admin access to the database server, should be the principal running this normally. If you are using Jenkins pass through the variable 'jenkins_AAD_objectId'."
 }
 
+variable "existing_admin_user_object_id" {
+  type        = string
+  default     = null
+  description = "Existing service principal admin object ID to keep as the stateful principal admin while adding admin_user_object_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects."
+
+  validation {
+    condition     = var.existing_admin_user_object_id == null || var.admin_user_object_id != null
+    error_message = "admin_user_object_id must be set when existing_admin_user_object_id is set."
+  }
+}
+
+variable "preserve_legacy_jenkins_admin" {
+  type        = bool
+  default     = true
+  description = "Keep the legacy Jenkins PTL service principal as the stateful PostgreSQL Entra admin while adding admin_user_object_id as an additional admin. Disable after database ownership has been reassigned from the legacy role."
+}
+
+variable "legacy_jenkins_admin_display_name" {
+  type        = string
+  default     = null
+  description = "Legacy Jenkins PTL service principal display name to preserve as the stateful PostgreSQL Entra admin. Defaults from business_area."
+}
+
+variable "additional_admin_user_object_ids" {
+  type        = list(string)
+  default     = []
+  description = "Additional service principal object IDs to grant PostgreSQL Entra admin access."
+}
+
 variable "enable_read_only_group_access" {
   type        = bool
   default     = true

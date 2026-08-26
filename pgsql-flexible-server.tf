@@ -29,6 +29,30 @@ locals {
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
+
+  business_area_normalised = lower(var.business_area)
+  legacy_jenkins_admin_display_names = {
+    cft        = "jenkins-cftptl-intsvc-mi"
+    sds        = "jenkins-ptl-mi"
+    "cft:sbox" = "jenkins-cftsbox-intsvc-mi"
+    "sds:sbox" = "jenkins-ptlsbox-mi"
+  }
+  legacy_jenkins_admin_key                = "${local.business_area_normalised}:${local.env}"
+  legacy_jenkins_admin_display_name       = var.legacy_jenkins_admin_display_name != null ? var.legacy_jenkins_admin_display_name : lookup(local.legacy_jenkins_admin_display_names, local.legacy_jenkins_admin_key, lookup(local.legacy_jenkins_admin_display_names, local.business_area_normalised, local.legacy_jenkins_admin_display_names.cft))
+  use_legacy_jenkins_admin                = var.preserve_legacy_jenkins_admin && var.existing_admin_user_object_id == null && var.admin_user_object_id != null
+  legacy_jenkins_admin_object_id          = local.use_legacy_jenkins_admin ? data.azuread_service_principal.legacy_jenkins_admin[0].object_id : null
+  effective_existing_admin_user_object_id = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : local.legacy_jenkins_admin_object_id
+
+  principal_admin_object_id   = local.effective_existing_admin_user_object_id != null ? local.effective_existing_admin_user_object_id : var.admin_user_object_id
+  admin_migration_in_progress = local.effective_existing_admin_user_object_id != null && var.admin_user_object_id != null
+  admin_candidates = distinct(concat(
+    local.admin_migration_in_progress ? [var.admin_user_object_id] : [],
+    var.additional_admin_user_object_ids
+  ))
+  additional_admin_user_object_ids = toset([
+    for object_id in local.admin_candidates : object_id
+    if object_id != local.principal_admin_object_id
+  ])
 }
 
 data "azurerm_key_vault_secret" "email_address" {
@@ -61,6 +85,21 @@ data "azuread_group" "db_report_admin" {
 data "azuread_service_principal" "mi_name" {
   count     = local.enable_aad_group_access ? 1 : 0
   object_id = var.admin_user_object_id
+}
+
+data "azuread_service_principal" "legacy_jenkins_admin" {
+  count        = var.enable_read_only_group_access && local.use_legacy_jenkins_admin ? 1 : 0
+  display_name = local.legacy_jenkins_admin_display_name
+}
+
+data "azuread_service_principal" "principal_admin" {
+  count     = var.enable_read_only_group_access ? 1 : 0
+  object_id = local.principal_admin_object_id
+}
+
+data "azuread_service_principal" "additional_mi_names" {
+  for_each  = var.enable_read_only_group_access ? local.additional_admin_user_object_ids : toset([])
+  object_id = each.value
 }
 
 resource "terraform_data" "trigger_password_reset" {
@@ -183,11 +222,24 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = var.admin_user_object_id
-  principal_name      = data.azuread_service_principal.mi_name[0].display_name
+  object_id           = local.principal_admin_object_id
+  principal_name      = data.azuread_service_principal.principal_admin[0].display_name
   principal_type      = "ServicePrincipal"
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
+  ]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_additional_principal_admin" {
+  for_each            = var.enable_read_only_group_access ? local.additional_admin_user_object_ids : toset([])
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = each.value
+  principal_name      = data.azuread_service_principal.additional_mi_names[each.key].display_name
+  principal_type      = "ServicePrincipal"
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
   ]
 }
 
@@ -237,6 +289,7 @@ resource "null_resource" "set-user-permissions-additionaldbs" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
@@ -265,6 +318,7 @@ resource "null_resource" "set-schema-ownership" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
@@ -301,6 +355,7 @@ resource "null_resource" "set-db-report-privileges" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin
