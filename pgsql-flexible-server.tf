@@ -88,17 +88,17 @@ data "azuread_service_principal" "mi_name" {
 }
 
 data "azuread_service_principal" "legacy_jenkins_admin" {
-  count        = var.enable_read_only_group_access && local.use_legacy_jenkins_admin ? 1 : 0
+  count        = local.enable_aad_group_access && local.use_legacy_jenkins_admin ? 1 : 0
   display_name = local.legacy_jenkins_admin_display_name
 }
 
 data "azuread_service_principal" "principal_admin" {
-  count     = var.enable_read_only_group_access ? 1 : 0
+  count     = local.enable_aad_group_access ? 1 : 0
   object_id = local.principal_admin_object_id
 }
 
 data "azuread_service_principal" "additional_mi_names" {
-  for_each  = var.enable_read_only_group_access ? local.additional_admin_user_object_ids : toset([])
+  for_each  = local.enable_aad_group_access ? local.additional_admin_user_object_ids : toset([])
   object_id = each.value
 }
 
@@ -231,7 +231,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_additional_principal_admin" {
-  for_each            = var.enable_read_only_group_access ? local.additional_admin_user_object_ids : toset([])
+  for_each            = local.enable_aad_group_access ? local.additional_admin_user_object_ids : toset([])
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
