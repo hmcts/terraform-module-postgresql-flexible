@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "terraform-module-postgresql-flexible"
+  annotations:
+    github.com/project-slug: hmcts/terraform-module-postgresql-flexible
+    backstage.io/adr-location: docs/adrs
+  tags:
+    - terraform-module
+  links:
+    - url: https://hmcts-reform.slack.com/app_redirect?channel=platops-help
+      title: "#platops-help on Slack"
+      icon: chat
+spec:
+  type: service
+  lifecycle: production
+  owner: dts_platform_operations
