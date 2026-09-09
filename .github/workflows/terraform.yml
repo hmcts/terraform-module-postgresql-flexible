@@ -38,3 +38,9 @@ jobs:
 
       - name: Terraform format
         run: terraform fmt -check
+
+      - name: Initialise offline module tests
+        run: terraform init -backend=false -input=false
+
+      - name: Test reader groups and administrator compatibility without Azure
+        run: terraform test -filter=tests/reader-groups.tftest.hcl -no-color
