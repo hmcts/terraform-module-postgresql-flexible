@@ -102,6 +102,11 @@ VNet injection is used to restrict network access to PostgreSQL flexible servers
 
 All developers can access non production databases with reader access.
 Write access can be enabled per module by setting `enable_write_group_access = true`.
+By default, the writer group is `DTS JIT Access <product> DB Writer SC` in production
+and `DTS <BUSINESS_AREA> DB Access Writer` elsewhere. Set `db_writer_group_name`
+to the exact display name of an existing Entra group to override this default for
+a particular module instance. Changing the group does not revoke grants already
+made to the previous PostgreSQL role; review those grants during migration.
 
 Security cleared developers can access production DBs using just in time access and an approved business justification.
 
@@ -429,6 +434,7 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_charset"></a> [charset](#input\_charset) | Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset. | `string` | `"utf8"` | no |
 | <a name="input_collation"></a> [collation](#input\_collation) | Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation. | `string` | `"en_GB.utf8"` | no |
 | <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | Common tag to be applied to resources. | `map(string)` | n/a | yes |
+| <a name="input_db_writer_group_name"></a> [db\_writer\_group\_name](#input\_db\_writer\_group\_name) | Optional Entra group display name for database write access. Defaults to the environment-specific platform group. | `string` | `null` | no |
 | <a name="input_component"></a> [component](#input\_component) | https://hmcts.github.io/glossary/#component | `string` | n/a | yes |
 | <a name="input_cpu_threshold"></a> [cpu\_threshold](#input\_cpu\_threshold) | Average CPU utilisation threshold | `number` | `80` | no |
 | <a name="input_create_mode"></a> [create\_mode](#input\_create\_mode) | The creation mode which can be used to restore or replicate existing servers | `string` | `"Default"` | no |

@@ -125,6 +125,12 @@ variable "enable_write_group_access" {
   description = "Enables write group support for accessing the database"
 }
 
+variable "db_writer_group_name" {
+  type        = string
+  default     = null
+  description = "Optional Entra group display name for database write access. Defaults to the environment-specific platform group."
+}
+
 variable "collation" {
   type        = string
   default     = "en_GB.utf8"

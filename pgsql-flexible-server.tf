@@ -16,7 +16,7 @@ locals {
   admin_group     = local.is_prod ? "DTS Platform Operations PostgreSQL Admin Access SC" : "DTS Platform Operations PostgreSQL Admin Access"
   db_report_group = "DTS Production DB Reporting"
   db_reader_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
-  db_writer_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Writer SC" : "DTS ${upper(var.business_area)} DB Access Writer"
+  db_writer_user  = coalesce(var.db_writer_group_name, local.is_prod ? "DTS JIT Access ${var.product} DB Writer SC" : "DTS ${upper(var.business_area)} DB Access Writer")
 
   enable_aad_group_access = var.enable_read_only_group_access || var.enable_write_group_access
 
