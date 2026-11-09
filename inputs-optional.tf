@@ -140,7 +140,7 @@ variable "charset" {
 variable "high_availability" {
   type        = bool
   default     = null
-  description = "Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself."
+  description = "DEPRECATED: HA is now enabled only for production environments. This input is ignored."
 }
 
 variable "public_access" {
