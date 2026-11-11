@@ -80,7 +80,7 @@ During Jenkins identity migrations, the module keeps the legacy Jenkins PTL Post
 
 ```hcl
 module "postgresql" {
-  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
+  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
 
   admin_user_object_id = var.jenkins_AAD_objectId
 
