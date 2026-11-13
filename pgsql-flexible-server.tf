@@ -20,8 +20,7 @@ locals {
 
   enable_aad_group_access = var.enable_read_only_group_access || var.enable_write_group_access
 
-
-  high_availability = local.env == "prod"
+  high_availability = local.env == "prod" && var.high_availability != false
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
 
