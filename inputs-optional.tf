@@ -140,7 +140,7 @@ variable "charset" {
 variable "high_availability" {
   type        = bool
   default     = null
-  description = "DEPRECATED: HA is now enabled only for production environments. This input is ignored."
+  description = "HA is enabled by default in production. Set to false to disable HA in production. HA is always disabled in non-production."
 }
 
 variable "public_access" {
