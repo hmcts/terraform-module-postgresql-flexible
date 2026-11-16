@@ -350,8 +350,6 @@ In this example _beetroot_ and _carrot_ tables in _pg_database_ will be granted 
 Use the optional `schemas_for_reader_access` list to define which schemas the `DTS JIT Access <product> DB Reader SC` group can read. If it is omitted the module defaults to `["public"]`.
 Use the optional `schemas_for_writer_access` list to define which schemas the `DTS JIT Access <product> DB Writer SC` group can write to. If it is omitted the module uses `schemas_for_reader_access`, or defaults to `["public"]`.
 
-Reader grants cover existing objects and future objects created by either the Jenkins database identity or the configured `pgsql_admin_username` (default `pgadmin`). Migrations using another role need default privileges configured for that role. Writer grants cover existing objects only; retrigger after migrations that add tables. Updating the permissions script automatically retriggers these grants on the next Terraform apply.
-
 ### Retriggering 
 
 The database privileges will be granted only on the first terraform run. To reapply, the terraform can be retriggered to run by setting the following parameter and subsequently updating its value each time a reapply is needed:
