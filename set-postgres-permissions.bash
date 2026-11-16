@@ -80,7 +80,7 @@ if [[ -n "${SQL_COMMAND_POSTGRES}" ]]; then
    set +x
 fi
 
-# Keep defaults for the Jenkins identity and the password admin used by application migrations.
+# Reader defaults cover the Jenkins identity and the password admin used by application migrations.
 SCHEMA_SQL=""
 
 if [[ "${ENABLE_READ_ONLY_GROUP_ACCESS}" == "true" ]]; then
@@ -102,8 +102,8 @@ if [[ "${ENABLE_WRITE_GROUP_ACCESS}" == "true" ]]; then
       SCHEMA_SQL+="GRANT USAGE ON SCHEMA \"${schema}\" TO \"${DB_WRITER_USER}\";"
       SCHEMA_SQL+="GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA \"${schema}\" TO \"${DB_WRITER_USER}\";"
       SCHEMA_SQL+="GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA \"${schema}\" TO \"${DB_WRITER_USER}\";"
-      SCHEMA_SQL+="ALTER DEFAULT PRIVILEGES FOR ROLE \"${DB_USER}\", \"${DB_ADMIN}\" IN SCHEMA \"${schema}\" GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO \"${DB_WRITER_USER}\";"
-      SCHEMA_SQL+="ALTER DEFAULT PRIVILEGES FOR ROLE \"${DB_USER}\", \"${DB_ADMIN}\" IN SCHEMA \"${schema}\" GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO \"${DB_WRITER_USER}\";"
+      SCHEMA_SQL+="ALTER DEFAULT PRIVILEGES IN SCHEMA \"${schema}\" GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO \"${DB_WRITER_USER}\";"
+      SCHEMA_SQL+="ALTER DEFAULT PRIVILEGES IN SCHEMA \"${schema}\" GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO \"${DB_WRITER_USER}\";"
    done
 fi
 
