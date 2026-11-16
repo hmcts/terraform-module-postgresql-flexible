@@ -80,6 +80,7 @@ if [[ -n "${SQL_COMMAND_POSTGRES}" ]]; then
    set +x
 fi
 
+# Reader defaults cover the Jenkins identity and the password admin used by application migrations.
 SCHEMA_SQL=""
 
 if [[ "${ENABLE_READ_ONLY_GROUP_ACCESS}" == "true" ]]; then
@@ -89,7 +90,7 @@ if [[ "${ENABLE_READ_ONLY_GROUP_ACCESS}" == "true" ]]; then
    for schema in "${READER_SCHEMAS[@]}"; do
       SCHEMA_SQL+="GRANT USAGE ON SCHEMA \"${schema}\" TO \"${DB_READER_USER}\";"
       SCHEMA_SQL+="GRANT SELECT ON ALL TABLES IN SCHEMA \"${schema}\" TO \"${DB_READER_USER}\";"
-      SCHEMA_SQL+="ALTER DEFAULT PRIVILEGES IN SCHEMA \"${schema}\" GRANT SELECT ON TABLES TO \"${DB_READER_USER}\";"
+      SCHEMA_SQL+="ALTER DEFAULT PRIVILEGES FOR ROLE \"${DB_USER}\", \"${DB_ADMIN}\" IN SCHEMA \"${schema}\" GRANT SELECT ON TABLES TO \"${DB_READER_USER}\";"
    done
 fi
 
