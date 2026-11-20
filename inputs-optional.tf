@@ -23,7 +23,7 @@ variable "pgsql_sku" {
 }
 
 variable "pgsql_storage_mb" {
-  description = "Max storage allowed for the PGSql Flexibile instance"
+  description = "Storage size for the PGSql Flexible instance. Used when the server is created, then ignored to avoid shrink plans after Azure auto-grows storage."
   type        = number
   default     = 65536
 }
@@ -84,10 +84,45 @@ variable "admin_user_object_id" {
   description = "The ID of the principal to be granted admin access to the database server, should be the principal running this normally. If you are using Jenkins pass through the variable 'jenkins_AAD_objectId'."
 }
 
+variable "existing_admin_user_object_id" {
+  type        = string
+  default     = null
+  description = "Existing service principal admin object ID to keep as the stateful principal admin while adding admin_user_object_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects."
+
+  validation {
+    condition     = var.existing_admin_user_object_id == null || var.admin_user_object_id != null
+    error_message = "admin_user_object_id must be set when existing_admin_user_object_id is set."
+  }
+}
+
+variable "preserve_legacy_jenkins_admin" {
+  type        = bool
+  default     = true
+  description = "Keep the legacy Jenkins PTL service principal as the stateful PostgreSQL Entra admin while adding admin_user_object_id as an additional admin. Disable after database ownership has been reassigned from the legacy role."
+}
+
+variable "legacy_jenkins_admin_display_name" {
+  type        = string
+  default     = null
+  description = "Legacy Jenkins PTL service principal display name to preserve as the stateful PostgreSQL Entra admin. Defaults from business_area."
+}
+
+variable "additional_admin_user_object_ids" {
+  type        = list(string)
+  default     = []
+  description = "Additional service principal object IDs to grant PostgreSQL Entra admin access."
+}
+
 variable "enable_read_only_group_access" {
   type        = bool
   default     = true
   description = "Enables read only group support for accessing the database"
+}
+
+variable "enable_write_group_access" {
+  type        = bool
+  default     = false
+  description = "Enables write group support for accessing the database"
 }
 
 variable "collation" {
@@ -105,7 +140,7 @@ variable "charset" {
 variable "high_availability" {
   type        = bool
   default     = null
-  description = "Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself."
+  description = "HA is enabled by default in production. Set to false to disable HA in production. HA is always disabled in non-production."
 }
 
 variable "public_access" {
@@ -165,7 +200,7 @@ variable "subnet_suffix" {
 variable "auto_grow_enabled" {
   type        = bool
   default     = false
-  description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false."
+  description = "Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled."
 }
 
 variable "trigger_password_reset" {
@@ -265,4 +300,39 @@ variable "force_db_report_privileges_trigger" {
   description = "Update this to a new value to force set_db_report_permissions script to re-run."
   type        = string
   default     = ""
+}
+
+variable "service_criticality" {
+  description = "Service criticality rating from 1-5. Services with criticality >= 4 are enrolled in immutable backup vault when enable_immutable_backups is true."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.service_criticality >= 1 && var.service_criticality <= 5
+    error_message = "Service criticality must be between 1 and 5."
+  }
+}
+
+variable "backup_vault_id" {
+  description = "Resource ID of the Azure Data Protection Backup Vault."
+  type        = string
+  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault"
+}
+
+variable "backup_vault_principal_id" {
+  description = "Principal ID of the backup vault's managed identity. Update if vault is recreated."
+  type        = string
+  default     = "cfc3a379-b0fa-4a91-bdb1-51948bde431f"
+}
+
+variable "backup_policy_id" {
+  description = "Resource ID of the backup policy within the backup vault."
+  type        = string
+  default     = "/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault/backupPolicies/postgresql-crit4-5"
+}
+
+variable "manage_reader_role_on_rg" {
+  description = "Whether this module should create the Reader role on the resource group for the backup vault's managed identity. Set to false if managed externally."
+  type        = bool
+  default     = true
 }

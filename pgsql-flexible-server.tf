@@ -13,19 +13,44 @@ locals {
 
   is_prod = length(regexall(".*(prod).*", var.env)) > 0
 
-  admin_group     = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  admin_group     = local.is_prod ? "DTS Platform Operations PostgreSQL Admin Access SC" : "DTS Platform Operations PostgreSQL Admin Access"
   db_report_group = "DTS Production DB Reporting"
   db_reader_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
+  db_writer_user  = local.is_prod ? "DTS JIT Access ${var.product} DB Writer SC" : "DTS ${upper(var.business_area)} DB Access Writer"
 
+  enable_aad_group_access = var.enable_read_only_group_access || var.enable_write_group_access
 
-  high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
-  high_availability              = var.high_availability == null ? contains(local.high_availability_environments, local.env) : var.high_availability
+  high_availability = local.env == "prod" && var.high_availability != false
 
   subnet_name = var.subnet_suffix != null ? "postgres-${var.subnet_suffix}" : "postgresql"
 
   kv_name          = var.kv_name != "" ? var.kv_name : "${var.product}-${var.env}"
   user_secret_name = var.user_secret_name != "" ? var.user_secret_name : "${var.product}-${var.component}-POSTGRES-USER"
   pass_secret_name = var.pass_secret_name != "" ? var.pass_secret_name : "${var.product}-${var.component}-POSTGRES-PASS"
+
+  business_area_normalised = lower(var.business_area)
+  legacy_jenkins_admin_display_names = {
+    cft        = "jenkins-cftptl-intsvc-mi"
+    sds        = "jenkins-ptl-mi"
+    "cft:sbox" = "jenkins-cftsbox-intsvc-mi"
+    "sds:sbox" = "jenkins-ptlsbox-mi"
+  }
+  legacy_jenkins_admin_key                = "${local.business_area_normalised}:${local.env}"
+  legacy_jenkins_admin_display_name       = var.legacy_jenkins_admin_display_name != null ? var.legacy_jenkins_admin_display_name : lookup(local.legacy_jenkins_admin_display_names, local.legacy_jenkins_admin_key, lookup(local.legacy_jenkins_admin_display_names, local.business_area_normalised, local.legacy_jenkins_admin_display_names.cft))
+  use_legacy_jenkins_admin                = var.preserve_legacy_jenkins_admin && var.existing_admin_user_object_id == null && var.admin_user_object_id != null
+  legacy_jenkins_admin_object_id          = local.use_legacy_jenkins_admin ? data.azuread_service_principal.legacy_jenkins_admin[0].object_id : null
+  effective_existing_admin_user_object_id = var.existing_admin_user_object_id != null ? var.existing_admin_user_object_id : local.legacy_jenkins_admin_object_id
+
+  principal_admin_object_id   = local.effective_existing_admin_user_object_id != null ? local.effective_existing_admin_user_object_id : var.admin_user_object_id
+  admin_migration_in_progress = local.effective_existing_admin_user_object_id != null && var.admin_user_object_id != null
+  admin_candidates = distinct(concat(
+    local.admin_migration_in_progress ? [var.admin_user_object_id] : [],
+    var.additional_admin_user_object_ids
+  ))
+  additional_admin_user_object_ids = toset([
+    for object_id in local.admin_candidates : object_id
+    if object_id != local.principal_admin_object_id
+  ])
 }
 
 data "azurerm_key_vault_secret" "email_address" {
@@ -56,8 +81,23 @@ data "azuread_group" "db_report_admin" {
 }
 
 data "azuread_service_principal" "mi_name" {
-  count     = var.enable_read_only_group_access ? 1 : 0
+  count     = local.enable_aad_group_access ? 1 : 0
   object_id = var.admin_user_object_id
+}
+
+data "azuread_service_principal" "legacy_jenkins_admin" {
+  count        = local.enable_aad_group_access && local.use_legacy_jenkins_admin ? 1 : 0
+  display_name = local.legacy_jenkins_admin_display_name
+}
+
+data "azuread_service_principal" "principal_admin" {
+  count     = local.enable_aad_group_access ? 1 : 0
+  object_id = local.principal_admin_object_id
+}
+
+data "azuread_service_principal" "additional_mi_names" {
+  for_each  = local.enable_aad_group_access ? local.additional_admin_user_object_ids : toset([])
+  object_id = each.value
 }
 
 resource "terraform_data" "trigger_password_reset" {
@@ -122,6 +162,7 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
     ignore_changes = [
       zone,
       high_availability.0.standby_availability_zone,
+      storage_mb,
     ]
   }
 
@@ -175,42 +216,78 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pg
 }
 
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
-  count               = var.enable_read_only_group_access ? 1 : 0
+  count               = local.enable_aad_group_access ? 1 : 0
   server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
   resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = var.admin_user_object_id
-  principal_name      = data.azuread_service_principal.mi_name[0].display_name
+  object_id           = local.principal_admin_object_id
+  principal_name      = data.azuread_service_principal.principal_admin[0].display_name
   principal_type      = "ServicePrincipal"
   depends_on = [
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
   ]
 }
 
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_additional_principal_admin" {
+  for_each            = local.enable_aad_group_access ? local.additional_admin_user_object_ids : toset([])
+  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
+  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = each.value
+  principal_name      = data.azuread_service_principal.additional_mi_names[each.key].display_name
+  principal_type      = "ServicePrincipal"
+  depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin
+  ]
+}
+
 resource "null_resource" "set-user-permissions-additionaldbs" {
-  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
+  for_each = local.enable_aad_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
 
   triggers = {
     script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
     name           = local.name
     db_reader_user = local.db_reader_user
+    db_writer_user = local.db_writer_user
     force_trigger  = var.force_user_permissions_trigger
+    enable_read    = tostring(var.enable_read_only_group_access)
+    enable_write   = tostring(var.enable_write_group_access)
+    db_reader_schemas = join(
+      ",",
+      coalesce(each.value.schemas_for_reader_access, ["public"])
+    )
+    db_writer_schemas = join(
+      ",",
+      coalesce(each.value.schemas_for_writer_access, each.value.schemas_for_reader_access, ["public"])
+    )
   }
 
   provisioner "local-exec" {
     command = "${path.module}/set-postgres-permissions.bash"
 
     environment = {
-      PGHOST         = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = data.azuread_service_principal.mi_name[0].display_name
-      DB_ADMIN_GROUP = local.admin_group
-      DB_READER_USER = local.db_reader_user
-      DB_NAME        = each.value.name
-      DB_ADMIN       = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
-      DB_PASSWORD    = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
+      PGHOST                        = azurerm_postgresql_flexible_server.pgsql_server.fqdn
+      DB_USER                       = data.azuread_service_principal.mi_name[0].display_name
+      DB_ADMIN_GROUP                = local.admin_group
+      DB_READER_USER                = local.db_reader_user
+      DB_WRITER_USER                = local.db_writer_user
+      DB_NAME                       = each.value.name
+      DB_ADMIN                      = azurerm_postgresql_flexible_server.pgsql_server.administrator_login
+      DB_PASSWORD                   = nonsensitive(azurerm_postgresql_flexible_server.pgsql_server.administrator_password)
+      ENABLE_READ_ONLY_GROUP_ACCESS = tostring(var.enable_read_only_group_access)
+      ENABLE_WRITE_GROUP_ACCESS     = tostring(var.enable_write_group_access)
+      DB_READER_SCHEMAS = join(
+        ",",
+        coalesce(each.value.schemas_for_reader_access, ["public"])
+      )
+      DB_WRITER_SCHEMAS = join(
+        ",",
+        coalesce(each.value.schemas_for_writer_access, each.value.schemas_for_reader_access, ["public"])
+      )
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
@@ -239,6 +316,7 @@ resource "null_resource" "set-schema-ownership" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases
   ]
@@ -265,7 +343,7 @@ resource "null_resource" "set-db-report-privileges" {
     environment = {
       PGHOST                  = azurerm_postgresql_flexible_server.pgsql_server.fqdn
       DB_NAME                 = each.value.name
-      KV_NAME                 = var.kv_name
+      KV_NAME                 = local.kv_name
       KV_SUBSCRIPTION         = var.kv_subscription
       USER_SECRET_NAME        = local.user_secret_name
       PASS_SECRET_NAME        = local.pass_secret_name
@@ -275,6 +353,7 @@ resource "null_resource" "set-db-report-privileges" {
     }
   }
   depends_on = [
+    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
     azurerm_postgresql_flexible_server_database.pg_databases,
     azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin

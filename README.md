@@ -49,9 +49,15 @@ module "postgresql" {
 
   pgsql_databases = [
     {
-      name : "application"
+      name                      : "application"
+      schemas_for_reader_access : ["public"]
+      schemas_for_writer_access : ["public"]
     }
   ]
+
+  # Enables write access grants for the matching DB writer Entra group.
+  # This is disabled by default.
+  enable_write_group_access = true
 
   pgsql_sku     = "GP_Standard_D2ds_v4"
   pgsql_version = "16"
@@ -70,6 +76,20 @@ module "postgresql" {
 }
 ```
 
+During Jenkins identity migrations, the module keeps the legacy Jenkins PTL PostgreSQL Entra admin in place and adds the current Jenkins identity as an additional admin. This avoids replacing the existing admin while it may still own database objects. Sandbox environments preserve the legacy sandbox PTL identity and add the current sandbox Jenkins identity.
+
+```hcl
+module "postgresql" {
+  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
+
+  admin_user_object_id = var.jenkins_AAD_objectId
+
+  # Other module inputs omitted.
+}
+```
+
+After the old admin has had database ownership reassigned and no longer owns dependent objects, set `preserve_legacy_jenkins_admin = false` in a separate apply. That later apply will intentionally move the stateful `pgsql_principal_admin` resource to `admin_user_object_id`.
+
 variables.tf
 ```hcl
 variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users will need to specify this
@@ -81,6 +101,7 @@ variable "aks_subscription_id" {} # provided by the Jenkins library, ADO users w
 VNet injection is used to restrict network access to PostgreSQL flexible servers. This means that you can't access the database directly from your local machine. Typically, you will need to set up an SSH tunnel to access the database you want to.
 
 All developers can access non production databases with reader access.
+Write access can be enabled per module by setting `enable_write_group_access = true`.
 
 Security cleared developers can access production DBs using just in time access and an approved business justification.
 
@@ -132,6 +153,7 @@ POSTGRES_HOST=rpe-draft-store-aat.postgres.database.azure.com
 DB_NAME=draftstore
 
 DB_USER="DTS\ CFT\ DB\ Access\ Reader" # read access
+#DB_USER="DTS\ CFT\ DB\ Access\ Writer" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations" # operations team administrative access
 
 psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
@@ -156,6 +178,7 @@ export PGPASSWORD=$(az account get-access-token --resource-type oss-rdbms --quer
 DB_NAME=draftstore
 
 DB_USER="DTS\ CFT\ DB\ Access\ Reader" # read access
+#DB_USER="DTS\ CFT\ DB\ Access\ Writer" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations" # operations team administrative access
 
 psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
@@ -210,6 +233,7 @@ DB_NAME=draftstore
 
 # make sure you update the product name in the middle to your product
 DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC" # read access
+#DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Writer\ SC" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations\ SC" # operations team administrative access
 
 psql "sslmode=require host=${POSTGRES_HOST} dbname=${DB_NAME} user=${DB_USER}"
@@ -239,12 +263,51 @@ DB_NAME=draftstore
 
 # make sure you update the product name in the middle to your product
 DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Reader\ SC" # read access
+#DB_USER="DTS\ JIT\ Access\ draft-store\ DB\ Writer\ SC" # write access, if enabled
 #DB_USER="DTS\ Platform\ Operations\ SC" # operations team administrative access
 
 psql "sslmode=require host=localhost port=5440 dbname=${DB_NAME} user=${DB_USER}"
 ```
 
 </details>
+
+## Automated backups for Disaster Recovery
+
+### Scope & Function
+
+If your _service criticality_ rating is 4 or 5, you should enrol your **production** database for automated backups. With this enabled, an immutable backup will be taken weekly at 02:00 UTC on Sundays with lifecycle rules aligning with HMCTS policy. 
+
+Your database size **must** be under 1TB for this functionality. If your database size is larger, please **do not** enable this.
+
+### Enroling
+
+To enrol, define and assign the _service_criticality_ variable in your codebase and use as the value for _service_criticality_ parameter for this module call. 
+
+[Example PR](https://github.com/hmcts/sds-toffee-recipes-service/pull/691/files)
+
+Declare service_criticality as a variable in variables.tf, defaulting to 1:
+
+```yaml
+variable "service_criticality" {
+  description = "Service criticality rating from 1-5."
+  type        = number
+  default     = 1
+}
+```
+
+Set variable in your prod.tfvars **only**:
+```yaml
+service_criticality = 5
+```
+
+Pass to the module:
+```yaml
+module "postgresql_flexible" {
+   ...
+   ...
+   service_criticality = var.service_criticality
+}
+```
 
 ## Reporting through postgresql-cron-jobs pipeline
 
@@ -258,6 +321,12 @@ First enable this feature with the following bool parameter:
 enable_db_report_privileges = true
 ```
 
+To grant database write access to the matching DB writer Entra group, enable:
+
+```yaml
+enable_write_group_access = true
+```
+
 Where pgsql_databases is defined, add the following for each database object declaration:
 
 ```yaml
@@ -266,13 +335,20 @@ pgsql_databases = [
       name : "pg_database"
       report_privilege_schema : "public"
       report_privilege_tables : ["beetroot", "carrot"]
+      schemas_for_reader_access : ["public", "my-custom-schema"]
+      schemas_for_writer_access : ["public"]
     },
     {
       name : "pg_database2"
+      schemas_for_reader_access : ["public", "a-different-schema"]
+      schemas_for_writer_access : ["public", "a-different-schema"]
     }
 ]
 ```
 In this example _beetroot_ and _carrot_ tables in _pg_database_ will be granted read rights for 'DTS Production DB Reporting' Entra group; no tables on _pg_database2_ will be granted read rights.
+
+Use the optional `schemas_for_reader_access` list to define which schemas the `DTS JIT Access <product> DB Reader SC` group can read. If it is omitted the module defaults to `["public"]`.
+Use the optional `schemas_for_writer_access` list to define which schemas the `DTS JIT Access <product> DB Writer SC` group can write to. If it is omitted the module uses `schemas_for_reader_access`, or defaults to `["public"]`.
 
 ### Retriggering 
 
@@ -300,6 +376,7 @@ force_db_report_privileges_trigger = "1"
 
 | Name | Type |
 |------|------|
+| [azurerm_data_protection_backup_instance_postgresql_flexible_server.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/data_protection_backup_instance_postgresql_flexible_server) | resource |
 | [azurerm_log_analytics_workspace.pgsql_log_analytics_workspace](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace) | resource |
 | [azurerm_monitor_action_group.db-alerts-action-group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
 | [azurerm_monitor_diagnostic_setting.pgsql_diag](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
@@ -308,12 +385,15 @@ force_db_report_privileges_trigger = "1"
 | [azurerm_monitor_metric_alert.db_alert_storage_utilization](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_postgresql_flexible_server.pgsql_server](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
+| [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_additional_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_db_report_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_active_directory_administrator) | resource |
 | [azurerm_postgresql_flexible_server_configuration.pgsql_server_config](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_configuration) | resource |
 | [azurerm_postgresql_flexible_server_database.pg_databases](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
 | [azurerm_postgresql_flexible_server_firewall_rule.pg_firewall_rules](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_firewall_rule) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
+| [azurerm_role_assignment.backup_vault_postgres_ltr](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
+| [azurerm_role_assignment.backup_vault_rg_reader](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) | resource |
 | [null_resource.set-db-report-privileges](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.set-schema-ownership](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.set-user-permissions-additionaldbs](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
@@ -321,7 +401,10 @@ force_db_report_privileges_trigger = "1"
 | [terraform_data.trigger_password_reset](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [azuread_group.db_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
 | [azuread_group.db_report_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/group) | data source |
+| [azuread_service_principal.additional_mi_names](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.legacy_jenkins_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azuread_service_principal.mi_name](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.principal_admin](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 | [azurerm_key_vault_secret.email_address](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_subnet.pg_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
@@ -332,12 +415,16 @@ force_db_report_privileges_trigger = "1"
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_action_group_name"></a> [action\_group\_name](#input\_action\_group\_name) | The name of the Action Group to create. | `string` | `"db_alerts_action_group_name"` | no |
+| <a name="input_additional_admin_user_object_ids"></a> [additional\_admin\_user\_object\_ids](#input\_additional\_admin\_user\_object\_ids) | Additional service principal object IDs to grant PostgreSQL Entra admin access. | `list(string)` | `[]` | no |
 | <a name="input_admin_user_object_id"></a> [admin\_user\_object\_id](#input\_admin\_user\_object\_id) | The ID of the principal to be granted admin access to the database server, should be the principal running this normally. If you are using Jenkins pass through the variable 'jenkins\_AAD\_objectId'. | `any` | `null` | no |
 | <a name="input_alert_frequency"></a> [alert\_frequency](#input\_alert\_frequency) | The frequency of the alert check. | `string` | `"PT5M"` | no |
 | <a name="input_alert_severity"></a> [alert\_severity](#input\_alert\_severity) | The severity level of the alert (1=Critical, 2=Warning ...). | `number` | `1` | no |
 | <a name="input_alert_window_size"></a> [alert\_window\_size](#input\_alert\_window\_size) | The period over which the metric is evaluated. | `string` | `"PT15M"` | no |
-| <a name="input_auto_grow_enabled"></a> [auto\_grow\_enabled](#input\_auto\_grow\_enabled) | Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled? Defaults to false. | `bool` | `false` | no |
+| <a name="input_auto_grow_enabled"></a> [auto\_grow\_enabled](#input\_auto\_grow\_enabled) | Specifies whether the storage auto grow for PostgreSQL Flexible Server is enabled. | `bool` | `false` | no |
+| <a name="input_backup_policy_id"></a> [backup\_policy\_id](#input\_backup\_policy\_id) | Resource ID of the backup policy within the backup vault. | `string` | `"/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault/backupPolicies/postgresql-crit4-5"` | no |
 | <a name="input_backup_retention_days"></a> [backup\_retention\_days](#input\_backup\_retention\_days) | Backup retention period in days for the PGSql instance. Valid values are between 7 & 35 days | `number` | `35` | no |
+| <a name="input_backup_vault_id"></a> [backup\_vault\_id](#input\_backup\_vault\_id) | Resource ID of the Azure Data Protection Backup Vault. | `string` | `"/subscriptions/8999dec3-0104-4a27-94ee-6588559729d1/resourceGroups/mgmt-infra-prod-rg/providers/Microsoft.DataProtection/backupVaults/cnp-backup-vault"` | no |
+| <a name="input_backup_vault_principal_id"></a> [backup\_vault\_principal\_id](#input\_backup\_vault\_principal\_id) | Principal ID of the backup vault's managed identity. Update if vault is recreated. | `string` | `"cfc3a379-b0fa-4a91-bdb1-51948bde431f"` | no |
 | <a name="input_business_area"></a> [business\_area](#input\_business\_area) | business\_area name - sds or cft. | `any` | n/a | yes |
 | <a name="input_charset"></a> [charset](#input\_charset) | Specifies the Charset for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Charset. | `string` | `"utf8"` | no |
 | <a name="input_collation"></a> [collation](#input\_collation) | Specifies the Collation for the Azure PostgreSQL Flexible Server Database, which needs to be a valid PostgreSQL Collation. | `string` | `"en_GB.utf8"` | no |
@@ -352,31 +439,37 @@ force_db_report_privileges_trigger = "1"
 | <a name="input_enable_qpi"></a> [enable\_qpi](#input\_enable\_qpi) | Enables Query Performance Insight. Creates Log Analytics workspace and diagnostic setting needed | `bool` | `false` | no |
 | <a name="input_enable_read_only_group_access"></a> [enable\_read\_only\_group\_access](#input\_enable\_read\_only\_group\_access) | Enables read only group support for accessing the database | `bool` | `true` | no |
 | <a name="input_enable_schema_ownership"></a> [enable\_schema\_ownership](#input\_enable\_schema\_ownership) | Enables the schema ownership script. Change this to true if you want to use the script. Defaults to false | `bool` | `false` | no |
+| <a name="input_enable_write_group_access"></a> [enable\_write\_group\_access](#input\_enable\_write\_group\_access) | Enables write group support for accessing the database | `bool` | `false` | no |
 | <a name="input_env"></a> [env](#input\_env) | Environment value. | `string` | n/a | yes |
+| <a name="input_existing_admin_user_object_id"></a> [existing\_admin\_user\_object\_id](#input\_existing\_admin\_user\_object\_id) | Existing service principal admin object ID to keep as the stateful principal admin while adding admin\_user\_object\_id as an additional admin. Use during identity migrations to avoid replacing an admin that owns database objects. | `string` | `null` | no |
 | <a name="input_force_db_report_privileges_trigger"></a> [force\_db\_report\_privileges\_trigger](#input\_force\_db\_report\_privileges\_trigger) | Update this to a new value to force set\_db\_report\_permissions script to re-run. | `string` | `""` | no |
 | <a name="input_force_schema_ownership_trigger"></a> [force\_schema\_ownership\_trigger](#input\_force\_schema\_ownership\_trigger) | Update this to a new value to force the schema ownership script to run again. | `string` | `""` | no |
 | <a name="input_force_user_permissions_trigger"></a> [force\_user\_permissions\_trigger](#input\_force\_user\_permissions\_trigger) | Update this to a new value to force the user permissions script to run again | `string` | `""` | no |
 | <a name="input_geo_redundant_backups"></a> [geo\_redundant\_backups](#input\_geo\_redundant\_backups) | Enable geo-redundant backups for the PGSql instance. | `bool` | `false` | no |
-| <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | Overrides the automatic selection of high availability mode for the PostgreSQL Flexible Server. Generally you shouldn't set this yourself. | `bool` | `null` | no |
+| <a name="input_high_availability"></a> [high\_availability](#input\_high\_availability) | HA is enabled by default in production. Set to false to disable HA in production. HA is always disabled in non-production. | `bool` | `null` | no |
 | <a name="input_kv_name"></a> [kv\_name](#input\_kv\_name) | Update this with the name of the key vault that stores the single server secrets. Defaults to product-env. | `string` | `""` | no |
 | <a name="input_kv_subscription"></a> [kv\_subscription](#input\_kv\_subscription) | Update this with the name of the subscription where the single server key vault is. Defaults to DCD-CNP-DEV. | `string` | `"DCD-CNP-DEV"` | no |
+| <a name="input_legacy_jenkins_admin_display_name"></a> [legacy\_jenkins\_admin\_display\_name](#input\_legacy\_jenkins\_admin\_display\_name) | Legacy Jenkins PTL service principal display name to preserve as the stateful PostgreSQL Entra admin. Defaults from business\_area. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | Target Azure location to deploy the resource | `string` | `"UK South"` | no |
+| <a name="input_manage_reader_role_on_rg"></a> [manage\_reader\_role\_on\_rg](#input\_manage\_reader\_role\_on\_rg) | Whether this module should create the Reader role on the resource group for the backup vault's managed identity. Set to false if managed externally. | `bool` | `true` | no |
 | <a name="input_memory_threshold"></a> [memory\_threshold](#input\_memory\_threshold) | Average memory utilisation threshold | `number` | `80` | no |
 | <a name="input_name"></a> [name](#input\_name) | The default name will be product+component+env, you can override the product+component part by setting this | `string` | `""` | no |
 | <a name="input_pass_secret_name"></a> [pass\_secret\_name](#input\_pass\_secret\_name) | Update this with the name of the secret that stores the single server password. Defaults to product-componenet-POSTGRES-PASS. | `string` | `""` | no |
 | <a name="input_pgsql_admin_username"></a> [pgsql\_admin\_username](#input\_pgsql\_admin\_username) | Admin username | `string` | `"pgadmin"` | no |
-| <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | `list(object({ name : string, collation : optional(string), charset : optional(string), report_privilege_schema : optional(string), report_privilege_tables : optional(list(string)) }))` | n/a | yes |
+| <a name="input_pgsql_databases"></a> [pgsql\_databases](#input\_pgsql\_databases) | Databases for the pgsql instance. | <pre>list(object({<br/>    name : string,<br/>    collation : optional(string),<br/>    charset : optional(string),<br/>    report_privilege_schema : optional(string),<br/>    report_privilege_tables : optional(list(string)),<br/>    schemas_for_reader_access : optional(list(string)),<br/>    schemas_for_writer_access : optional(list(string))<br/>  }))</pre> | n/a | yes |
 | <a name="input_pgsql_delegated_subnet_id"></a> [pgsql\_delegated\_subnet\_id](#input\_pgsql\_delegated\_subnet\_id) | PGSql delegated subnet id. | `string` | `""` | no |
 | <a name="input_pgsql_firewall_rules"></a> [pgsql\_firewall\_rules](#input\_pgsql\_firewall\_rules) | Postgres firewall rules | `list(object({ name : string, start_ip_address : string, end_ip_address : string }))` | `[]` | no |
 | <a name="input_pgsql_server_configuration"></a> [pgsql\_server\_configuration](#input\_pgsql\_server\_configuration) | Postgres server configuration | `list(object({ name : string, value : string }))` | <pre>[<br/>  {<br/>    "name": "backslash_quote",<br/>    "value": "on"<br/>  }<br/>]</pre> | no |
 | <a name="input_pgsql_sku"></a> [pgsql\_sku](#input\_pgsql\_sku) | The PGSql flexible server instance sku | `string` | `"GP_Standard_D2s_v3"` | no |
-| <a name="input_pgsql_storage_mb"></a> [pgsql\_storage\_mb](#input\_pgsql\_storage\_mb) | Max storage allowed for the PGSql Flexibile instance | `number` | `65536` | no |
+| <a name="input_pgsql_storage_mb"></a> [pgsql\_storage\_mb](#input\_pgsql\_storage\_mb) | Storage size for the PGSql Flexible instance. Used when the server is created, then ignored to avoid shrink plans after Azure auto-grows storage. | `number` | `65536` | no |
 | <a name="input_pgsql_storage_tier"></a> [pgsql\_storage\_tier](#input\_pgsql\_storage\_tier) | The storage tier, this should be left as null but may need to be overriden to allow increased storage. | `string` | `null` | no |
 | <a name="input_pgsql_version"></a> [pgsql\_version](#input\_pgsql\_version) | The PGSql flexible server instance version. | `string` | n/a | yes |
+| <a name="input_preserve_legacy_jenkins_admin"></a> [preserve\_legacy\_jenkins\_admin](#input\_preserve\_legacy\_jenkins\_admin) | Keep the legacy Jenkins PTL service principal as the stateful PostgreSQL Entra admin while adding admin\_user\_object\_id as an additional admin. Disable after database ownership has been reassigned from the legacy role. | `bool` | `true` | no |
 | <a name="input_product"></a> [product](#input\_product) | https://hmcts.github.io/glossary/#product | `string` | n/a | yes |
 | <a name="input_public_access"></a> [public\_access](#input\_public\_access) | Specifies whether or not public access is allowed for this PostgreSQL Flexible Server. Defaults to false. | `bool` | `false` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of existing resource group to deploy resources into | `string` | `null` | no |
 | <a name="input_restore_time"></a> [restore\_time](#input\_restore\_time) | The point in time to restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
+| <a name="input_service_criticality"></a> [service\_criticality](#input\_service\_criticality) | Service criticality rating from 1-5. Services with criticality >= 4 are enrolled in immutable backup vault when enable\_immutable\_backups is true. | `number` | `1` | no |
 | <a name="input_sms_receivers"></a> [sms\_receivers](#input\_sms\_receivers) | A map of SMS receivers, with keys as names and values as maps containing country code and phone number. | <pre>map(object({<br/>    country_code = string<br/>    phone_number = string<br/>  }))</pre> | `{}` | no |
 | <a name="input_source_server_id"></a> [source\_server\_id](#input\_source\_server\_id) | Source server ID for point in time restore. Only used when create mode is set to PointInTimeRestore | `any` | `null` | no |
 | <a name="input_storage_threshold"></a> [storage\_threshold](#input\_storage\_threshold) | Average storage utilisation threshold | `number` | `80` | no |
@@ -389,8 +482,11 @@ force_db_report_privileges_trigger = "1"
 
 | Name | Description |
 |------|-------------|
+| <a name="output_backup_instance_id"></a> [backup\_instance\_id](#output\_backup\_instance\_id) | The ID of the backup instance. Null if not enrolled. |
+| <a name="output_backup_instance_name"></a> [backup\_instance\_name](#output\_backup\_instance\_name) | The name of the backup instance. Null if not enrolled. |
 | <a name="output_fqdn"></a> [fqdn](#output\_fqdn) | n/a |
 | <a name="output_instance_id"></a> [instance\_id](#output\_instance\_id) | n/a |
+| <a name="output_is_enrolled_in_backup_vault"></a> [is\_enrolled\_in\_backup\_vault](#output\_is\_enrolled\_in\_backup\_vault) | Whether this PostgreSQL server is enrolled in a backup vault. |
 | <a name="output_password"></a> [password](#output\_password) | n/a |
 | <a name="output_resource_group_location"></a> [resource\_group\_location](#output\_resource\_group\_location) | n/a |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | n/a |
